@@ -1,0 +1,11 @@
+# Configuracao local -- NUNCA versionar (contem credenciais do banco)
+conf/config.php
+
+# Bancos SQLite locais
+conf/*.db
+*.db
+*.db-journal
+
+# Uploads temporarios e caches
+*.log
+*.tmp

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Exemplo de web.config para IIS (Windows Server). Copie para a raiz do
+  site no IIS (a pasta que contem index.php, backend/, conf/, css/, js/,
+  img/ juntos) e ajuste os pontos marcados com "AJUSTE AQUI".
+
+  Projeto sem dependencias (sem Composer/vendor): um unico site, com um
+  unico index.php decidindo tudo (API ou pagina). Pre-requisitos no
+  servidor: PHP (versao Non Thread Safe) mais modulo FastCGI do IIS mais
+  modulo URL Rewrite da Microsoft.
+-->
+<configuration>
+  <system.webServer>
+    <!-- AJUSTE AQUI: caminho do php-cgi.exe instalado no servidor (confira
+         a versao com "php -v"). Geralmente isto e configurado uma unica
+         vez no IIS Manager (Handler Mappings) em vez de aqui; o bloco
+         abaixo e so referencia caso precise registrar na mao. -->
+    <handlers>
+      <add name="PHP_via_FastCGI" path="*.php" verb="*"
+           modules="FastCgiModule"
+           scriptProcessor="C:\Program Files\PHP\php-cgi.exe"
+           resourceType="Either" />
+    </handlers>
+
+    <rewrite>
+      <rules>
+        <!-- Arquivo ou pasta real (css/js/img/index.php), serve direto. -->
+        <rule name="Arquivo estatico real" stopProcessing="true">
+          <match url="^(.*)$" />
+          <conditions logicalGrouping="MatchAll">
+            <add input="{REQUEST_FILENAME}" matchType="IsFile" />
+          </conditions>
+          <action type="None" />
+        </rule>
+
+        <!-- Qualquer outra coisa (rotas do SPA e /api/...) cai no
+             index.php unico da raiz, que decide o resto. -->
+        <rule name="Front controller" stopProcessing="true">
+          <match url="^index\.php$" negate="true" />
+          <action type="Rewrite" url="index.php" />
+        </rule>
+      </rules>
+    </rewrite>
+
+    <!-- Bloqueia acesso via URL a pastas internas, mesmo que existam de
+         verdade no disco; so o index.php deve enxerga-las (logica da API
+         em backend/, credenciais do banco em conf/, arquivo .db do
+         SQLite em db/ -- sem bloquear, o banco inteiro fica baixavel
+         direto pela URL). -->
+    <security>
+      <requestFiltering>
+        <hiddenSegments>
+          <add segment="backend" />
+          <add segment="conf" />
+          <add segment="deploy" />
+          <add segment="db" />
+          <add segment=".git" />
+        </hiddenSegments>
+      </requestFiltering>
+    </security>
+
+    <!-- Bloqueia listagem de diretorio -->
+    <directoryBrowse enabled="false" />
+  </system.webServer>
+</configuration>
