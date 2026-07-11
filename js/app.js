@@ -647,6 +647,7 @@ function afterLogin() {
   atualizarMfaBanner();
   iniciarMonitorInatividade();
   carregarTimeoutInatividade();
+  carregarDbInfo();
   navTo('overview');
 }
 
@@ -3350,6 +3351,38 @@ document.addEventListener('input', (e) => {
   const fn = INPUT_ACTIONS[e.target.dataset.oninput];
   if (fn) fn(e.target);
 });
+
+// ---------------------------------------------------------------------------
+// Info do banco de dados — exibida no rodapé da sidebar
+// ---------------------------------------------------------------------------
+const DB_DRIVER_LABEL = { sqlite: 'SQLite', mysql: 'MySQL', pgsql: 'PostgreSQL', sqlsrv: 'SQL Server' };
+
+function formatBytes(b) {
+  b = Number(b);
+  if (!b || isNaN(b)) return null;
+  if (b < 1024) return b + ' B';
+  if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+  if (b < 1024 * 1024 * 1024) return (b / 1024 / 1024).toFixed(1) + ' MB';
+  return (b / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+}
+
+async function carregarDbInfo() {
+  try {
+    const info = await api.get('/sistema/info');
+    const el   = $('dbInfo');
+    if (!el) return;
+    const partes = [
+      DB_DRIVER_LABEL[info.driver] || info.driver,
+      info.versao,
+      formatBytes(info.tamanho_bytes),
+    ].filter(Boolean);
+    const txt = partes.join(' · ');
+    el.textContent = txt;
+    el.title       = txt;
+    el.style.display = '';
+  } catch (e) { /* silencioso — nao interrompe o login */ }
+}
+
 
 applyStaticI18n();
 tryAutoLogin();
