@@ -532,3 +532,6 @@ tbody tr.row-sel{background:var(--accent-soft)}
 .obj-row{display:flex;gap:8px;align-items:center}
 .obj-row .obj-nome{flex:1;min-width:0}
 .obj-row .obj-tipo{width:148px;flex-shrink:0}
+
+/* ── Info do banco no rodapé da sidebar ──────────────────────────────────── */
+.db-info{font-size:10.5px;color:var(--side-muted);padding:4px 10px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.7;cursor:default;line-height:1.4}
