@@ -1,0 +1,94 @@
+================================================================================
+LICENSES-THIRD-PARTY.txt — Gestao_Dados
+================================================================================
+This file lists the third-party dependencies used by the project and their
+respective licenses, for compliance and audit purposes.
+
+The project itself is licensed under the MIT License (see the LICENSE file in
+the project root). All dependencies listed below are MIT-compatible.
+
+Update this file whenever a third-party library is added to or removed from
+the project (keep it in sync with requirements.txt).
+
+Last reviewed: 2026-07-02
+================================================================================
+
+
+--------------------------------------------------------------------------------
+1. JAVASCRIPT LIBRARIES
+--------------------------------------------------------------------------------
+
+Chart.js
+  Version ..... 4.4.4
+  License ..... MIT License
+  Copyright ... (c) 2014-2024 Chart.js Contributors
+  Source ...... https://github.com/chartjs/Chart.js
+  Usage ....... Dashboard charts (loaded via CDN in index.php)
+
+jsPDF
+  Version ..... 2.5.2
+  License ..... MIT License
+  Copyright ... (c) 2010-2025 James Hall
+                (c) 2015-2025 yWorks GmbH
+  Source ...... https://github.com/parallax/jsPDF
+  Usage ....... PDF report export (vendored in js/vendor/)
+  Note ........ Includes internal components under the Apache License 2.0
+                (also permissive and MIT-compatible).
+
+jsPDF-AutoTable
+  Version ..... 3.8.4
+  License ..... MIT License
+  Copyright ... (c) 2014 Simon Bengtsson
+  Source ...... https://github.com/simonbengtsson/jsPDF-AutoTable
+  Usage ....... PDF table generation, jsPDF plugin (js/vendor/)
+
+
+--------------------------------------------------------------------------------
+2. FONTS (Google Fonts)
+--------------------------------------------------------------------------------
+
+Inter
+  License ..... SIL Open Font License 1.1 (OFL-1.1)
+  Source ...... https://fonts.google.com/specimen/Inter
+  Usage ....... Main interface typography (index.php)
+
+JetBrains Mono
+  License ..... SIL Open Font License 1.1 (OFL-1.1)
+  Source ...... https://fonts.google.com/specimen/JetBrains+Mono
+  Usage ....... Monospaced font (index.php and setup/index.php)
+
+Plus Jakarta Sans
+  License ..... SIL Open Font License 1.1 (OFL-1.1)
+  Source ...... https://fonts.google.com/specimen/Plus+Jakarta+Sans
+  Usage ....... Installer screen typography (setup/index.php)
+
+Note on OFL: the fonts can be freely used, embedded, and redistributed,
+including in commercial projects. The only relevant restriction is that the
+font may NOT be sold on its own (by itself). Using it inside the project is
+allowed without issue.
+
+
+--------------------------------------------------------------------------------
+3. RUNTIME / PLATFORM
+--------------------------------------------------------------------------------
+
+PHP (>= 8.1) and native extensions (ext-pdo, ext-openssl, ext-mbstring,
+ext-json, ext-hash, ext-pdo_*)
+  License ..... PHP License 3.01 (permissive)
+  Source ...... https://www.php.net/license/
+  Note ........ The PHP runtime is not redistributed with the project; it is
+                only used as the execution platform. Listed here for
+                completeness only.
+
+
+================================================================================
+COMPATIBILITY SUMMARY
+================================================================================
+Project: MIT License
+Dependencies: MIT, Apache 2.0, OFL-1.1, PHP License — all permissive.
+No copyleft dependencies (GPL / LGPL / AGPL) present.
+Result: NO LICENSE CONFLICT.
+================================================================================
+
+Note: this document is a technical compliance review, not legal advice. For
+formal licensing decisions, consult your legal team.

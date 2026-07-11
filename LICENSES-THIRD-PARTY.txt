@@ -1,0 +1,94 @@
+================================================================================
+LICENSES-THIRD-PARTY.txt — Gestao_Dados
+================================================================================
+Este arquivo lista as dependencias de terceiros usadas pelo projeto e suas
+respectivas licencas, para fins de conformidade (compliance) e auditoria.
+
+O projeto em si e licenciado sob a MIT License (ver arquivo LICENSE na raiz).
+Todas as dependencias abaixo sao compativeis com a MIT.
+
+Atualizar este arquivo sempre que uma nova biblioteca de terceiros for
+adicionada ou removida do projeto (manter em sincronia com requirements.txt).
+
+Ultima verificacao: 2026-07-02
+================================================================================
+
+
+--------------------------------------------------------------------------------
+1. BIBLIOTECAS JAVASCRIPT
+--------------------------------------------------------------------------------
+
+Chart.js
+  Versao ...... 4.4.4
+  Licenca ..... MIT License
+  Copyright ... (c) 2014-2024 Chart.js Contributors
+  Origem ...... https://github.com/chartjs/Chart.js
+  Uso ......... Graficos no dashboard (carregado via CDN em index.php)
+
+jsPDF
+  Versao ...... 2.5.2
+  Licenca ..... MIT License
+  Copyright ... (c) 2010-2025 James Hall
+                (c) 2015-2025 yWorks GmbH
+  Origem ...... https://github.com/parallax/jsPDF
+  Uso ......... Exportacao de relatorios em PDF (vendorizado em js/vendor/)
+  Obs ......... Inclui componentes internos sob Apache License 2.0
+                (tambem permissiva e compativel com MIT).
+
+jsPDF-AutoTable
+  Versao ...... 3.8.4
+  Licenca ..... MIT License
+  Copyright ... (c) 2014 Simon Bengtsson
+  Origem ...... https://github.com/simonbengtsson/jsPDF-AutoTable
+  Uso ......... Geracao de tabelas em PDF, plugin do jsPDF (js/vendor/)
+
+
+--------------------------------------------------------------------------------
+2. FONTES (Google Fonts)
+--------------------------------------------------------------------------------
+
+Inter
+  Licenca ..... SIL Open Font License 1.1 (OFL-1.1)
+  Origem ...... https://fonts.google.com/specimen/Inter
+  Uso ......... Tipografia da interface principal (index.php)
+
+JetBrains Mono
+  Licenca ..... SIL Open Font License 1.1 (OFL-1.1)
+  Origem ...... https://fonts.google.com/specimen/JetBrains+Mono
+  Uso ......... Fonte monoespacada (index.php e setup/index.php)
+
+Plus Jakarta Sans
+  Licenca ..... SIL Open Font License 1.1 (OFL-1.1)
+  Origem ...... https://fonts.google.com/specimen/Plus+Jakarta+Sans
+  Uso ......... Tipografia da tela do instalador (setup/index.php)
+
+Obs sobre a OFL: as fontes podem ser usadas, incorporadas e redistribuidas
+livremente, inclusive em projetos comerciais. A unica restricao relevante e
+que a fonte NAO pode ser vendida isoladamente (por si so). Uso dentro do
+projeto e permitido sem problemas.
+
+
+--------------------------------------------------------------------------------
+3. RUNTIME / PLATAFORMA
+--------------------------------------------------------------------------------
+
+PHP (>= 8.1) e extensoes nativas (ext-pdo, ext-openssl, ext-mbstring,
+ext-json, ext-hash, ext-pdo_*)
+  Licenca ..... PHP License 3.01 (permissiva)
+  Origem ...... https://www.php.net/license/
+  Obs ......... O runtime PHP nao e redistribuido junto com o projeto; e
+                apenas usado como plataforma de execucao. Listado aqui apenas
+                por completude.
+
+
+================================================================================
+RESUMO DE COMPATIBILIDADE
+================================================================================
+Projeto: MIT License
+Dependencias: MIT, Apache 2.0, OFL-1.1, PHP License — todas permissivas.
+Nenhuma dependencia copyleft (GPL / LGPL / AGPL) presente.
+Resultado: SEM CONFLITO DE LICENCA.
+================================================================================
+
+Nota: este documento e uma triagem tecnica de conformidade, nao um parecer
+juridico. Para decisoes formais de licenciamento, consultar a area juridica.

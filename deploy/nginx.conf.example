@@ -1,0 +1,71 @@
+# Exemplo de config do Nginx para o Portal de Gestao de Dados.
+# Copie para /etc/nginx/sites-available/meu-portal, ajuste os pontos
+# marcados com "AJUSTE AQUI" e habilite com:
+#   sudo ln -s /etc/nginx/sites-available/meu-portal /etc/nginx/sites-enabled/
+#   sudo nginx -t && sudo systemctl reload nginx
+#
+# Projeto sem dependencias (sem Composer/vendor) e com estrutura plana:
+#   index.php, css/, js/, img/, backend/, conf/ -- todos soltos na raiz.
+# O Nginx serve os arquivos estaticos reais direto (mais rapido) e manda
+# qualquer outra coisa (rotas do SPA e /api/...) pro index.php via PHP-FPM.
+
+server {
+    listen 80;
+    listen [::]:80;
+
+    # AJUSTE AQUI: dominio real do portal.
+    server_name portal.minhaempresa.com.br;
+
+    # AJUSTE AQUI: caminho absoluto onde o projeto foi copiado no servidor
+    # (a pasta que contem index.php, backend/, conf/, css/, js/, img/ juntos).
+    root /var/www/meu-portal;
+    index index.php;
+
+    # Bloqueia acesso direto as pastas internas -- so o index.php deve
+    # enxergar o que tem dentro de backend/, conf/ (logica da API e
+    # credenciais do banco) e db/ (arquivo .db do SQLite -- sem isso,
+    # alguem poderia baixar o banco inteiro so acessando a URL).
+    #
+    # O bloco ^~ abaixo tem prioridade maxima no Nginx (prefixo literal,
+    # nao regex) e garante que conf/ nunca seja servido mesmo que um
+    # bloco de location posterior seja adicionado por engano.
+    location ^~ /conf/ {
+        deny all;
+    }
+    location ~ ^/(backend|conf|deploy|db)(/|$) {
+        deny all;
+    }
+    location ~ /\.git {
+        deny all;
+    }
+    location ~ ^/(README\.md|DEPLOY\.md)$ {
+        deny all;
+    }
+
+    # Arquivo real (css/js/img/index.html) -- serve direto. Qualquer outra
+    # coisa (rotas do SPA e /api/...) cai no index.php unico.
+    location / {
+        try_files $uri $uri/ /index.php;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+        fastcgi_param SCRIPT_NAME /index.php;
+
+        # AJUSTE AQUI: socket do PHP-FPM (confira a versao instalada com
+        # "php -v" no servidor -- ex.: php8.1-fpm.sock, php8.2-fpm.sock).
+        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+    }
+
+    client_max_body_size 10m;
+
+    access_log /var/log/nginx/meu-portal.access.log;
+    error_log  /var/log/nginx/meu-portal.error.log;
+}
+
+# Para HTTPS, depois que o dominio estiver apontando pro servidor, rode
+# "sudo certbot --nginx -d portal.minhaempresa.com.br" (Let's Encrypt).
+# O certbot edita este arquivo automaticamente para adicionar o bloco de
+# "listen 443 ssl" e redirecionar HTTP -> HTTPS. Nao precisa escrever isso
+# na mao.

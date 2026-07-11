@@ -1,0 +1,77 @@
+# ============================================================================
+# requirements.txt — Gestao_Dados
+# Levantamento das dependencias reais do projeto, levantadas direto no codigo
+# (backend/*.php, index.php, setup/index.php). Atualizar este arquivo sempre
+# que uma nova extensao/lib for adicionada ao codigo.
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# FILOSOFIA DO PROJETO: ZERO-DEPENDENCY
+# ----------------------------------------------------------------------------
+# Este projeto NAO usa Composer nem NPM. Nao ha vendor/, composer.json,
+# package.json ou node_modules. Tudo e PHP nativo + 1 lib JS via CDN.
+# Nao adicionar Composer/Slim/Monolog/PHPMailer etc. sem antes discutir —
+# isso muda a arquitetura de instalacao (hoje: copiar pasta + apontar o
+# document root, sem "composer install").
+
+# ----------------------------------------------------------------------------
+# RUNTIME
+# ----------------------------------------------------------------------------
+php>=8.1
+# Confirmado em uso: tipo "mixed" (backend/api.php) -> exige PHP >= 8.0.
+# README.md já trava em PHP 8.1+; manter os dois sincronizados se subir a versão.
+
+# ----------------------------------------------------------------------------
+# EXTENSOES PHP NATIVAS (vem com o PHP, mas precisam estar habilitadas)
+# ----------------------------------------------------------------------------
+ext-pdo                 # backend/db.php — acesso a banco via PDO (obrigatória)
+ext-openssl             # backend/auth.php, backend/mailer.php — cifra de senha SMTP / JWT
+ext-mbstring            # backend/mailer.php — mb_encode_mimeheader (assunto de e-mail com acento)
+ext-json                # backend/api.php — json_encode/json_decode (request/response da API)
+ext-hash                # uso de hash() para checksums/assinaturas
+# password_hash()/password_verify()/random_bytes() são da core do PHP, não exigem extensão extra.
+
+# ----------------------------------------------------------------------------
+# DRIVER DE BANCO — instalar SOMENTE o que for usado em produção
+# (escolha feita em /setup; backend/db.php verifica extension_loaded() e
+# acusa erro amigável se faltar)
+# ----------------------------------------------------------------------------
+ext-pdo_sqlite          # padrão zero-config (cria db/database.db sozinho)
+# ext-pdo_mysql         # se o banco escolhido for MySQL/MariaDB
+# ext-pdo_pgsql         # se o banco escolhido for PostgreSQL
+# ext-pdo_sqlsrv        # se o banco escolhido for SQL Server (driver da Microsoft)
+
+# ----------------------------------------------------------------------------
+# FRONTEND — bibliotecas carregadas via CDN (sem build step, sem npm install)
+# ----------------------------------------------------------------------------
+# Carregadas em index.php:
+#   Chart.js 4.4.4   https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js
+#   Google Fonts     Inter (400-800) + JetBrains Mono (400-500)
+# Carregadas em setup/index.php (tela do instalador):
+#   Google Fonts     Plus Jakarta Sans (400-800) + JetBrains Mono (400-500)
+#
+# Boas práticas de atualização:
+#   - Trocar a versão do Chart.js direto na URL do <script> em index.php.
+#     Antes de subir a versão major, checar breaking changes no changelog do Chart.js.
+#   - js/app.js e js/api.js são código próprio do projeto (sem versionamento externo).
+
+# ----------------------------------------------------------------------------
+# FRONTEND — bibliotecas vendorizadas localmente (sem CDN, sem npm install)
+# ----------------------------------------------------------------------------
+# Arquivos em js/vendor/, referenciados em index.php (exportação de Relatórios em PDF):
+#   jsPDF 2.5.2                  js/vendor/jspdf.umd.min.js
+#   jsPDF-AutoTable 3.8.4        js/vendor/jspdf.plugin.autotable.min.js
+#
+# Boas práticas de atualização:
+#   - São arquivos estáticos baixados manualmente (não há npm/composer aqui).
+#     Para atualizar, baixar o .min.js da nova versão e substituir o arquivo em js/vendor/.
+#   - Checar breaking changes no changelog do jsPDF antes de subir a versão major.
+
+# ----------------------------------------------------------------------------
+# NÃO USADO (de propósito) — não adicionar sem necessidade real
+# ----------------------------------------------------------------------------
+# - Composer / autoload PSR-4
+# - Slim Framework, Laravel, Symfony
+# - PHPMailer / Swiftmailer (SMTP é enviado via fsockopen nativo em backend/mailer.php)
+# - firebase/php-jwt (JWT é montado/validado manualmente em backend/auth.php)
+# - npm / node_modules / bundlers (Webpack, Vite etc.)

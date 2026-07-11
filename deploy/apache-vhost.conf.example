@@ -1,0 +1,56 @@
+# Exemplo de virtual host do Apache para o Portal de Gestao de Dados.
+# Copie para /etc/apache2/sites-available/meu-portal.conf, ajuste os
+# pontos marcados com "AJUSTE AQUI" e habilite com:
+#   sudo a2ensite meu-portal
+#   sudo a2enmod rewrite
+#   sudo systemctl reload apache2
+#
+# Projeto sem dependencias (sem Composer/vendor) e com estrutura plana:
+#   index.php, css/, js/, img/, backend/, conf/ -- todos soltos na raiz.
+# O DocumentRoot aponta pra essa raiz; o .htaccess (ja incluido no projeto)
+# serve arquivos reais direto e manda tudo mais (rotas do SPA e /api/...)
+# pro index.php. Para o .htaccess funcionar, AllowOverride precisa estar
+# em "All" (ja configurado abaixo).
+#
+# Pressupoe mod_php (Apache executando o PHP direto). Se o servidor usa
+# PHP-FPM via mod_proxy_fcgi, ajuste o <Directory> com a diretiva
+# SetHandler/ProxyFCGI correspondente -- a documentacao do seu PHP-FPM tem
+# o trecho certo para colar aqui.
+
+<VirtualHost *:80>
+    # AJUSTE AQUI: dominio real do portal.
+    ServerName portal.minhaempresa.com.br
+
+    # AJUSTE AQUI: caminho absoluto onde o projeto foi copiado no servidor
+    # (a pasta que contem index.php, backend/, conf/, css/, js/, img/ juntos).
+    DocumentRoot /var/www/meu-portal
+
+    <Directory /var/www/meu-portal>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    # backend/, conf/ e db/ nao devem ser acessados direto pela web -- so
+    # por dentro do index.php da raiz (via require interno do PHP). O
+    # .htaccess da raiz ja bloqueia isso; este bloco e so reforco no nivel
+    # do vhost, que nao depende do AllowOverride. db/ guarda o arquivo .db
+    # do SQLite -- sem bloquear, alguem poderia baixar o banco inteiro so
+    # acessando a URL.
+    <Directory /var/www/meu-portal/backend>
+        Require all denied
+    </Directory>
+    <Directory /var/www/meu-portal/conf>
+        Require all denied
+    </Directory>
+    <Directory /var/www/meu-portal/db>
+        Require all denied
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/meu-portal-error.log
+    CustomLog ${APACHE_LOG_DIR}/meu-portal-access.log combined
+</VirtualHost>
+
+# Para HTTPS, depois que o dominio estiver apontando pro servidor, rode
+# "sudo certbot --apache -d portal.minhaempresa.com.br" (Let's
+# Encrypt). O certbot cria o bloco <VirtualHost *:443> sozinho.

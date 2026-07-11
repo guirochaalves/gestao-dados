@@ -1,0 +1,35 @@
+# Front controller unico do projeto (Apache): toda requisicao que nao
+# corresponder a um arquivo/pasta real cai no index.php desta mesma pasta
+# (a raiz do projeto), que decide se e /api/... (rotas em backend/),
+# arquivo estatico real (css/js/img) ou a pagina do portal. So importa se
+# voce estiver usando Apache com o DocumentRoot apontando para esta pasta,
+# com AllowOverride All -- ver DEPLOY.md.
+# Em Nginx isso e feito via "location" (deploy/nginx.conf.example); em IIS,
+# via web.config (deploy/iis-web.config.example).
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Bloqueia acesso direto a pastas/arquivos internos -- defesa extra,
+    # mesmo que existam de verdade no disco. backend/ guarda a logica da
+    # API; conf/ guarda config.php (credenciais do banco e chave secreta);
+    # db/ guarda o arquivo .db do SQLite (sem essa regra, alguem poderia
+    # baixar o banco inteiro -- senhas com hash e tudo -- so acessando a URL).
+    RewriteRule ^(backend|conf|deploy|db)(/|$) - [F,L]
+    RewriteRule ^(composer\.(json|lock)|README\.md|DEPLOY\.md)$ - [F,L]
+
+    # Se o arquivo ou pasta pedido existe de verdade (ex.: css/style.css,
+    # js/app.js, img/logo.png), serve direto, sem passar pelo PHP.
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Qualquer outra coisa (inclusive /api/... e as rotas do SPA) cai
+    # no index.php, que resolve.
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Reforco sem depender do mod_rewrite: nunca serve esses arquivos por engano.
+<FilesMatch "(^composer\.(json|lock)$|^README\.md$|^DEPLOY\.md$)">
+    Require all denied
+</FilesMatch>
