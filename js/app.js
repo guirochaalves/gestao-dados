@@ -56,6 +56,7 @@ function avatarCellHtml(nome) {
 // Opções dos campos <select> (mesmas do console original)
 // ---------------------------------------------------------------------------
 const OPT = {
+  tipoObjeto: ['Procedure','Função','Trigger','View','Tabela','Índice','Sequence','Package','Job','Tipo','Sinônimo','Grant','Script','Outro'],
   tipoConta: ['Login SQL', 'Login Windows', 'Grupo AD'],
   statusAc: ['Ativo', 'Revogado', 'Suspenso'],
   ambiente: ['Produção', 'Homologação', 'Desenvolvimento'],
@@ -136,7 +137,7 @@ const SCHEMA = {
       { k: 'ambiente', l: 'Ambiente', t: 'select', cat: 'mudanca_ambiente', table: 1, pill: 1 },
       { k: 'tipo', l: 'Tipo', t: 'select', cat: 'mudanca_tipo', table: 1 },
       { k: 'descricao', l: 'Descrição da mudança', t: 'textarea', full: 1, table: 1, trunc: 1 },
-      { k: 'script', l: 'Objetos', t: 'multitext', full: 1, table: 1, trunc: 1 },
+      { k: 'objetos', l: 'Objetos', t: 'objetos', full: 1, table: 1, trunc: 1 },
       { k: 'rollback', l: 'Plano de rollback', t: 'textarea', full: 1 },
       { k: 'solicitante', l: 'Solicitante', t: 'text' },
       { k: 'aprovador', l: 'Aprovador', t: 'text', table: 1 },
@@ -359,7 +360,12 @@ const I18N = {
     'db_ddladmin': 'db_ddladmin', 'db_securityadmin': 'db_securityadmin', 'sysadmin': 'sysadmin',
     'Outros': 'Other',
 
-    'Chamado': 'Ticket', 'Objetos': 'Objects', 'Adicionar objeto': 'Add object', 'Nome do objeto': 'Object name',
+    'Chamado': 'Ticket', 'Objetos': 'Objects', 'Adicionar objeto': 'Add object',
+    'Tipo': 'Type',
+    'Função': 'Function',
+    'Índice': 'Index',
+    'Sinônimo': 'Synonym',
+    'Sequência': 'Sequence', 'Nome do objeto': 'Object name',
     'Alterações em produção com aprovação e rollback': 'Production changes with approval and rollback',
     'O que cada papel pode fazer': 'What each role can do', 'Master': 'Master',
     'Visualiza os artefatos liberados, sem criar, editar ou excluir registros.': 'Views the allowed records, without creating, editing or deleting them.',
@@ -900,6 +906,10 @@ async function renderOverview() {
 
 function cellVal(f, r) {
   const raw = r[f.k];
+  if (f.t === 'objetos') {
+    if (!Array.isArray(raw) || !raw.length) return '—';
+    return esc(raw.map((o) => o.nome + (o.tipo ? ` (${o.tipo})` : '')).join(', '));
+  }
   let v = raw;
   if (f.t === 'date') v = fmtDate(v);
   // Só traduz valores de listas FIXAS (f.o: Sim/Não, tipo de conta, etc.)
@@ -1018,7 +1028,10 @@ function tableHtml(key, cols, rows, sing, searching) {
     if (podeEscrever) h += `<td class="td-check"><input type="checkbox" data-act="tblToggleRow" data-key="${key}" data-id="${r.id}" ${st.sel.has(String(r.id)) ? 'checked' : ''}></td>`;
     cols.forEach((f) => {
       const cls = (f.mono ? 'mono ' : '') + (f.trunc ? 'trunc' : '');
-      const title = f.trunc ? ` title="${esc(r[f.k])}"` : '';
+      const _tRaw = f.t === 'objetos' && Array.isArray(r[f.k])
+        ? r[f.k].map((o) => o.nome + (o.tipo ? ` (${o.tipo})` : '')).join(', ')
+        : String(r[f.k] ?? '');
+      const title = f.trunc ? ` title="${esc(_tRaw)}"` : '';
       h += `<td class="${cls.trim()}" data-col="${f.k}" style="${st.hidden.has(f.k) ? 'display:none' : ''}"${title}>${cellVal(f, r)}</td>`;
     });
     if (podeEscrever) {
@@ -1380,7 +1393,8 @@ function buildForm(key, data) {
   const sch = SCHEMA[key];
   let h = '';
   sch.fields.forEach((f) => {
-    const v = data ? esc(data[f.k]) : '';
+    const today = new Date().toISOString().slice(0, 10);
+    const v = data ? esc(data[f.k]) : (f.t === 'date' ? today : '');
     h += `<div class="fld ${f.full ? 'full' : ''}"><label>${esc(tr(f.l))}</label>`;
     if (f.t === 'select') {
       // value explícito (esc(o)): sem isso o <option> usa o próprio texto
@@ -1390,6 +1404,16 @@ function buildForm(key, data) {
       h += `<select data-k="${f.k}"><option value="">—</option>` + optionsFor(f).map((o) => `<option value="${esc(o)}" ${data && data[f.k] === o ? 'selected' : ''}>${esc(f.o ? tr(o) : o)}</option>`).join('') + '</select>';
     } else if (f.t === 'textarea') {
       h += `<textarea data-k="${f.k}">${v}</textarea>`;
+    } else if (f.t === 'objetos') {
+      // Retrocompatibilidade: migra dados do campo legado 'script' se objetos vier vazio
+      let objItems = (data && Array.isArray(data[f.k])) ? data[f.k] : [];
+      if (!objItems.length && data && data.script) {
+        objItems = String(data.script).split(',').map((s) => s.trim()).filter(Boolean).map((n) => ({ nome: n, tipo: '' }));
+      }
+      if (!objItems.length) objItems = [{ nome: '', tipo: '' }];
+      h += '<div class="obj-list">' + objItems.map((o) => objetoRowHtml(o.nome || '', o.tipo || '')).join('') + '</div>';
+      h += '<button type="button" class="btn btn-ghost" style="margin-top:8px" data-act="addObjetoRow">+ ' + esc(tr('Adicionar objeto')) + '</button>';
+      h += '<input type="hidden" data-k="' + f.k + '" value="' + esc(JSON.stringify(objItems.filter((o) => o.nome))) + '">';
     } else if (f.t === 'multitext') {
       const items = (data && data[f.k] ? String(data[f.k]).split(',').map((s) => s.trim()).filter(Boolean) : []);
       if (!items.length) items.push('');
@@ -1419,6 +1443,49 @@ function buildForm(key, data) {
   });
   return h;
 }
+
+// ---------------------------------------------------------------------------
+// Campo 'objetos' no módulo Mudanças: cada objeto tem nome e tipo distintos,
+// salvos em mudancas_objetos (uma linha por objeto no banco).
+// ---------------------------------------------------------------------------
+function objetoRowHtml(nome, tipo) {
+  nome = nome || ''; tipo = tipo || '';
+  const opts = OPT.tipoObjeto.map(
+    (t) => '<option value="' + esc(t) + '"' + (tipo === t ? ' selected' : '') + '>' + esc(t) + '</option>'
+  ).join('');
+  return '<div class="obj-row">'
+    + '<input type="text" class="obj-nome" value="' + esc(nome) + '" placeholder="' + esc(tr('Nome do objeto')) + '" data-oninput="syncObjetos">'
+    + '<select class="obj-tipo" data-oninput="syncObjetos"><option value="">— ' + esc(tr('Tipo')) + ' —</option>' + opts + '</select>'
+    + '<button type="button" class="icon-btn del" data-act="removeObjetoRow" title="' + esc(tr('Remover')) + '">&times;</button>'
+    + '</div>';
+}
+
+function syncObjetos(el) {
+  const fld    = el ? el.closest('.fld') : null;
+  if (!fld) return;
+  const hidden = fld.querySelector('input[type="hidden"][data-k="objetos"]');
+  if (!hidden) return;
+  const rows = [...fld.querySelectorAll('.obj-row')].map((row) => ({
+    nome: (row.querySelector('.obj-nome') ? row.querySelector('.obj-nome').value : '').trim(),
+    tipo: (row.querySelector('.obj-tipo') ? row.querySelector('.obj-tipo').value : '').trim(),
+  })).filter((o) => o.nome);
+  hidden.value = JSON.stringify(rows);
+}
+
+function addObjetoRow(btn) {
+  const fld  = btn.closest('.fld');
+  const list = fld.querySelector('.obj-list');
+  list.insertAdjacentHTML('beforeend', objetoRowHtml('', ''));
+  syncObjetos(btn);
+}
+
+function removeObjetoRow(btn) {
+  const fld  = btn.closest('.fld');
+  btn.closest('.obj-row').remove();
+  const first = fld.querySelector('.obj-nome');
+  if (first) syncObjetos(first);
+}
+
 
 function multitextRowHtml(val) {
   return `<div class="multitext-row"><input type="text" value="${esc(val)}" placeholder="${esc(tr('Nome do objeto'))}" data-oninput="syncMultitext"><button type="button" class="icon-btn del" data-act="removeMultitextRow" title="${esc(tr('Remover'))}">&times;</button></div>`;
@@ -1528,17 +1595,23 @@ async function openEdit(key, id) {
 function closeModal() { $('overlay').classList.remove('show'); editId = null; }
 
 async function saveModal() {
-  // Garante que campos multitext sincronizem o hidden antes de coletar.
-  // Sem isso, digitar e clicar em Salvar sem acionar outro evento deixa o
-  // hidden com o valor antigo (syncMultitext nunca teria sido chamado).
+  // Flush defensivo: sincroniza multitext e obj-list antes de coletar
   $('modalBody').querySelectorAll('.multitext').forEach((wrap) => {
     const hidden = wrap.closest('.fld').querySelector('input[type="hidden"][data-k]');
     if (!hidden) return;
     const vals = [...wrap.querySelectorAll('.multitext-row input[type="text"]')].map((i) => i.value.trim()).filter(Boolean);
     hidden.value = vals.join(', ');
   });
+  $('modalBody').querySelectorAll('.obj-list').forEach((list) => {
+    const first = list.querySelector('.obj-nome');
+    if (first) syncObjetos(first);
+  });
   const rec = {};
   $('modalBody').querySelectorAll('[data-k]').forEach((el) => { rec[el.dataset.k] = el.value.trim() === '' ? null : el.value.trim(); });
+  // Campo objetos: converter JSON string → array para a API
+  if (typeof rec.objetos === 'string') {
+    try { rec.objetos = JSON.parse(rec.objetos || '[]'); } catch (e) { rec.objetos = []; }
+  }
   const saveBtn = $('modalSave');
   saveBtn.disabled = true;
   try {
@@ -3192,6 +3265,8 @@ removeTag,
   // multitext (campo de objetos/lista livre)
   addMultitextRow,
   removeMultitextRow,
+  addObjetoRow,
+  removeObjetoRow,
   // Usuarios
   delUsuario: (el) => delUsuario(el.dataset.id),
   openRolesModal: (el) => openRolesModal(el.dataset.id),
@@ -3253,6 +3328,7 @@ const INPUT_ACTIONS = {
   filterCadastroDrawer,
   filterTagOptions,
   syncMultitext,
+  syncObjetos,
 };
 
 document.addEventListener('click', (e) => {
