@@ -1800,9 +1800,11 @@ function openUserModal(u) {
   const mods = u ? String(u.modulos_permitidos || '').split(',').map((s) => s.trim()).filter(Boolean) : [];
   buildModulosChecklist('userModulosChk', mods);
   toggleModulosWrap('userModulosWrap', $('userRoleSel').value);
+  $('userRoleWrap').style.display = u ? 'none' : '';
+  $('userSave').textContent = u ? tr('Atualizar cadastro') : tr('Criar usuário');
   $('userOverlay').classList.add('show');
 }
-function closeUserModal() { $('userOverlay').classList.remove('show'); userEditId = null; $('userLogin').value = ''; $('userLogin').readOnly = false; $('userLogin').style.opacity = ''; $('userNome').value = ''; $('userEmail').value = ''; $('userSenha').value = ''; $('userRoleSel').value = 'leitura'; $('userAtivoWrap').style.display = 'none'; }
+function closeUserModal() { $('userOverlay').classList.remove('show'); userEditId = null; $('userLogin').value = ''; $('userLogin').readOnly = false; $('userLogin').style.opacity = ''; $('userNome').value = ''; $('userEmail').value = ''; $('userSenha').value = ''; $('userRoleSel').value = 'leitura'; $('userAtivoWrap').style.display = 'none'; $('userRoleWrap').style.display = ''; $('userSave').textContent = tr('Criar usuário'); }
 $('userClose').addEventListener('click', closeUserModal);
 $('userCancel').addEventListener('click', closeUserModal);
 $('userRoleSel').addEventListener('change', (e) => toggleModulosWrap('userModulosWrap', e.target.value));

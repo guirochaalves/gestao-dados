@@ -379,10 +379,12 @@ header('Content-Type: text/html; charset=utf-8');
         <label data-i18n>Status da conta</label>
         <select id="userAtivo"><option value="1" data-i18n>Ativo</option><option value="0" data-i18n>Desativado</option></select>
       </div>
-      <div class="fld"><label data-i18n>Papel</label><select id="userRoleSel"><option value="leitura" data-i18n>Leitura</option><option value="escrita" data-i18n>Escrita</option><option value="admin" data-i18n>Administrador</option></select></div>
-      <div class="fld" id="userModulosWrap">
-        <label data-i18n>Artefatos permitidos</label>
-        <div class="chk-group" id="userModulosChk"></div>
+      <div id="userRoleWrap">
+        <div class="fld"><label data-i18n>Papel</label><select id="userRoleSel"><option value="leitura" data-i18n>Leitura</option><option value="escrita" data-i18n>Escrita</option><option value="admin" data-i18n>Administrador</option></select></div>
+        <div class="fld" id="userModulosWrap">
+          <label data-i18n>Artefatos permitidos</label>
+          <div class="chk-group" id="userModulosChk"></div>
+        </div>
       </div>
     </div>
     <div class="modal-f"><button class="btn btn-ghost" id="userCancel" data-i18n>Cancelar</button><button class="btn btn-primary" id="userSave" data-i18n>Criar usuário</button></div>
@@ -495,6 +497,4 @@ header('Content-Type: text/html; charset=utf-8');
 <script src="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>/js/api.js?v=<?= @filemtime(__DIR__ . '/js/api.js') ?: time() ?>"></script>
 <script src="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>/js/vendor/jspdf.umd.min.js"></script>
 <script src="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>/js/vendor/jspdf.plugin.autotable.min.js"></script>
-<script src="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>/js/app.js?v=<?= @filemtime(__DIR__ . '/js/app.js') ?: time() ?>"></script>
-</body>
-</html>
+<script src="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>/js/app.js?v=<?= @filemtime(__DIR__ . '
