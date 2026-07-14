@@ -685,6 +685,7 @@ $('loginForm').addEventListener('submit', async (e) => {
       return;
     }
     setToken(resp.access_token);
+    if (resp.must_change_password) { showMustChangeOverlay(); return; }
     currentUser = await api.get('/auth/me');
     afterLogin();
   } catch (err) {
@@ -706,6 +707,7 @@ $('mfaForm').addEventListener('submit', async (e) => {
     const resp = await api.post('/auth/mfa/verificar', { mfa_token: mfaToken, codigo: $('mfaCodigo').value.trim() });
     setToken(resp.access_token);
     mfaToken = null;
+    if (resp.must_change_password) { showMustChangeOverlay(); return; }
     currentUser = await api.get('/auth/me');
     afterLogin();
   } catch (err) {
@@ -1734,7 +1736,7 @@ function usuariosTableHtml(users) {
     h += `<td data-col="nome_completo" style="${st.hidden.has('nome_completo') ? 'display:none' : ''}">${avatarCellHtml(u.nome_completo || u.username)}</td>`;
     h += `<td data-col="role" style="${st.hidden.has('role') ? 'display:none' : ''}"><span class="pill ${ROLE_PILL[u.role] || 'p-gray'}">${esc(tr(ROLE_LABEL[u.role] || 'Leitura'))}</span></td>`;
     h += `<td class="mono" data-col="criado_em" style="${st.hidden.has('criado_em') ? 'display:none' : ''}">${u.criado_em ? fmtDate(u.criado_em.slice(0, 10)) : '—'}</td>`;
-    h += `<td><div class="row-act" style="justify-content:flex-end"><button class="icon-btn del" data-act="delUsuario" data-id="${u.id}" title="${esc(tr('Remover'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button></div></td></tr>`;
+    h += `<td><div class="row-act" style="justify-content:flex-end"><button class="icon-btn" data-act="openEditUsuario" data-id="${u.id}" title="${esc(tr('Editar'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button><button class="icon-btn del" data-act="delUsuario" data-id="${u.id}" title="${esc(tr('Remover'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button></div></td></tr>`;
   });
   h += '</tbody></table></div>';
   h += tblPaginationHtml('usuarios', applied.length, st.page, pages);
@@ -1781,26 +1783,52 @@ function toggleModulosWrap(wrapId, role) {
   $(wrapId).style.display = role === 'admin' ? 'none' : '';
 }
 
-function openUserModal() {
-  buildModulosChecklist('userModulosChk', []);
+let userEditId = null;
+function openUserModal(u) {
+  userEditId = u ? String(u.id) : null;
+  $('userModalTitle').textContent = u ? tr('Editar usuário') : tr('Novo usuário');
+  $('userLogin').value = u ? u.username : '';
+  $('userLogin').readOnly = !!u;
+  $('userLogin').style.opacity = u ? '0.6' : '';
+  $('userNome').value = u ? (u.nome_completo || '') : '';
+  $('userEmail').value = u ? (u.email || '') : '';
+  $('userSenha').value = '';
+  $('userSenhaHint').textContent = u ? tr('Deixe em branco para manter a senha atual.') : tr('Mínimo 8 caracteres, com letra e número.');
+  $('userAtivoWrap').style.display = u ? '' : 'none';
+  if (u) $('userAtivo').value = String(u.ativo ?? 1);
+  $('userRoleSel').value = u ? (u.role || 'leitura') : 'leitura';
+  const mods = u ? String(u.modulos_permitidos || '').split(',').map((s) => s.trim()).filter(Boolean) : [];
+  buildModulosChecklist('userModulosChk', mods);
   toggleModulosWrap('userModulosWrap', $('userRoleSel').value);
   $('userOverlay').classList.add('show');
 }
-function closeUserModal() { $('userOverlay').classList.remove('show'); $('userLogin').value = ''; $('userNome').value = ''; $('userEmail').value = ''; $('userSenha').value = ''; $('userRoleSel').value = 'leitura'; }
+function closeUserModal() { $('userOverlay').classList.remove('show'); userEditId = null; $('userLogin').value = ''; $('userLogin').readOnly = false; $('userLogin').style.opacity = ''; $('userNome').value = ''; $('userEmail').value = ''; $('userSenha').value = ''; $('userRoleSel').value = 'leitura'; $('userAtivoWrap').style.display = 'none'; }
 $('userClose').addEventListener('click', closeUserModal);
 $('userCancel').addEventListener('click', closeUserModal);
 $('userRoleSel').addEventListener('change', (e) => toggleModulosWrap('userModulosWrap', e.target.value));
 $('userSave').addEventListener('click', async () => {
   try {
-    await api.post('/usuarios', {
-      username: $('userLogin').value.trim(),
-      nome_completo: $('userNome').value.trim(),
-      email: $('userEmail').value.trim(),
-      password: $('userSenha').value,
-      role: $('userRoleSel').value,
-      modulos: readModulosChecklist('userModulosChk'),
-    });
-    toast('Usuário criado');
+    if (userEditId) {
+      const body = {};
+      const nome = $('userNome').value.trim();
+      const email = $('userEmail').value.trim();
+      if (nome) body.nome_completo = nome;
+      if (email) body.email = email;
+      body.ativo = Number($('userAtivo').value);
+      if ($('userSenha').value) body.password = $('userSenha').value;
+      await api.put('/usuarios/' + userEditId, body);
+      toast('Usuário atualizado');
+    } else {
+      await api.post('/usuarios', {
+        username: $('userLogin').value.trim(),
+        nome_completo: $('userNome').value.trim(),
+        email: $('userEmail').value.trim(),
+        password: $('userSenha').value,
+        role: $('userRoleSel').value,
+        modulos: readModulosChecklist('userModulosChk'),
+      });
+      toast('Usuário criado');
+    }
     closeUserModal();
     await navTo('usuarios');
   } catch (e) { toast(e.message, true); }
@@ -3327,6 +3355,7 @@ removeTag,
   // Usuarios
   delUsuario: (el) => delUsuario(el.dataset.id),
   openRolesModal: (el) => openRolesModal(el.dataset.id),
+  openEditUsuario: (el) => openUserModal(cache.usuarios.find((u) => String(u.id) === el.dataset.id)),
   // Cadastro (gaveta de tipos)
   openCadastroDrawer: (el) => openCadastroDrawer(el.dataset.cat),
   cancelarSelCadastro,
@@ -3439,6 +3468,40 @@ async function carregarDbInfo() {
   } catch (e) { /* silencioso — nao interrompe o login */ }
 }
 
+
+function showMustChangeOverlay() {
+  $('mustChangeSenha').value = '';
+  $('mustChangeSenhaConf').value = '';
+  $('mustChangeErr').textContent = '';
+  $('mustChangeErr').classList.remove('show');
+  $('mustChangeOverlay').classList.add('show');
+}
+
+$('mustChangeSave').addEventListener('click', async () => {
+  const nova = $('mustChangeSenha').value;
+  const conf = $('mustChangeSenhaConf').value;
+  $('mustChangeErr').classList.remove('show');
+  if (!nova || nova.length < 8) {
+    $('mustChangeErr').textContent = tr('A senha deve ter pelo menos 8 caracteres.');
+    $('mustChangeErr').classList.add('show');
+    return;
+  }
+  if (nova !== conf) {
+    $('mustChangeErr').textContent = tr('As senhas não coincidem.');
+    $('mustChangeErr').classList.add('show');
+    return;
+  }
+  try {
+    await api.post('/auth/change-password', { senha_atual: null, nova_senha: nova, force: true });
+    $('mustChangeOverlay').classList.remove('show');
+    localStorage.removeItem('gov_token');
+    showLogin();
+    toast(tr('Senha definida! Faça login com a nova senha.'));
+  } catch (e) {
+    $('mustChangeErr').textContent = e.message || tr('Erro ao salvar.');
+    $('mustChangeErr').classList.add('show');
+  }
+});
 
 applyStaticI18n();
 tryAutoLogin();
