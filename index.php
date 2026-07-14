@@ -365,15 +365,19 @@ header('Content-Type: text/html; charset=utf-8');
 
 <div class="overlay" id="userOverlay">
   <div class="modal" style="max-width:460px">
-    <div class="modal-h"><h3 data-i18n>Novo usuário</h3><button class="x" id="userClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-h"><h3 id="userModalTitle" data-i18n>Novo usuário</h3><button class="x" id="userClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-b" style="grid-template-columns:1fr">
       <div class="fld"><label data-i18n>Login</label><input type="text" id="userLogin"></div>
       <div class="fld"><label data-i18n>Nome completo</label><input type="text" id="userNome"></div>
       <div class="fld"><label data-i18n>E-mail</label><input type="email" id="userEmail"></div>
       <div class="fld">
         <label data-i18n>Senha</label>
-        <input type="password" id="userSenha">
-        <div style="font-size:11.5px;color:var(--muted);margin-top:4px" data-i18n>Mínimo 8 caracteres, com letra e número.</div>
+        <input type="password" id="userSenha" placeholder="">
+        <div id="userSenhaHint" style="font-size:11.5px;color:var(--muted);margin-top:4px" data-i18n>Mínimo 8 caracteres, com letra e número.</div>
+      </div>
+      <div class="fld" id="userAtivoWrap" style="display:none">
+        <label data-i18n>Status da conta</label>
+        <select id="userAtivo"><option value="1" data-i18n>Ativo</option><option value="0" data-i18n>Desativado</option></select>
       </div>
       <div class="fld"><label data-i18n>Papel</label><select id="userRoleSel"><option value="leitura" data-i18n>Leitura</option><option value="escrita" data-i18n>Escrita</option><option value="admin" data-i18n>Administrador</option></select></div>
       <div class="fld" id="userModulosWrap">
@@ -382,6 +386,20 @@ header('Content-Type: text/html; charset=utf-8');
       </div>
     </div>
     <div class="modal-f"><button class="btn btn-ghost" id="userCancel" data-i18n>Cancelar</button><button class="btn btn-primary" id="userSave" data-i18n>Criar usuário</button></div>
+  </div>
+</div>
+
+<!-- Overlay: troca obrigatória de senha (primeiro login / senha redefinida pelo admin) -->
+<div class="overlay" id="mustChangeOverlay" style="z-index:1100">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-h"><h3 data-i18n>Defina sua senha</h3></div>
+    <div class="modal-b" style="grid-template-columns:1fr">
+      <p style="margin:0 0 8px;color:var(--muted);font-size:13.5px" data-i18n>Por segurança, você precisa criar uma nova senha antes de continuar.</p>
+      <div class="fld"><label data-i18n>Nova senha</label><input type="password" id="mustChangeSenha"></div>
+      <div class="fld"><label data-i18n>Confirmar senha</label><input type="password" id="mustChangeSenhaConf"></div>
+      <div id="mustChangeErr" class="login-err"></div>
+    </div>
+    <div class="modal-f"><button class="btn btn-primary" id="mustChangeSave" data-i18n>Salvar senha</button></div>
   </div>
 </div>
 

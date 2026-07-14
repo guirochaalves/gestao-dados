@@ -717,7 +717,9 @@ function migrate(): void
     ensureColumn($pdo, tableName('usuarios'), 'mfa_ativo', 'INT NOT NULL DEFAULT 0');
     ensureColumn($pdo, tableName('usuarios'), 'cor_tema', "VARCHAR(20) NOT NULL DEFAULT 'padrao'");
     ensureColumn($pdo, tableName('usuarios'), 'estilo_side', "VARCHAR(20) NOT NULL DEFAULT 'claro'");
-    ensureColumn($pdo, tableName('usuarios'), 'ativo', 'INT NOT NULL DEFAULT 1');
+    ensureColumn($pdo, tableName('usuarios'), 'ativo',                'INT NOT NULL DEFAULT 1');
+    // Força troca de senha no próximo login (senha temporária enviada por e-mail).
+    ensureColumn($pdo, tableName('usuarios'), 'must_change_password', 'INT NOT NULL DEFAULT 0');
     ensureColumn($pdo, tableName('config_email'), 'testado_ok', 'INT NOT NULL DEFAULT 0');
     ensureColumn($pdo, tableName('config_projeto'), 'timeout_inatividade_min', 'INT NOT NULL DEFAULT 30');
     ensureColumn($pdo, tableName('acessos'), 'servidor', 'VARCHAR(150)');

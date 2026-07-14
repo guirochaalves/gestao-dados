@@ -658,7 +658,8 @@ function despachar(string $metodo, string $caminho): void
 
         $token = criarToken(['sub' => (string) $user['username'], 'role' => (string) $user['role']]);
         registrarAuditoria('auth', (int) $user['id'], 'login_sucesso', (string) $user['username']);
-        responderJson(['access_token' => $token, 'token_type' => 'bearer']);
+        $mustChange = (int) ($user['must_change_password'] ?? 0) === 1;
+        responderJson(['access_token' => $token, 'token_type' => 'bearer', 'must_change_password' => $mustChange]);
     }
 
     // Segunda etapa do login com MFA: confere o codigo de 6 digitos contra o
@@ -688,7 +689,8 @@ function despachar(string $metodo, string $caminho): void
 
         $token = criarToken(['sub' => (string) $user['username'], 'role' => (string) $user['role']]);
         registrarAuditoria('auth', (int) $user['id'], 'login_sucesso', (string) $user['username']);
-        responderJson(['access_token' => $token, 'token_type' => 'bearer']);
+        $mustChange = (int) ($user['must_change_password'] ?? 0) === 1;
+        responderJson(['access_token' => $token, 'token_type' => 'bearer', 'must_change_password' => $mustChange]);
     }
 
     // Reenvia um codigo novo (invalida o anterior e o mfa_token muda --
@@ -824,13 +826,22 @@ function despachar(string $metodo, string $caminho): void
         $user = exigirLogin();
         $body = corpoRequisicao();
         $senhaAtual = (string) ($body['senha_atual'] ?? '');
-        $novaSenha = (string) ($body['nova_senha'] ?? '');
+        $novaSenha  = (string) ($body['nova_senha'] ?? '');
+        // 'force' so e aceito quando must_change_password=1 (fluxo de
+        // primeiro login / senha redefinida pelo admin). Nesse caso nao
+        // exigimos a senha atual pois o usuario pode nao conhece-la.
+        $force = ($body['force'] ?? false) === true && (int) ($user['must_change_password'] ?? 0) === 1;
 
-        if ($senhaAtual === '' || $novaSenha === '') {
-            responderErro(422, 'Informe a senha atual e a nova senha.');
+        if ($novaSenha === '') {
+            responderErro(422, 'Informe a nova senha.');
         }
-        if (!verifyPassword($senhaAtual, (string) $user['password_hash'])) {
-            responderErro(400, 'Senha atual incorreta.');
+        if (!$force) {
+            if ($senhaAtual === '') {
+                responderErro(422, 'Informe a senha atual e a nova senha.');
+            }
+            if (!verifyPassword($senhaAtual, (string) $user['password_hash'])) {
+                responderErro(400, 'Senha atual incorreta.');
+            }
         }
         $erroSenha = avaliarForcaSenha($novaSenha);
         if ($erroSenha !== null) {
@@ -838,8 +849,10 @@ function despachar(string $metodo, string $caminho): void
         }
 
         $pdo = db();
-        $sql = 'UPDATE ' . quoteIdent(tableName('usuarios')) . ' SET ' . quoteIdent('password_hash') . ' = ?, ' .
-            quoteIdent('atualizado_em') . ' = ? WHERE ' . quoteIdent('id') . ' = ?';
+        $sql = 'UPDATE ' . quoteIdent(tableName('usuarios')) . ' SET '
+             . quoteIdent('password_hash')       . ' = ?, '
+             . quoteIdent('must_change_password') . ' = 0, '
+             . quoteIdent('atualizado_em')        . ' = ? WHERE ' . quoteIdent('id') . ' = ?';
         $pdo->prepare($sql)->execute([hashPassword($novaSenha), date('Y-m-d H:i:s'), $user['id']]);
 
         // Revoga o token atual -- se alguem roubou a sessao antes da troca
@@ -891,8 +904,15 @@ function despachar(string $metodo, string $caminho): void
             $role = 'leitura';
         }
 
-        if ($username === '' || $password === '') {
-            responderErro(422, 'Informe login e senha.');
+        // Se a senha vier em branco, gera uma senha temporária aleatória
+        // e marcamos o usuario para trocar no primeiro login.
+        $senhaTemporaria = false;
+        if ($password === '' || $password === null) {
+            $password = bin2hex(random_bytes(6)); // 12 caracteres hex
+            $senhaTemporaria = true;
+        }
+        if ($username === '') {
+            responderErro(422, 'Informe o login.');
         }
         $erroSenha = avaliarForcaSenha($password);
         if ($erroSenha !== null) {
@@ -919,7 +939,7 @@ function despachar(string $metodo, string $caminho): void
 
         $agora = date('Y-m-d H:i:s');
         $colunas = implode(', ', array_map('quoteIdent', [
-            'username', 'nome_completo', 'email', 'role', 'password_hash', 'modulos_permitidos', 'criado_em', 'atualizado_em',
+            'username', 'nome_completo', 'email', 'role', 'password_hash', 'modulos_permitidos', 'must_change_password', 'criado_em', 'atualizado_em',
         ]));
         $valores = [
             $username,
@@ -928,10 +948,11 @@ function despachar(string $metodo, string $caminho): void
             $role,
             hashPassword($password),
             $modulosTexto,
+            $senhaTemporaria ? 1 : 0,
             $agora,
             $agora,
         ];
-        $sql = 'INSERT INTO ' . quoteIdent(tableName('usuarios')) . " ({$colunas}) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = 'INSERT INTO ' . quoteIdent(tableName('usuarios')) . " ({$colunas}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         if (dbDriver() === 'pgsql') {
             $sql .= ' RETURNING ' . quoteIdent('id');
@@ -950,7 +971,98 @@ function despachar(string $metodo, string $caminho): void
         $novoUsuario = $stmt->fetch();
         $novoUsuarioArr = $novoUsuario !== false ? $novoUsuario : [];
         registrarAuditoria('usuarios', $novoId, 'criar', (string) $admin['username'], null, semSenha($novoUsuarioArr));
+
+        // Envia e-mail de boas-vindas com as credenciais.
+        // Falha silenciosa: usuario foi criado com sucesso mesmo que o e-mail falhe.
+        if ($email !== '' && $senhaTemporaria) {
+            $cfgEmail = configEmail();
+            if ($cfgEmail !== null) {
+                $titulo = projectTitle();
+                $corpo  = "Olá! Sua conta no {$titulo} foi criada.\n\n"
+                        . "Login: {$username}\n"
+                        . "Senha temporária: {$password}\n\n"
+                        . "Você será solicitado a definir uma nova senha no primeiro acesso.\n"
+                        . "Acesse o portal e faça login com as credenciais acima.";
+                try {
+                    smtpEnviar($cfgEmail, $email, "Bem-vindo ao {$titulo} — suas credenciais", $corpo);
+                } catch (Throwable $e) {
+                    error_log('Falha ao enviar e-mail de boas-vindas: ' . $e->getMessage());
+                }
+            }
+        }
+
         responderJson(semSenha($novoUsuarioArr), 201);
+    }
+
+    // ---- /usuarios/{id} (editar dados: nome, email, senha, ativo) -------
+    if (preg_match('#^/usuarios/(\d+)$#', $caminho, $m) && $metodo === 'PUT') {
+        $admin = exigirLogin();
+        exigirAdmin($admin);
+        $id   = (int) $m[1];
+        $body = corpoRequisicao();
+        $pdo  = db();
+
+        $stmt = $pdo->prepare('SELECT * FROM ' . quoteIdent(tableName('usuarios')) . ' WHERE ' . quoteIdent('id') . ' = ?');
+        $stmt->execute([$id]);
+        /** @var array<string, mixed>|false $alvo */
+        $alvo = $stmt->fetch();
+        if ($alvo === false) {
+            responderErro(404, 'Usuário não encontrado.');
+        }
+
+        $agora       = date('Y-m-d H:i:s');
+        $sets        = [];
+        $vals        = [];
+
+        if (array_key_exists('nome_completo', $body)) {
+            $sets[] = quoteIdent('nome_completo') . ' = ?';
+            $vals[] = trim((string) ($body['nome_completo'] ?? '')) ?: null;
+        }
+        if (array_key_exists('email', $body)) {
+            $emailNovo = trim((string) ($body['email'] ?? ''));
+            if ($emailNovo !== '' && !filter_var($emailNovo, FILTER_VALIDATE_EMAIL)) {
+                responderErro(422, 'E-mail inválido.');
+            }
+            $sets[] = quoteIdent('email') . ' = ?';
+            $vals[] = $emailNovo ?: null;
+        }
+        if (array_key_exists('ativo', $body)) {
+            $sets[] = quoteIdent('ativo') . ' = ?';
+            $vals[] = (int) ($body['ativo'] ?? 1);
+        }
+        if (array_key_exists('password', $body) && (string) ($body['password'] ?? '') !== '') {
+            $novaSenha = (string) $body['password'];
+            $erroSenha = avaliarForcaSenha($novaSenha);
+            if ($erroSenha !== null) { responderErro(422, $erroSenha); }
+            $sets[] = quoteIdent('password_hash') . ' = ?';
+            $vals[] = hashPassword($novaSenha);
+            // Ao redefinir a senha pelo admin, o usuário deve trocar no próximo login.
+            $sets[] = quoteIdent('must_change_password') . ' = ?';
+            $vals[] = 1;
+            // Revogar tokens ativos para forçar novo login imediato.
+            revogarTodosTokens($id);
+        }
+
+        if (empty($sets)) {
+            responderJson(semSenha((array) $alvo));
+        }
+
+        $sets[] = quoteIdent('atualizado_em') . ' = ?';
+        $vals[] = $agora;
+        $vals[] = $id;
+
+        $antes = semSenha((array) $alvo);
+        $pdo->prepare(
+            'UPDATE ' . quoteIdent(tableName('usuarios')) . ' SET ' . implode(', ', $sets) . ' WHERE ' . quoteIdent('id') . ' = ?'
+        )->execute($vals);
+
+        $stmt = $pdo->prepare('SELECT * FROM ' . quoteIdent(tableName('usuarios')) . ' WHERE ' . quoteIdent('id') . ' = ?');
+        $stmt->execute([$id]);
+        /** @var array<string, mixed>|false $atualizado */
+        $atualizado = $stmt->fetch();
+        $atualizadoArr = $atualizado !== false ? semSenha((array) $atualizado) : $antes;
+        registrarAuditoria('usuarios', $id, 'atualizar', (string) $admin['username'], $antes, $atualizadoArr);
+        responderJson($atualizadoArr);
     }
 
     // ---- /usuarios/{id}/permissoes (definir role + modulos, so admin) --

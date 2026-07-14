@@ -154,6 +154,22 @@ function tokenRevogado(string $jti): bool
 }
 
 /**
+ * Marca todos os tokens ativos de um usuario como "deve trocar a senha".
+ * Como nao indexamos tokens por usuario_id, a revogacao efetiva se da
+ * via must_change_password=1: o frontend detecta o flag e redireciona
+ * para a tela de troca de senha antes de qualquer outra acao.
+ */
+function revogarTodosTokens(int $userId): void
+{
+    $pdo = db();
+    $pdo->prepare(
+        'UPDATE ' . quoteIdent(tableName('usuarios')) .
+        ' SET ' . quoteIdent('must_change_password') . ' = 1' .
+        ' WHERE ' . quoteIdent('id') . ' = ?'
+    )->execute([$userId]);
+}
+
+/**
  * Le o header "Authorization" tentando todas as formas como ele pode
  * chegar no PHP. Em CGI/FastCGI normal vem em HTTP_AUTHORIZATION; no
  * Apache, quando o .htaccess faz um rewrite interno (nosso caso -- tudo
