@@ -2405,7 +2405,9 @@ async function obterLogoPdf() {
 // de relatório de verdade (e não uma tabela crua jogada na página).
 async function exportPdf(key, filtros) {
   const sch = SCHEMA[key];
-  const cols = sch.fields;
+  // Usa só colunas visíveis na tabela (table:1) — exportar todos os campos
+  // em PDF causa colunas microscópicas quando há muitos campos (ex.: integrações).
+  const cols = sch.fields.filter((f) => f.table);
   const qs = relatoriosQueryString(filtros);
   let rows;
   try { rows = await api.get(ENDPOINT[key] + (qs ? '?' + qs : '')); } catch (e) { toast(e.message, true); return; }
@@ -2468,13 +2470,24 @@ async function exportPdf(key, filtros) {
     return String(v ?? '');
   }));
 
+  // Fonte menor para tabelas largas (>8 colunas) para evitar quebra de palavra
+  const numCols = cols.length;
+  const fontSize = numCols > 12 ? 6.5 : numCols > 8 ? 7.5 : 8.5;
+  const cellPad  = numCols > 10 ? 2 : 3;
+
   doc.autoTable({
     head, body,
     startY: 26,
-    margin: { top: 26, left: 12, right: 12, bottom: 14 },
-    styles: { fontSize: 8.5, cellPadding: 3, valign: 'middle', lineColor: [228, 228, 230], lineWidth: 0.1 },
-    headStyles: { fillColor: corAccent, textColor: 255, fontStyle: 'bold' },
+    margin: { top: 26, left: 8, right: 8, bottom: 14 },
+    tableWidth: 'auto',
+    styles: { fontSize, cellPadding: cellPad, valign: 'middle', overflow: 'linebreak', lineColor: [228, 228, 230], lineWidth: 0.1 },
+    headStyles: { fillColor: corAccent, textColor: 255, fontStyle: 'bold', halign: 'center' },
     alternateRowStyles: { fillColor: [246, 246, 248] },
+    columnStyles: Object.fromEntries(cols.map((f, i) => {
+      // Colunas curtas (IPs, datas, pills) recebem largura fixa menor
+      const narrow = f.mono || f.pill || f.k.startsWith('ip_') || f.k === 'ultima_revisao' || f.k === 'criado_por' || f.k === 'status' || f.k === 'ambiente';
+      return [i, { cellWidth: narrow ? 'wrap' : 'auto' }];
+    })),
     didDrawPage: (data) => { desenharCabecalho(); desenharRodape(data); },
   });
 
