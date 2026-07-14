@@ -701,6 +701,12 @@ function despachar(string $metodo, string $caminho): void
             responderErro(401, 'Sessao de verificacao expirada. Faca login novamente.');
         }
 
+        // Rate limit: cooldown de 60s e maximo de 5 reenvios por codigo.
+        $erroRateLimit = mfaChecarReenvio($mfaTokenAntigo);
+        if ($erroRateLimit !== null) {
+            responderErro(429, $erroRateLimit);
+        }
+
         $pdo = db();
         $stmt = $pdo->prepare('SELECT * FROM ' . quoteIdent(tableName('usuarios')) . ' WHERE ' . quoteIdent('username') . ' = ?');
         $stmt->execute([$usuario]);

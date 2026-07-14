@@ -724,6 +724,9 @@ function migrate(): void
     ensureColumn($pdo, tableName('dicionario_dados'), 'servidor', 'VARCHAR(150)');
     ensureColumn($pdo, tableName('integracoes'), 'ip_origem', 'VARCHAR(45)');
     ensureColumn($pdo, tableName('integracoes'), 'ip_destino', 'VARCHAR(45)');
+    // Rate limit de reenvio MFA: contadores por codigo.
+    ensureColumn($pdo, tableName('mfa_codigos'), 'reenvios',       'INT NOT NULL DEFAULT 0');
+    ensureColumn($pdo, tableName('mfa_codigos'), 'ultimo_reenvio', 'DATETIME');
     // Campo "Adicionado por": registra o username de quem criou cada registro.
     ensureColumn($pdo, tableName('acessos'),         'criado_por', 'VARCHAR(150)');
     ensureColumn($pdo, tableName('mudancas'),         'criado_por', 'VARCHAR(150)');

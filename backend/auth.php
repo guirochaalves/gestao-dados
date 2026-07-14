@@ -368,7 +368,9 @@ function exigirMaster(array $user): void
 // ---------------------------------------------------------------------------
 
 /** Quanto tempo (minutos) o codigo de 6 digitos vale apos ser enviado. */
-const MFA_CODIGO_TTL_MINUTOS = 10;
+const MFA_CODIGO_TTL_MINUTOS   = 10;
+const MFA_REENVIO_COOLDOWN_SEG = 60;   // intervalo minimo entre reenvios
+const MFA_REENVIO_MAX          = 5;    // max reenvios por codigo
 
 /** Tentativas erradas de codigo (mesmo token) ate invalidar a tentativa de login. */
 const MFA_MAX_TENTATIVAS = 5;
@@ -425,6 +427,59 @@ function mfaApagarPorToken(string $token): void
     $pdo = db();
     $pdo->prepare('DELETE FROM ' . quoteIdent(tableName('mfa_codigos')) . ' WHERE ' . quoteIdent('token') . ' = ?')
         ->execute([$token]);
+}
+
+/**
+ * Verifica se o token ainda pode ser reenviado e, se sim, incrementa os
+ * contadores. Retorna null em caso de sucesso, ou mensagem de erro para
+ * devolver ao cliente.
+ *
+ * Regras:
+ *   - Cooldown de MFA_REENVIO_COOLDOWN_SEG segundos entre reenvios.
+ *   - No maximo MFA_REENVIO_MAX reenvios por codigo.
+ */
+function mfaChecarReenvio(string $token): ?string
+{
+    $pdo    = db();
+    $tabela = quoteIdent(tableName('mfa_codigos'));
+
+    $stmt = $pdo->prepare(
+        'SELECT ' . quoteIdent('reenvios') . ', ' . quoteIdent('ultimo_reenvio') .
+        ' FROM ' . $tabela . ' WHERE ' . quoteIdent('token') . ' = ?'
+    );
+    $stmt->execute([$token]);
+    /** @var array<string, mixed>|false $row */
+    $row = $stmt->fetch();
+
+    if ($row === false) {
+        return 'Token invalido.';
+    }
+
+    $reenvios      = (int) ($row['reenvios'] ?? 0);
+    $ultimoReenvio = (string) ($row['ultimo_reenvio'] ?? '');
+
+    if ($reenvios >= MFA_REENVIO_MAX) {
+        return 'Limite de reenvios atingido. Faca login novamente para receber um novo codigo.';
+    }
+
+    if ($ultimoReenvio !== '') {
+        $segundosDesde = time() - (int) strtotime($ultimoReenvio);
+        if ($segundosDesde < MFA_REENVIO_COOLDOWN_SEG) {
+            $faltam = MFA_REENVIO_COOLDOWN_SEG - $segundosDesde;
+            return "Aguarde {$faltam} segundo(s) antes de solicitar um novo envio.";
+        }
+    }
+
+    // Incrementa antes do envio para evitar flood em chamadas concorrentes.
+    $agora = date('Y-m-d H:i:s');
+    $pdo->prepare(
+        'UPDATE ' . $tabela .
+        ' SET ' . quoteIdent('reenvios') . ' = ' . quoteIdent('reenvios') . ' + 1,' .
+        ' ' . quoteIdent('ultimo_reenvio') . ' = ?' .
+        ' WHERE ' . quoteIdent('token') . ' = ?'
+    )->execute([$agora, $token]);
+
+    return null;
 }
 
 /**
