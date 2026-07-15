@@ -218,7 +218,7 @@ server {
     index index.php;
 
     location /gestao {
-        try_files $uri $uri/ /gestao/index.php$is_args$args;
+        try_files $uri /gestao/index.php$is_args$args;
     }
 
     location ~ \.php$ {
