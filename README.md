@@ -1,6 +1,6 @@
 # Portal de Gestão de Dados
 
-Portal web para gerenciar acessos, mudanças, política de backup, testes de restore e dicionário de dados, com uma seção de Relatórios pra exportar tudo. Backend em **PHP puro — sem framework, sem Composer, sem nenhuma dependência externa** — e dados armazenados em banco de dados.
+Portal web para gerenciar acessos, mudanças, política de backup, testes de restore, dicionário de dados, integrações de sistemas e jobs e rotinas agendadas, com uma seção de Relatórios pra exportar tudo. Backend em **PHP puro — sem framework, sem Composer, sem nenhuma dependência externa** — e dados armazenados em banco de dados.
 
 O projeto é **white-label / instalável**: não tem mais nome ou marca fixa no código. Quem instala escolhe o motor de banco, o título do projeto e o usuário administrador através de um assistente de instalação (`/setup`) — igual instalador de WordPress/phpMyAdmin. Nada disso fica "hardcoded".
 
