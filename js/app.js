@@ -264,7 +264,7 @@ const I18N = {
     'Jobs, ETLs e rotinas agendadas: agendamento, execução e responsável': 'Jobs, ETLs and scheduled routines: schedule, run and owner',
     'Servidor / instância': 'Server / instance', 'Descrição / finalidade': 'Description / purpose',
     'Comando / Passo': 'Command / Step', 'Adicionar passo': 'Add step', 'Nome do passo': 'Step name', 'O que executa': 'What it runs', 'Última execução': 'Last run', 'Próxima execução': 'Next run',
-    'Jobs cadastrados': 'Registered jobs', 'ativo(s)': 'active', 'Jobs falhando': 'Failing jobs', 'em status Falhando': 'in Failing status',
+    'Jobs cadastrados': 'Registered jobs', 'ativo(s)': 'active', 'Jobs desativados': 'Disabled jobs', 'em status Desabilitado': 'in Disabled status',
     'Tempo da Frequência': 'Frequency time', 'Agendamentos': 'Schedules', 'Início': 'Start', 'Fim': 'End', 'Adicionar agendamento': 'Add schedule',
     'Guia de Segurança': 'Security Guide',
     'Segurança': 'Security',
@@ -934,7 +934,7 @@ async function renderOverview() {
   if (canRead('integracoes')) atencao += tile(tr('Integrações com dado sensível'), s.integracoes_sensiveis, tr('dado pessoal / LGPD'), s.integracoes_sensiveis > 0 ? 'attn' : '', I.shield);
   if (canRead('integracoes')) atencao += tile(tr('Sem responsável técnico'), s.integracoes_sem_responsavel, tr('integrações sem dono definido'), s.integracoes_sem_responsavel > 0 ? 'attn' : 'ok', I.users);
   if (canRead('integracoes')) atencao += tile(tr('Revisão vencida ou ausente'), s.integracoes_revisao_vencida, tr('sem revisão há mais de 1 ano'), s.integracoes_revisao_vencida > 0 ? 'attn' : 'ok', I.clock);
-  if (canRead('jobs')) atencao += tile(tr('Jobs falhando'), s.jobs_falhando, tr('em status Falhando'), s.jobs_falhando > 0 ? 'attn' : 'ok', I.alert);
+  if (canRead('jobs')) atencao += tile(tr('Jobs desativados'), s.jobs_desativados, tr('em status Desabilitado'), s.jobs_desativados > 0 ? 'attn' : 'ok', I.alert);
 
   let h = '';
   if (principais) h += `<div class="tiles">${principais}</div>`;

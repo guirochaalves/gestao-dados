@@ -235,15 +235,17 @@ function dashboardStats(array $user): array
         }
     }
 
-    // Jobs: total, ativos e em falha (status "Falhando").
+    // Jobs: total, ativos e desativados (status "Desabilitado"). "Falhando"
+    // nao entra aqui porque nao ha deteccao automatica de falha -- e um status
+    // preenchido manualmente.
     $jobsAtivos = 0;
-    $jobsFalhando = 0;
+    $jobsDesativados = 0;
     foreach ($jobs as $j) {
         if (($j['status'] ?? null) === 'Ativo') {
             $jobsAtivos++;
         }
-        if (($j['status'] ?? null) === 'Falhando') {
-            $jobsFalhando++;
+        if (($j['status'] ?? null) === 'Desabilitado') {
+            $jobsDesativados++;
         }
     }
 
@@ -277,7 +279,7 @@ function dashboardStats(array $user): array
         'integracoes_revisao_vencida' => $intRevVencida,
         'jobs_total' => count($jobs),
         'jobs_ativos' => $jobsAtivos,
-        'jobs_falhando' => $jobsFalhando,
+        'jobs_desativados' => $jobsDesativados,
     ];
 }
 
