@@ -959,7 +959,16 @@ function despachar(string $metodo, string $caminho): void
         $username = trim((string) ($body['username'] ?? ''));
         $password = (string) ($body['password'] ?? '');
         $role = (string) ($body['role'] ?? 'leitura');
-        if (!in_array($role, ['leitura', 'escrita', 'admin'], true)) {
+        // So o proprio master pode conceder o papel Master (evita escalonamento
+        // de privilegio por um administrador comum).
+        if ($role === 'master' && (string) ($admin['role'] ?? '') !== 'master') {
+            responderErro(403, 'Apenas o usuario master pode conceder o papel Master.');
+        }
+        $rolesPermitidos = ['leitura', 'escrita', 'admin'];
+        if ((string) ($admin['role'] ?? '') === 'master') {
+            $rolesPermitidos[] = 'master';
+        }
+        if (!in_array($role, $rolesPermitidos, true)) {
             $role = 'leitura';
         }
 
@@ -1149,8 +1158,16 @@ function despachar(string $metodo, string $caminho): void
         }
 
         $role = (string) ($body['role'] ?? $alvo['role']);
-        if (!in_array($role, ['leitura', 'escrita', 'admin'], true)) {
-            responderErro(422, 'Role invalida. Use leitura, escrita ou admin.');
+        // So o proprio master pode conceder o papel Master.
+        if ($role === 'master' && (string) ($admin['role'] ?? '') !== 'master') {
+            responderErro(403, 'Apenas o usuario master pode conceder o papel Master.');
+        }
+        $rolesPermitidos = ['leitura', 'escrita', 'admin'];
+        if ((string) ($admin['role'] ?? '') === 'master') {
+            $rolesPermitidos[] = 'master';
+        }
+        if (!in_array($role, $rolesPermitidos, true)) {
+            responderErro(422, 'Role invalida. Use leitura, escrita, admin ou master.');
         }
         $modulosEnviados = is_array($body['modulos'] ?? null) ? $body['modulos'] : [];
         $modulosEnviadosStr = array_map(static fn (mixed $v): string => (string) $v, $modulosEnviados);

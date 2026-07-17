@@ -383,7 +383,7 @@ header('Content-Type: text/html; charset=utf-8');
         <select id="userAtivo"><option value="1" data-i18n>Ativo</option><option value="0" data-i18n>Desativado</option></select>
       </div>
       <div id="userRoleWrap">
-        <div class="fld"><label data-i18n>Papel</label><select id="userRoleSel"><option value="leitura" data-i18n>Leitura</option><option value="escrita" data-i18n>Escrita</option><option value="admin" data-i18n>Administrador</option></select></div>
+        <div class="fld"><label data-i18n>Papel</label><select id="userRoleSel"><option value="leitura" data-i18n>Leitura</option><option value="escrita" data-i18n>Escrita</option><option value="admin" data-i18n>Administrador</option><option value="master" data-i18n>Master</option></select></div>
         <div class="fld" id="userModulosWrap">
           <label data-i18n>Artefatos permitidos</label>
           <div class="chk-group" id="userModulosChk"></div>
@@ -413,7 +413,7 @@ header('Content-Type: text/html; charset=utf-8');
     <div class="modal-h"><h3 data-i18n>Editar permissões</h3><button class="x" id="rolesClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-b" style="grid-template-columns:1fr">
       <div class="fld"><label data-i18n>Usuário</label><input type="text" id="rolesUserLabel" disabled></div>
-      <div class="fld"><label data-i18n>Papel</label><select id="rolesRoleSel"><option value="leitura" data-i18n>Leitura</option><option value="escrita" data-i18n>Escrita</option><option value="admin" data-i18n>Administrador</option></select></div>
+      <div class="fld"><label data-i18n>Papel</label><select id="rolesRoleSel"><option value="leitura" data-i18n>Leitura</option><option value="escrita" data-i18n>Escrita</option><option value="admin" data-i18n>Administrador</option><option value="master" data-i18n>Master</option></select></div>
       <div class="fld" id="rolesModulosWrap">
         <label data-i18n>Artefatos permitidos</label>
         <div class="chk-group" id="rolesModulosChk"></div>

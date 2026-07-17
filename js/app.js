@@ -1930,7 +1930,19 @@ function readModulosChecklist(containerId) {
 }
 
 function toggleModulosWrap(wrapId, role) {
-  $(wrapId).style.display = role === 'admin' ? 'none' : '';
+  $(wrapId).style.display = (role === 'admin' || role === 'master') ? 'none' : '';
+}
+
+// Opcao "Master" no select de papel: so pode ser CONCEDIDA por um master.
+// Fica visivel se eu sou master (posso conceder) ou se o usuario alvo ja e
+// master (para o valor aparecer corretamente), mas so selecionavel por master.
+function ajustarOpcaoMaster(selectId, targetRole) {
+  const souMaster = !!currentUser && currentUser.role === 'master';
+  const sel = $(selectId);
+  const opt = sel ? sel.querySelector('option[value="master"]') : null;
+  if (!opt) return;
+  opt.hidden = !(souMaster || targetRole === 'master');
+  opt.disabled = !souMaster;
 }
 
 let userEditId = null;
@@ -1946,6 +1958,7 @@ function openUserModal(u) {
   $('userSenhaHint').textContent = u ? tr('Deixe em branco para manter a senha atual.') : tr('Mínimo 8 caracteres, com letra e número.');
   $('userAtivoWrap').style.display = u ? '' : 'none';
   if (u) $('userAtivo').value = String(u.ativo ?? 1);
+  ajustarOpcaoMaster('userRoleSel', u ? u.role : null);
   $('userRoleSel').value = u ? (u.role || 'leitura') : 'leitura';
   const mods = u ? String(u.modulos_permitidos || '').split(',').map((s) => s.trim()).filter(Boolean) : [];
   buildModulosChecklist('userModulosChk', mods);
@@ -1993,6 +2006,7 @@ function openRolesModal(id) {
   if (!u) return;
   rolesEditId = id;
   $('rolesUserLabel').value = u.nome_completo ? `${u.nome_completo} (${u.username})` : u.username;
+  ajustarOpcaoMaster('rolesRoleSel', u.role);
   $('rolesRoleSel').value = u.role || 'leitura';
   const mods = String(u.modulos_permitidos || '').split(',').map((s) => s.trim()).filter(Boolean);
   buildModulosChecklist('rolesModulosChk', mods);
