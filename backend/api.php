@@ -386,7 +386,7 @@ $MODULOS = [
     ],
     'jobs' => [
         'tabela' => tableName('jobs'),
-        'colunas' => ['nome', 'tipo', 'servidor', 'banco', 'descricao', 'comando', 'frequencia', 'horario', 'ultima_execucao', 'proxima_execucao', 'criticidade', 'status', 'responsavel', 'obs', 'criado_por'],
+        'colunas' => ['nome', 'tipo', 'servidor', 'banco', 'descricao', 'comando', 'frequencia', 'horario', 'agendamentos', 'criticidade', 'status', 'responsavel', 'obs', 'criado_por'],
         'busca' => ['nome', 'tipo', 'servidor', 'banco', 'frequencia', 'status', 'responsavel', 'criado_por'],
         'ordem' => 'nome',
     ],
@@ -447,7 +447,7 @@ $COLUNA_LABELS = [
     'jobs' => [
         'nome' => 'Job', 'tipo' => 'Tipo', 'servidor' => 'Servidor / instância', 'banco' => 'Banco',
         'descricao' => 'Descrição / finalidade', 'comando' => 'Comando / Passo', 'frequencia' => 'Frequência',
-        'horario' => 'Horário', 'ultima_execucao' => 'Última execução', 'proxima_execucao' => 'Próxima execução',
+        'horario' => 'Tempo da Frequência', 'agendamentos' => 'Agendamentos',
         'criticidade' => 'Criticidade', 'status' => 'Status', 'responsavel' => 'Responsável',
         'obs' => 'Observações', 'criado_por' => 'Adicionado por',
     ],

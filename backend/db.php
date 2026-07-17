@@ -649,8 +649,7 @@ function migrate(): void
             'comando' => $txt,
             'frequencia' => 'VARCHAR(60)',
             'horario' => 'VARCHAR(60)',
-            'ultima_execucao' => 'DATE',
-            'proxima_execucao' => 'DATE',
+            'agendamentos' => $txt,
             'criticidade' => 'VARCHAR(30)',
             'status' => 'VARCHAR(30)',
             'responsavel' => 'VARCHAR(150)',
@@ -800,6 +799,8 @@ function migrate(): void
     ensureColumn($pdo, tableName('restore_testes'),   'criado_por', 'VARCHAR(150)');
     ensureColumn($pdo, tableName('dicionario_dados'), 'criado_por', 'VARCHAR(150)');
     ensureColumn($pdo, tableName('integracoes'),      'criado_por', 'VARCHAR(150)');
+    // Jobs: agendamentos (Inicio->Fim) como JSON; substitui ultima/proxima execucao.
+    ensureColumn($pdo, tableName('jobs'), 'agendamentos', $txt);
 
     // Acessos > Nivel de acesso passou de lista fixa (antigo OPT.nivel no
     // front) pra categoria do Cadastro -- diferente das categorias abaixo,

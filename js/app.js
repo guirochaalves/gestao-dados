@@ -221,9 +221,8 @@ const SCHEMA = {
       { k: 'descricao', l: 'Descrição / finalidade', t: 'textarea', full: 1, table: 1, trunc: 1 },
       { k: 'comando', l: 'Comando / Passo', t: 'passos', full: 1, table: 1, trunc: 1 },
       { k: 'frequencia', l: 'Frequência', t: 'select', cat: 'job_frequencia', table: 1 },
-      { k: 'horario', l: 'Horário', t: 'text', table: 1, mono: 1 },
-      { k: 'ultima_execucao', l: 'Última execução', t: 'date', table: 1, mono: 1 },
-      { k: 'proxima_execucao', l: 'Próxima execução', t: 'date', table: 1, mono: 1 },
+      { k: 'horario', l: 'Tempo da Frequência', t: 'text', table: 1, mono: 1 },
+      { k: 'agendamentos', l: 'Agendamentos', t: 'agendas', full: 1, table: 1, trunc: 1 },
       { k: 'criticidade', l: 'Criticidade', t: 'select', cat: 'job_criticidade', table: 1, pill: 1 },
       { k: 'status', l: 'Status', t: 'select', cat: 'job_status', table: 1, pill: 1 },
       { k: 'responsavel', l: 'Responsável', t: 'text', table: 1 },
@@ -266,6 +265,7 @@ const I18N = {
     'Servidor / instância': 'Server / instance', 'Descrição / finalidade': 'Description / purpose',
     'Comando / Passo': 'Command / Step', 'Adicionar passo': 'Add step', 'Nome do passo': 'Step name', 'O que executa': 'What it runs', 'Última execução': 'Last run', 'Próxima execução': 'Next run',
     'Jobs cadastrados': 'Registered jobs', 'ativo(s)': 'active', 'Jobs falhando': 'Failing jobs', 'em status Falhando': 'in Failing status',
+    'Tempo da Frequência': 'Frequency time', 'Agendamentos': 'Schedules', 'Início': 'Start', 'Fim': 'End', 'Adicionar agendamento': 'Add schedule',
     'Guia de Segurança': 'Security Guide',
     'Segurança': 'Security',
     'Desativar usuário': 'Disable user',
@@ -958,6 +958,12 @@ function cellVal(f, r) {
     if (!Array.isArray(arr) || !arr.length) return '—';
     return esc(arr.map((o) => (o.nome ? o.nome + ': ' : '') + (o.comando || '')).join(' · '));
   }
+  if (f.t === 'agendas') {
+    let arr = raw;
+    if (typeof raw === 'string') { try { arr = JSON.parse(raw); } catch (e) { return esc(raw); } }
+    if (!Array.isArray(arr) || !arr.length) return '—';
+    return esc(arr.map((o) => (o.inicio || '') + (o.fim ? '–' + o.fim : '')).join(' · '));
+  }
   let v = raw;
   if (f.t === 'date') v = fmtDate(v);
   // Só traduz valores de listas FIXAS (f.o: Sim/Não, tipo de conta, etc.)
@@ -1478,6 +1484,18 @@ function buildForm(key, data) {
       h += '<button type="button" class="btn btn-ghost" style="margin-top:8px" data-act="addPassoRow">+ ' + esc(tr('Adicionar passo')) + '</button>';
       const passosFiltrados = passoItems.filter((o) => o.nome || o.comando);
       h += '<input type="hidden" data-k="' + f.k + '" value="' + esc(passosFiltrados.length ? JSON.stringify(passosFiltrados) : '') + '">';
+    } else if (f.t === 'agendas') {
+      // Campo repetível de agendamentos: cada linha é uma janela Início -> Fim
+      // (hora). Guardado como JSON na coluna 'agendamentos'.
+      let agItems = [];
+      const rawG = data ? data[f.k] : '';
+      if (rawG) { try { const parsed = JSON.parse(rawG); if (Array.isArray(parsed)) agItems = parsed; } catch (e) {} }
+      if (!agItems.length) agItems = [{ inicio: '', fim: '' }];
+      h += `<div style="font-size:12px;color:var(--muted);margin-bottom:6px">${esc(tr('Início'))} → ${esc(tr('Fim'))}</div>`;
+      h += '<div class="obj-list agenda-list">' + agItems.map((o) => agendaRowHtml(o.inicio || '', o.fim || '')).join('') + '</div>';
+      h += '<button type="button" class="btn btn-ghost" style="margin-top:8px" data-act="addAgendaRow">+ ' + esc(tr('Adicionar agendamento')) + '</button>';
+      const agFiltrados = agItems.filter((o) => o.inicio || o.fim);
+      h += '<input type="hidden" data-k="' + f.k + '" value="' + esc(agFiltrados.length ? JSON.stringify(agFiltrados) : '') + '">';
     } else if (f.t === 'multitext') {
       const items = (data && data[f.k] ? String(data[f.k]).split(',').map((s) => s.trim()).filter(Boolean) : []);
       if (!items.length) items.push('');
@@ -1587,6 +1605,44 @@ function removePassoRow(btn) {
   btn.closest('.obj-row').remove();
   const first = fld.querySelector('.passo-nome');
   if (first) syncPassos(first);
+}
+
+// ---------------------------------------------------------------------------
+// Campo 'agendas' (módulo Jobs): cada linha é uma janela de horário
+// Início -> Fim. Guardado como JSON na coluna 'agendamentos'.
+// ---------------------------------------------------------------------------
+function agendaRowHtml(inicio, fim) {
+  return '<div class="obj-row">'
+    + '<input type="time" class="agenda-inicio" style="flex:1;min-width:0" value="' + esc(inicio || '') + '" data-oninput="syncAgendas" title="' + esc(tr('Início')) + '">'
+    + '<span style="color:var(--faint);flex-shrink:0">→</span>'
+    + '<input type="time" class="agenda-fim" style="flex:1;min-width:0" value="' + esc(fim || '') + '" data-oninput="syncAgendas" title="' + esc(tr('Fim')) + '">'
+    + '<button type="button" class="icon-btn del" data-act="removeAgendaRow" title="' + esc(tr('Remover')) + '">&times;</button>'
+    + '</div>';
+}
+
+function syncAgendas(el) {
+  const fld = el ? el.closest('.fld') : null;
+  if (!fld) return;
+  const hidden = fld.querySelector('input[type="hidden"][data-k]');
+  if (!hidden) return;
+  const rows = [...fld.querySelectorAll('.agenda-list .obj-row')].map((row) => ({
+    inicio: (row.querySelector('.agenda-inicio') ? row.querySelector('.agenda-inicio').value : '').trim(),
+    fim: (row.querySelector('.agenda-fim') ? row.querySelector('.agenda-fim').value : '').trim(),
+  })).filter((o) => o.inicio || o.fim);
+  hidden.value = rows.length ? JSON.stringify(rows) : '';
+}
+
+function addAgendaRow(btn) {
+  const list = btn.closest('.fld').querySelector('.agenda-list');
+  list.insertAdjacentHTML('beforeend', agendaRowHtml('', ''));
+  syncAgendas(btn);
+}
+
+function removeAgendaRow(btn) {
+  const fld = btn.closest('.fld');
+  btn.closest('.obj-row').remove();
+  const first = fld.querySelector('.agenda-inicio');
+  if (first) syncAgendas(first);
 }
 
 
@@ -1712,6 +1768,10 @@ async function saveModal() {
   $('modalBody').querySelectorAll('.passo-list').forEach((list) => {
     const first = list.querySelector('.passo-nome');
     if (first) syncPassos(first);
+  });
+  $('modalBody').querySelectorAll('.agenda-list').forEach((list) => {
+    const first = list.querySelector('.agenda-inicio');
+    if (first) syncAgendas(first);
   });
   const rec = {};
   $('modalBody').querySelectorAll('[data-k]').forEach((el) => {
@@ -2307,6 +2367,10 @@ async function exportCsv(key, filtros) {
       let arrP = v;
       if (typeof v === 'string') { try { arrP = JSON.parse(v); } catch (e) { arrP = []; } }
       v = Array.isArray(arrP) ? arrP.map((o) => (o && (o.nome || o.comando)) ? ((o.nome ? o.nome + ': ' : '') + (o.comando || '')) : '').filter(Boolean).join(' | ') : '';
+    } else if (f.t === 'agendas') {
+      let arrG = v;
+      if (typeof v === 'string') { try { arrG = JSON.parse(v); } catch (e) { arrG = []; } }
+      v = Array.isArray(arrG) ? arrG.map((o) => (o && (o.inicio || o.fim)) ? ((o.inicio || '') + (o.fim ? '-' + o.fim : '')) : '').filter(Boolean).join(' | ') : '';
     } else if (Array.isArray(v)) {
       // campo objetos: [{nome, tipo}, ...] → "NOME (tipo), ..."
       v = v.map((o) => (o && o.nome) ? (o.tipo ? o.nome + ' (' + o.tipo + ')' : o.nome) : '').filter(Boolean).join(', ');
@@ -3477,6 +3541,8 @@ removeTag,
   removeObjetoRow,
   addPassoRow,
   removePassoRow,
+  addAgendaRow,
+  removeAgendaRow,
   // Usuarios
   delUsuario: (el) => delUsuario(el.dataset.id),
   openRolesModal: (el) => openRolesModal(el.dataset.id),
@@ -3542,6 +3608,7 @@ const INPUT_ACTIONS = {
   syncMultitext,
   syncObjetos,
   syncPassos,
+  syncAgendas,
 };
 
 document.addEventListener('click', (e) => {
