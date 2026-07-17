@@ -15,7 +15,7 @@ let editId = null;
 let editKey = null;
 let currentUser = null;
 let mfaToken = null; // identifica a tentativa de login pendente de codigo MFA (ver /auth/login)
-let cache = { acessos: [], mudancas: [], backup: [], restore: [], dicionario: [], integracoes: [], usuarios: [] };
+let cache = { acessos: [], mudancas: [], backup: [], restore: [], dicionario: [], integracoes: [], jobs: [], usuarios: [] };
 let lang = localStorage.getItem('lang') || 'pt';
 
 // ---------------------------------------------------------------------------
@@ -89,6 +89,10 @@ const CATEGORIAS_CADASTRO = [
   { cat: 'integracao_ambiente', grupo: 'Integrações', label: 'Ambiente', ico: 'db' },
   { cat: 'integracao_criticidade', grupo: 'Integrações', label: 'Criticidade', ico: 'alert' },
   { cat: 'integracao_status', grupo: 'Integrações', label: 'Status', ico: 'clock' },
+  { cat: 'job_tipo', grupo: 'Jobs', label: 'Tipo', ico: 'refresh' },
+  { cat: 'job_frequencia', grupo: 'Jobs', label: 'Frequência', ico: 'clock' },
+  { cat: 'job_criticidade', grupo: 'Jobs', label: 'Criticidade', ico: 'alert' },
+  { cat: 'job_status', grupo: 'Jobs', label: 'Status', ico: 'shield' },
 ];
 let tiposPorCategoria = {};
 
@@ -208,12 +212,30 @@ const SCHEMA = {
       { k: 'obs', l: 'Observações', t: 'textarea', full: 1 },
       { k: 'criado_por', l: 'Adicionado por', t: 'text', table: 1, ro: 1 },
     ] },
+  jobs: { title: 'Jobs e rotinas', sub: 'Jobs, ETLs e rotinas agendadas: agendamento, execução e responsável', singular: 'job',
+    fields: [
+      { k: 'nome', l: 'Job', t: 'text', table: 1, mono: 1 },
+      { k: 'tipo', l: 'Tipo', t: 'select', cat: 'job_tipo', table: 1 },
+      { k: 'servidor', l: 'Servidor / instância', t: 'text', table: 1, mono: 1 },
+      { k: 'banco', l: 'Banco', t: 'text', table: 1 },
+      { k: 'descricao', l: 'Descrição / finalidade', t: 'textarea', full: 1, table: 1, trunc: 1 },
+      { k: 'comando', l: 'Comando / Passo', t: 'passos', full: 1, table: 1, trunc: 1 },
+      { k: 'frequencia', l: 'Frequência', t: 'select', cat: 'job_frequencia', table: 1 },
+      { k: 'horario', l: 'Horário', t: 'text', table: 1, mono: 1 },
+      { k: 'ultima_execucao', l: 'Última execução', t: 'date', table: 1, mono: 1 },
+      { k: 'proxima_execucao', l: 'Próxima execução', t: 'date', table: 1, mono: 1 },
+      { k: 'criticidade', l: 'Criticidade', t: 'select', cat: 'job_criticidade', table: 1, pill: 1 },
+      { k: 'status', l: 'Status', t: 'select', cat: 'job_status', table: 1, pill: 1 },
+      { k: 'responsavel', l: 'Responsável', t: 'text', table: 1 },
+      { k: 'obs', l: 'Observações', t: 'textarea', full: 1 },
+      { k: 'criado_por', l: 'Adicionado por', t: 'text', table: 1, ro: 1 },
+    ] },
 };
 
-const ENDPOINT = { acessos: '/acessos', mudancas: '/mudancas', backup: '/backup', restore: '/restore', dicionario: '/dicionario', integracoes: '/integracoes' };
+const ENDPOINT = { acessos: '/acessos', mudancas: '/mudancas', backup: '/backup', restore: '/restore', dicionario: '/dicionario', integracoes: '/integracoes', jobs: '/jobs' };
 
 const MODULOS_KEYS = Object.keys(ENDPOINT);
-const MODULO_LABELS = { acessos: 'Acessos', mudancas: 'Mudanças', backup: 'Backup', restore: 'Restore', dicionario: 'Dicionário', integracoes: 'Integrações' };
+const MODULO_LABELS = { acessos: 'Acessos', mudancas: 'Mudanças', backup: 'Backup', restore: 'Restore', dicionario: 'Dicionário', integracoes: 'Integrações', jobs: 'Jobs' };
 const ROLE_LABEL = { admin: 'Administrador', escrita: 'Escrita', leitura: 'Leitura', master: 'Master' };
 const ROLE_PILL = { admin: 'p-teal', escrita: 'p-amber', leitura: 'p-gray', master: 'p-violet' };
 
@@ -239,6 +261,11 @@ const I18N = {
     'Auditoria': 'Audit', 'Trilha de quem fez o quê, quando e a partir de qual IP': 'Trail of who did what, when, and from which IP',
     'Anterior': 'Previous', 'Próxima': 'Next',
     'Documentação': 'Documentation',
+    'Jobs': 'Jobs', 'Jobs e rotinas': 'Jobs & routines',
+    'Jobs, ETLs e rotinas agendadas: agendamento, execução e responsável': 'Jobs, ETLs and scheduled routines: schedule, run and owner',
+    'Servidor / instância': 'Server / instance', 'Descrição / finalidade': 'Description / purpose',
+    'Comando / Passo': 'Command / Step', 'Adicionar passo': 'Add step', 'Nome do passo': 'Step name', 'O que executa': 'What it runs', 'Última execução': 'Last run', 'Próxima execução': 'Next run',
+    'Jobs cadastrados': 'Registered jobs', 'ativo(s)': 'active', 'Jobs falhando': 'Failing jobs', 'em status Falhando': 'in Failing status',
     'Guia de Segurança': 'Security Guide',
     'Segurança': 'Security',
     'Desativar usuário': 'Disable user',
@@ -897,6 +924,7 @@ async function renderOverview() {
   if (canRead('restore')) principais += tile(tr('Último teste de restore'), s.ultimo_restore ? s.dias_desde_ultimo_restore + 'd' : '—', s.ultimo_restore ? tr('em ') + fmtDate(s.ultimo_restore) : tr('nenhum registrado'), (s.ultimo_restore === null || s.dias_desde_ultimo_restore > 30) ? 'attn' : 'ok', I.db);
   if (canRead('dicionario')) principais += tile(tr('Itens no dicionário'), s.totais.dicionario, tr('colunas catalogadas'), '', I.book);
   if (canRead('integracoes')) principais += tile(tr('Integrações mapeadas'), s.integracoes_total, tr('conexões entre sistemas'), '', I.exchange);
+  if (canRead('jobs')) principais += tile(tr('Jobs cadastrados'), s.jobs_total, s.jobs_ativos + ' ' + tr('ativo(s)'), '', I.refresh);
 
   let atencao = '';
   if (canRead('backup') && canRead('restore')) atencao += tile(tr('Bancos sem teste de restore'), s.bancos_sem_teste.length, semTesteTxt, s.bancos_sem_teste.length > 0 ? 'attn' : 'ok', I.alert);
@@ -906,6 +934,7 @@ async function renderOverview() {
   if (canRead('integracoes')) atencao += tile(tr('Integrações com dado sensível'), s.integracoes_sensiveis, tr('dado pessoal / LGPD'), s.integracoes_sensiveis > 0 ? 'attn' : '', I.shield);
   if (canRead('integracoes')) atencao += tile(tr('Sem responsável técnico'), s.integracoes_sem_responsavel, tr('integrações sem dono definido'), s.integracoes_sem_responsavel > 0 ? 'attn' : 'ok', I.users);
   if (canRead('integracoes')) atencao += tile(tr('Revisão vencida ou ausente'), s.integracoes_revisao_vencida, tr('sem revisão há mais de 1 ano'), s.integracoes_revisao_vencida > 0 ? 'attn' : 'ok', I.clock);
+  if (canRead('jobs')) atencao += tile(tr('Jobs falhando'), s.jobs_falhando, tr('em status Falhando'), s.jobs_falhando > 0 ? 'attn' : 'ok', I.alert);
 
   let h = '';
   if (principais) h += `<div class="tiles">${principais}</div>`;
@@ -922,6 +951,12 @@ function cellVal(f, r) {
   if (f.t === 'objetos') {
     if (!Array.isArray(raw) || !raw.length) return '—';
     return esc(raw.map((o) => o.nome + (o.tipo ? ` (${o.tipo})` : '')).join(', '));
+  }
+  if (f.t === 'passos') {
+    let arr = raw;
+    if (typeof raw === 'string') { try { arr = JSON.parse(raw); } catch (e) { return esc(raw); } }
+    if (!Array.isArray(arr) || !arr.length) return '—';
+    return esc(arr.map((o) => (o.nome ? o.nome + ': ' : '') + (o.comando || '')).join(' · '));
   }
   let v = raw;
   if (f.t === 'date') v = fmtDate(v);
@@ -1429,6 +1464,20 @@ function buildForm(key, data) {
       h += '<div class="obj-list">' + objItems.map((o) => objetoRowHtml(o.nome || '', o.tipo || '')).join('') + '</div>';
       h += '<button type="button" class="btn btn-ghost" style="margin-top:8px" data-act="addObjetoRow">+ ' + esc(tr('Adicionar objeto')) + '</button>';
       h += '<input type="hidden" data-k="' + f.k + '" value="' + esc(JSON.stringify(objItems.filter((o) => o.nome))) + '">';
+    } else if (f.t === 'passos') {
+      // Campo repetível de passos: cada linha tem nome do passo + o que ele
+      // executa (ambos texto livre). Guardado como JSON na coluna 'comando'.
+      let passoItems = [];
+      const rawP = data ? data[f.k] : '';
+      if (rawP) {
+        try { const parsed = JSON.parse(rawP); if (Array.isArray(parsed)) passoItems = parsed; } catch (e) {}
+        if (!passoItems.length && typeof rawP === 'string' && rawP.trim()) passoItems = [{ nome: '', comando: rawP }];
+      }
+      if (!passoItems.length) passoItems = [{ nome: '', comando: '' }];
+      h += '<div class="obj-list passo-list">' + passoItems.map((o) => passoRowHtml(o.nome || '', o.comando || '')).join('') + '</div>';
+      h += '<button type="button" class="btn btn-ghost" style="margin-top:8px" data-act="addPassoRow">+ ' + esc(tr('Adicionar passo')) + '</button>';
+      const passosFiltrados = passoItems.filter((o) => o.nome || o.comando);
+      h += '<input type="hidden" data-k="' + f.k + '" value="' + esc(passosFiltrados.length ? JSON.stringify(passosFiltrados) : '') + '">';
     } else if (f.t === 'multitext') {
       const items = (data && data[f.k] ? String(data[f.k]).split(',').map((s) => s.trim()).filter(Boolean) : []);
       if (!items.length) items.push('');
@@ -1501,6 +1550,43 @@ function removeObjetoRow(btn) {
   btn.closest('.obj-row').remove();
   const first = fld.querySelector('.obj-nome');
   if (first) syncObjetos(first);
+}
+
+// ---------------------------------------------------------------------------
+// Campo 'passos' (módulo Jobs): cada passo tem nome e comando, ambos texto
+// livre. Guardado como JSON na coluna 'comando' (sem sub-tabela).
+// ---------------------------------------------------------------------------
+function passoRowHtml(nome, comando) {
+  return '<div class="obj-row">'
+    + '<input type="text" class="passo-nome" style="flex:1;min-width:0" value="' + esc(nome || '') + '" placeholder="' + esc(tr('Nome do passo')) + '" data-oninput="syncPassos">'
+    + '<input type="text" class="passo-cmd" style="flex:1;min-width:0" value="' + esc(comando || '') + '" placeholder="' + esc(tr('O que executa')) + '" data-oninput="syncPassos">'
+    + '<button type="button" class="icon-btn del" data-act="removePassoRow" title="' + esc(tr('Remover')) + '">&times;</button>'
+    + '</div>';
+}
+
+function syncPassos(el) {
+  const fld = el ? el.closest('.fld') : null;
+  if (!fld) return;
+  const hidden = fld.querySelector('input[type="hidden"][data-k]');
+  if (!hidden) return;
+  const rows = [...fld.querySelectorAll('.passo-list .obj-row')].map((row) => ({
+    nome: (row.querySelector('.passo-nome') ? row.querySelector('.passo-nome').value : '').trim(),
+    comando: (row.querySelector('.passo-cmd') ? row.querySelector('.passo-cmd').value : '').trim(),
+  })).filter((o) => o.nome || o.comando);
+  hidden.value = rows.length ? JSON.stringify(rows) : '';
+}
+
+function addPassoRow(btn) {
+  const list = btn.closest('.fld').querySelector('.passo-list');
+  list.insertAdjacentHTML('beforeend', passoRowHtml('', ''));
+  syncPassos(btn);
+}
+
+function removePassoRow(btn) {
+  const fld = btn.closest('.fld');
+  btn.closest('.obj-row').remove();
+  const first = fld.querySelector('.passo-nome');
+  if (first) syncPassos(first);
 }
 
 
@@ -1622,6 +1708,10 @@ async function saveModal() {
   $('modalBody').querySelectorAll('.obj-list').forEach((list) => {
     const first = list.querySelector('.obj-nome');
     if (first) syncObjetos(first);
+  });
+  $('modalBody').querySelectorAll('.passo-list').forEach((list) => {
+    const first = list.querySelector('.passo-nome');
+    if (first) syncPassos(first);
   });
   const rec = {};
   $('modalBody').querySelectorAll('[data-k]').forEach((el) => {
@@ -2213,7 +2303,11 @@ async function exportCsv(key, filtros) {
   const head = cols.map((f) => tr(f.l)).join(';');
   const lines = rows.map((r) => cols.map((f) => {
     let v = r[f.k];
-    if (Array.isArray(v)) {
+    if (f.t === 'passos') {
+      let arrP = v;
+      if (typeof v === 'string') { try { arrP = JSON.parse(v); } catch (e) { arrP = []; } }
+      v = Array.isArray(arrP) ? arrP.map((o) => (o && (o.nome || o.comando)) ? ((o.nome ? o.nome + ': ' : '') + (o.comando || '')) : '').filter(Boolean).join(' | ') : '';
+    } else if (Array.isArray(v)) {
       // campo objetos: [{nome, tipo}, ...] → "NOME (tipo), ..."
       v = v.map((o) => (o && o.nome) ? (o.tipo ? o.nome + ' (' + o.tipo + ')' : o.nome) : '').filter(Boolean).join(', ');
     } else {
@@ -3381,6 +3475,8 @@ removeTag,
   removeMultitextRow,
   addObjetoRow,
   removeObjetoRow,
+  addPassoRow,
+  removePassoRow,
   // Usuarios
   delUsuario: (el) => delUsuario(el.dataset.id),
   openRolesModal: (el) => openRolesModal(el.dataset.id),
@@ -3445,6 +3541,7 @@ const INPUT_ACTIONS = {
   filterTagOptions,
   syncMultitext,
   syncObjetos,
+  syncPassos,
 };
 
 document.addEventListener('click', (e) => {

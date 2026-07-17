@@ -148,6 +148,7 @@ function dashboardStats(array $user): array
     $dicionario = in_array('dicionario', $visiveis, true) ? todosRegistros('dicionario_dados') : [];
     $backups = in_array('backup', $visiveis, true) ? todosRegistros('backup_politicas') : [];
     $integracoes = in_array('integracoes', $visiveis, true) ? todosRegistros('integracoes') : [];
+    $jobs = in_array('jobs', $visiveis, true) ? todosRegistros('jobs') : [];
 
     $ativos = 0;
     $aRevisar = 0;
@@ -234,6 +235,18 @@ function dashboardStats(array $user): array
         }
     }
 
+    // Jobs: total, ativos e em falha (status "Falhando").
+    $jobsAtivos = 0;
+    $jobsFalhando = 0;
+    foreach ($jobs as $j) {
+        if (($j['status'] ?? null) === 'Ativo') {
+            $jobsAtivos++;
+        }
+        if (($j['status'] ?? null) === 'Falhando') {
+            $jobsFalhando++;
+        }
+    }
+
     return [
         'acessos_ativos' => $ativos,
         'acessos_total' => count($acessos),
@@ -252,6 +265,7 @@ function dashboardStats(array $user): array
             'restore' => count($restores),
             'dicionario' => count($dicionario),
             'integracoes' => count($integracoes),
+            'jobs' => count($jobs),
         ],
         'por_status_acessos' => contagemPorCampo($acessos, 'status'),
         'por_status_mudancas' => contagemPorCampo($mudancas, 'status'),
@@ -261,6 +275,9 @@ function dashboardStats(array $user): array
         'integracoes_sensiveis' => $intSensiveis,
         'integracoes_sem_responsavel' => $intSemResp,
         'integracoes_revisao_vencida' => $intRevVencida,
+        'jobs_total' => count($jobs),
+        'jobs_ativos' => $jobsAtivos,
+        'jobs_falhando' => $jobsFalhando,
     ];
 }
 
@@ -280,6 +297,7 @@ function dashboardExport(array $user): array
         'restore' => in_array('restore', $visiveis, true) ? todosRegistros('restore_testes') : [],
         'dicionario' => in_array('dicionario', $visiveis, true) ? todosRegistros('dicionario_dados') : [],
         'integracoes' => in_array('integracoes', $visiveis, true) ? todosRegistros('integracoes') : [],
+        'jobs' => in_array('jobs', $visiveis, true) ? todosRegistros('jobs') : [],
     ];
 }
 
@@ -366,6 +384,12 @@ $MODULOS = [
         'busca' => ['nome', 'origem', 'ip_origem', 'destino', 'ip_destino', 'tipo', 'mecanismo', 'resp_tecnico', 'resp_negocio', 'status', 'criado_por'],
         'ordem' => 'nome',
     ],
+    'jobs' => [
+        'tabela' => tableName('jobs'),
+        'colunas' => ['nome', 'tipo', 'servidor', 'banco', 'descricao', 'comando', 'frequencia', 'horario', 'ultima_execucao', 'proxima_execucao', 'criticidade', 'status', 'responsavel', 'obs', 'criado_por'],
+        'busca' => ['nome', 'tipo', 'servidor', 'banco', 'frequencia', 'status', 'responsavel', 'criado_por'],
+        'ordem' => 'nome',
+    ],
 ];
 
 /** Titulo de cada modulo, usado no assunto do e-mail de relatorio. */
@@ -376,6 +400,7 @@ $MODULOS_TITULOS = [
     'restore' => 'Restore',
     'dicionario' => 'Dicionário',
     'integracoes' => 'Integrações',
+    'jobs' => 'Jobs',
 ];
 
 /**
@@ -419,6 +444,13 @@ $COLUNA_LABELS = [
         'criticidade' => 'Criticidade', 'resp_tecnico' => 'Responsável técnico', 'resp_negocio' => 'Responsável de negócio',
         'ambiente' => 'Ambiente', 'status' => 'Status', 'ultima_revisao' => 'Última revisão', 'obs' => 'Observações', 'criado_por' => 'Adicionado por',
     ],
+    'jobs' => [
+        'nome' => 'Job', 'tipo' => 'Tipo', 'servidor' => 'Servidor / instância', 'banco' => 'Banco',
+        'descricao' => 'Descrição / finalidade', 'comando' => 'Comando / Passo', 'frequencia' => 'Frequência',
+        'horario' => 'Horário', 'ultima_execucao' => 'Última execução', 'proxima_execucao' => 'Próxima execução',
+        'criticidade' => 'Criticidade', 'status' => 'Status', 'responsavel' => 'Responsável',
+        'obs' => 'Observações', 'criado_por' => 'Adicionado por',
+    ],
 ];
 
 /**
@@ -432,6 +464,7 @@ $CATEGORIAS_TIPOS = [
     'backup_criticidade', 'backup_tipo', 'backup_resultado',
     'acesso_nivel',
     'integracao_tipo', 'integracao_ambiente', 'integracao_criticidade', 'integracao_status',
+    'job_tipo', 'job_frequencia', 'job_criticidade', 'job_status',
 ];
 
 // ---------------------------------------------------------------------------

@@ -604,6 +604,28 @@ function migrate(): void
             'criado_em' => $carimbo,
             'atualizado_em' => $carimbo,
         ],
+        // Jobs e rotinas agendadas (SQL Agent, ETL/SSIS, cron etc.): o que
+        // roda sozinho no ambiente, com agendamento, execucao e responsavel.
+        'jobs' => [
+            'id' => $pk,
+            'nome' => 'VARCHAR(200)',
+            'tipo' => 'VARCHAR(60)',
+            'servidor' => 'VARCHAR(150)',
+            'banco' => 'VARCHAR(150)',
+            'descricao' => $txt,
+            'comando' => $txt,
+            'frequencia' => 'VARCHAR(60)',
+            'horario' => 'VARCHAR(60)',
+            'ultima_execucao' => 'DATE',
+            'proxima_execucao' => 'DATE',
+            'criticidade' => 'VARCHAR(30)',
+            'status' => 'VARCHAR(30)',
+            'responsavel' => 'VARCHAR(150)',
+            'obs' => $txt,
+            'criado_por' => 'VARCHAR(150)',
+            'criado_em' => $carimbo,
+            'atualizado_em' => $carimbo,
+        ],
         // Cadastro: listas de opcoes editaveis pelo administrador (Ambiente,
         // Tipo e Status de Mudancas; Criticidade, Tipo de backup e Resultado
         // de Restore). Uma tabela generica com discriminador "categoria" em
@@ -773,6 +795,21 @@ function migrate(): void
     ]);
     seedCategoriaSeVazia($pdo, 'integracao_status', [
         'Ativa', 'Inativa', 'Em implantação', 'A desativar', 'Desconhecida',
+    ]);
+
+    // Listas do modulo Jobs (Tipo, Frequencia, Criticidade e Status).
+    seedCategoriaSeVazia($pdo, 'job_tipo', [
+        'SQL Server Agent', 'Job Oracle / DBMS_SCHEDULER', 'ETL / SSIS', 'Cron',
+        'Windows Task Scheduler', 'Aplicação', 'Outro',
+    ]);
+    seedCategoriaSeVazia($pdo, 'job_frequencia', [
+        'Contínua', 'Horária', 'Diária', 'Semanal', 'Mensal', 'Sob demanda',
+    ]);
+    seedCategoriaSeVazia($pdo, 'job_criticidade', [
+        'Alta', 'Média', 'Baixa',
+    ]);
+    seedCategoriaSeVazia($pdo, 'job_status', [
+        'Ativo', 'Inativo', 'Desabilitado', 'Falhando',
     ]);
 
     // Semeia a tabela de Cadastro com os valores que ja existiam fixos no
