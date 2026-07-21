@@ -18,12 +18,13 @@ Last reviewed: 2026-07-02
 1. JAVASCRIPT LIBRARIES
 --------------------------------------------------------------------------------
 
-Chart.js
-  Version ..... 4.4.4
+Tabler Icons
+  Version ..... 3.x
   License ..... MIT License
-  Copyright ... (c) 2014-2024 Chart.js Contributors
-  Source ...... https://github.com/chartjs/Chart.js
-  Usage ....... Dashboard charts (loaded via CDN in index.php)
+  Copyright ... (c) 2020-2026 Pawel Kuna
+  Source ...... https://github.com/tabler/tabler-icons
+  Usage ....... Interface icons. The SVGs are inlined directly in the markup
+                (index.php and js/app.js), with no runtime dependency.
 
 jsPDF
   Version ..... 2.5.2
@@ -47,20 +48,18 @@ jsPDF-AutoTable
 2. FONTS (Google Fonts)
 --------------------------------------------------------------------------------
 
-Inter
+Google Sans
   License ..... SIL Open Font License 1.1 (OFL-1.1)
-  Source ...... https://fonts.google.com/specimen/Inter
-  Usage ....... Main interface typography (index.php)
+  Source ...... https://fonts.google.com/specimen/Google+Sans
+  Usage ....... Interface typography (index.php and setup/index.php)
+  Note ........ Released by Google under the OFL in December 2025. Before that
+                it was restricted to Google's own products -- earlier versions
+                of this project used it while it was not yet OFL-licensed.
 
-JetBrains Mono
+Datatype
   License ..... SIL Open Font License 1.1 (OFL-1.1)
-  Source ...... https://fonts.google.com/specimen/JetBrains+Mono
-  Usage ....... Monospaced font (index.php and setup/index.php)
-
-Plus Jakarta Sans
-  License ..... SIL Open Font License 1.1 (OFL-1.1)
-  Source ...... https://fonts.google.com/specimen/Plus+Jakarta+Sans
-  Usage ....... Installer screen typography (setup/index.php)
+  Source ...... https://fonts.google.com/specimen/Datatype
+  Usage ....... Support font for numbers and data (index.php and setup/index.php)
 
 Note on OFL: the fonts can be freely used, embedded, and redistributed,
 including in commercial projects. The only relevant restriction is that the

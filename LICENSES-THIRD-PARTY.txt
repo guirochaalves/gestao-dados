@@ -10,7 +10,7 @@ Todas as dependencias abaixo sao compativeis com a MIT.
 Atualizar este arquivo sempre que uma nova biblioteca de terceiros for
 adicionada ou removida do projeto (manter em sincronia com requirements.txt).
 
-Ultima verificacao: 2026-07-02
+Ultima verificacao: 2026-07-21
 ================================================================================
 
 
@@ -18,12 +18,13 @@ Ultima verificacao: 2026-07-02
 1. BIBLIOTECAS JAVASCRIPT
 --------------------------------------------------------------------------------
 
-Chart.js
-  Versao ...... 4.4.4
+Tabler Icons
+  Versao ...... 3.x
   Licenca ..... MIT License
-  Copyright ... (c) 2014-2024 Chart.js Contributors
-  Origem ...... https://github.com/chartjs/Chart.js
-  Uso ......... Graficos no dashboard (carregado via CDN em index.php)
+  Copyright ... (c) 2020-2026 Pawel Kuna
+  Origem ...... https://github.com/tabler/tabler-icons
+  Uso ......... Icones da interface. Os SVGs sao embutidos direto no markup
+                (index.php e js/app.js), sem dependencia em tempo de execucao.
 
 jsPDF
   Versao ...... 2.5.2
@@ -47,20 +48,18 @@ jsPDF-AutoTable
 2. FONTES (Google Fonts)
 --------------------------------------------------------------------------------
 
-Inter
+Google Sans
   Licenca ..... SIL Open Font License 1.1 (OFL-1.1)
-  Origem ...... https://fonts.google.com/specimen/Inter
-  Uso ......... Tipografia da interface principal (index.php)
+  Origem ...... https://fonts.google.com/specimen/Google+Sans
+  Uso ......... Tipografia da interface (index.php e setup/index.php)
+  Obs ......... Liberada pela Google sob OFL em dezembro/2025. Antes disso era
+                restrita aos produtos da propria Google -- versoes anteriores
+                deste projeto a usavam quando ainda nao era licenciada assim.
 
-JetBrains Mono
+Datatype
   Licenca ..... SIL Open Font License 1.1 (OFL-1.1)
-  Origem ...... https://fonts.google.com/specimen/JetBrains+Mono
-  Uso ......... Fonte monoespacada (index.php e setup/index.php)
-
-Plus Jakarta Sans
-  Licenca ..... SIL Open Font License 1.1 (OFL-1.1)
-  Origem ...... https://fonts.google.com/specimen/Plus+Jakarta+Sans
-  Uso ......... Tipografia da tela do instalador (setup/index.php)
+  Origem ...... https://fonts.google.com/specimen/Datatype
+  Uso ......... Fonte de apoio para numeros e dados (index.php e setup/index.php)
 
 Obs sobre a OFL: as fontes podem ser usadas, incorporadas e redistribuidas
 livremente, inclusive em projetos comerciais. A unica restricao relevante e

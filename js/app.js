@@ -499,26 +499,39 @@ function toast(msg, isErr) {
   setTimeout(() => t.classList.remove('show'), 2600);
 }
 
+// ---------------------------------------------------------------------------
+// Icones da interface: Tabler Icons (https://tabler.io/icons) -- licenca MIT,
+// (c) 2020-2026 Pawel Kuna. Ver LICENSES-THIRD-PARTY.txt.
+//
+// Os SVGs ficam embutidos direto no markup, sem biblioteca em tempo de
+// execucao: nada para instalar, nada para baixar, e cada icone herda a cor
+// (currentColor) e o tamanho do CSS de quem o contem.
+//
+// Para trocar ou acrescentar um icone, copie o SVG do site do Tabler e
+// mantenha o padrao: viewBox "0 0 24 24", stroke-width 2 e stroke-linecap/
+// stroke-linejoin "round" -- e remova o <path> da caixa transparente que o
+// Tabler inclui no inicio, que so serve de moldura.
+// ---------------------------------------------------------------------------
 const I = {
-  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
-  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
-  refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>',
-  db: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/></svg>',
-  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
-  palette: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20c1.4 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.5 1.8-1.5h2A4.5 4.5 0 0 0 22 11.5C22 6 17.5 2 12 2z"/><circle cx="7.5" cy="10.5" r="1.3"/><circle cx="11" cy="6.8" r="1.3"/><circle cx="15.5" cy="7.5" r="1.3"/><circle cx="17.5" cy="11.8" r="1.3"/></svg>',
-  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-  mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
-  filter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
-  columns: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>',
-  sort: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/></svg>',
-  chevDown: '<svg class="dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>',
-  chevLeft: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>',
-  chevRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>',
-  upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
-  help: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 9a3.5 3.5 0 1 1 5.6 2.8c-.9.7-1.6 1-1.6 2.5"/><line x1="12.5" y1="18.5" x2="12.5" y2="18.51"/></svg>',
-  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
-  exchange: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l4 4-4 4"/><path d="M20 7H4"/><path d="M8 21l-4-4 4-4"/><path d="M4 17h16"/></svg>',
-  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /> <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /> <path d="M16 3.13a4 4 0 0 1 0 7.75" /> <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /> <path d="M12 7v5l3 3" /></svg>',
+  refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /> <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg>',
+  db: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0" /> <path d="M4 6v6a8 3 0 0 0 16 0v-6" /> <path d="M4 12v6a8 3 0 0 0 16 0v-6" /></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" /></svg>',
+  palette: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25" /> <path d="M7.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /> <path d="M11.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /> <path d="M15.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4" /> <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0" /> <path d="M12 16h.01" /></svg>',
+  mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10" /> <path d="M3 7l9 6l9 -6" /></svg>',
+  filter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227" /></svg>',
+  columns: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l5.5 0" /> <path d="M4 10l5.5 0" /> <path d="M4 14l5.5 0" /> <path d="M4 18l5.5 0" /> <path d="M14.5 6l5.5 0" /> <path d="M14.5 10l5.5 0" /> <path d="M14.5 14l5.5 0" /> <path d="M14.5 18l5.5 0" /></svg>',
+  sort: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l4 -4l4 4m-4 -4v14" /> <path d="M21 15l-4 4l-4 -4m4 4v-14" /></svg>',
+  chevDown: '<svg class="dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6l6 -6" /></svg>',
+  chevLeft: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6l6 6" /></svg>',
+  chevRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6l-6 6" /></svg>',
+  upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 9l5 -5l5 5" /> <path d="M12 4l0 12" /></svg>',
+  help: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /> <path d="M12 16v.01" /> <path d="M12 13a2 2 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" /></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /> <path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /> <path d="M3 6l0 13" /> <path d="M12 6l0 13" /> <path d="M21 6l0 13" /></svg>',
+  exchange: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h14l-4 -4" /> <path d="M17 14h-14l4 4" /></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667l0 -8.666" /> <path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /></svg>',
 };
 
 const TEMA_CORES = [
@@ -1009,8 +1022,8 @@ function tblToolbarHtml(key, cols, pillCol, pillOpts, podeEscrever, total) {
       <span class="tbl-sel-info">${st.sel.size} ${esc(tr('selecionado(s)'))}</span>
       <div class="tbl-toolbar-actions">
         <button type="button" class="btn btn-ghost" data-act="tblClearSel" data-key="${key}">${esc(tr('Cancelar'))}</button>
-        ${temObs ? `<button type="button" class="btn btn-ghost" data-act="openBulkObs" data-key="${key}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>${esc(tr('Atualizar observações'))}</button>` : ''}
-        <button type="button" class="btn btn-red" data-act="tblBulkDelete" data-key="${key}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>${esc(tr('Excluir selecionados'))}</button>
+        ${temObs ? `<button type="button" class="btn btn-ghost" data-act="openBulkObs" data-key="${key}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /></svg>${esc(tr('Atualizar observações'))}</button>` : ''}
+        <button type="button" class="btn btn-red" data-act="tblBulkDelete" data-key="${key}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>${esc(tr('Excluir selecionados'))}</button>
       </div>
     </div>`;
   }
@@ -1030,7 +1043,7 @@ function tblToolbarHtml(key, cols, pillCol, pillOpts, podeEscrever, total) {
     ${cols.map((f) => `<button type="button" class="dd-opt${st.sortCol === f.k ? ' sel' : ''}" data-act="tblSetSort" data-key="${key}" data-col="${f.k}">${esc(tr(f.l))}${st.sortCol === f.k ? (st.sortDir === 'asc' ? ' ↑' : ' ↓') : ''}</button>`).join('')}
   </div></div>`;
   if (podeEscrever && total > 0 && podeExcluirTodos(key)) {
-    h += `<button type="button" class="btn btn-red" data-act="tblExcluirTodos" data-key="${key}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>${esc(tr('Excluir todos'))}</button>`;
+    h += `<button type="button" class="btn btn-red" data-act="tblExcluirTodos" data-key="${key}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>${esc(tr('Excluir todos'))}</button>`;
   }
   h += '</div></div>';
   return h;
@@ -1090,8 +1103,8 @@ function tableHtml(key, cols, rows, sing, searching) {
     });
     if (podeEscrever) {
       h += `<td><div class="row-act" style="justify-content:flex-end">
-        <button class="icon-btn" data-act="openEdit" data-key="${key}" data-id="${r.id}" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>
-        <button class="icon-btn del" data-act="delRow" data-key="${key}" data-id="${r.id}" title="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+        <button class="icon-btn" data-act="openEdit" data-key="${key}" data-id="${r.id}" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /></svg></button>
+        <button class="icon-btn del" data-act="delRow" data-key="${key}" data-id="${r.id}" title="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button>
       </div></td>`;
     }
     h += '</tr>';
@@ -1199,7 +1212,7 @@ async function renderTable(key) {
     foot += `<button type="button" class="btn btn-ghost icon-only tt-wrap" data-act="dicTemplateCsv" data-tt="${esc(tr('Baixe o modelo antes de importar'))}" aria-label="${esc(tr('Baixar modelo de importação (CSV)'))}">${I.help}</button>`;
     foot += `<button type="button" class="btn btn-ghost" data-act="dicImportarClick">${I.upload}${esc(tr('Importar'))}</button>`;
   }
-  const icoExport = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>`;
+  const icoExport = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4" /> <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /> <path d="M9 9l1 0" /> <path d="M9 13l6 0" /> <path d="M9 17l6 0" /></svg>`;
   if (rows.length && key === 'mudancas') foot += `<button type="button" class="btn btn-ghost" data-act="exportMudancasCsv">${icoExport}${esc(tr('Exportar CSV'))}</button>`;
   if (rows.length && key !== 'mudancas') foot += `<button type="button" class="btn btn-ghost" data-act="exportCsv" data-key="${key}">${icoExport}${esc(tr('Exportar CSV'))}</button>`;
   if (foot) h += `<div style="margin-top:14px;text-align:right;display:flex;gap:8px;justify-content:flex-end">${foot}</div>`;
@@ -1221,7 +1234,7 @@ async function renderBackup() {
   } catch (e) { $('content').innerHTML = `<div class="card"><div class="empty"><p>${esc(e.message)}</p></div></div>`; return; }
 
   let h = `<div class="sec-h" style="margin-top:0">${esc(tr('Política por banco'))}</div>` + tableHtml('backup', polCols, pol, 'política', !!query);
-  if (pol.length) h += `<div style="margin-top:12px;text-align:right"><button class="btn btn-ghost" data-act="exportCsv" data-key="backup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>${esc(tr('Exportar CSV'))}</button></div>`;
+  if (pol.length) h += `<div style="margin-top:12px;text-align:right"><button class="btn btn-ghost" data-act="exportCsv" data-key="backup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4" /> <path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4" /> <path d="M7 16.5a1.5 1.5 0 0 0 -3 0v3a1.5 1.5 0 0 0 3 0" /> <path d="M10 20.25c0 .414 .336 .75 .75 .75h1.25a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-1a1 1 0 0 1 -1 -1v-1a1 1 0 0 1 1 -1h1.25a.75 .75 0 0 1 .75 .75" /> <path d="M16 15l2 6l2 -6" /></svg>${esc(tr('Exportar CSV'))}</button></div>`;
   h += `<div class="sec-h">${esc(tr('Restore'))} ${canWrite('restore') ? `<button class="btn btn-green" style="margin-left:auto;padding:5px 11px" data-act="openNew" data-key="restore">${esc(tr('Adicionar'))}</button>` : ''}</div>` + tableHtml('restore', rtCols, rts, 'teste', !!query);
   $('content').innerHTML = h;
 }
@@ -1855,7 +1868,7 @@ function usuariosTableHtml(users) {
       <span class="tbl-sel-info">${st.sel.size} ${esc(tr('selecionado(s)'))}</span>
       <div class="tbl-toolbar-actions">
         <button type="button" class="btn btn-ghost" data-act="tblClearSel" data-key="usuarios">${esc(tr('Cancelar'))}</button>
-        <button type="button" class="btn btn-red" data-act="tblBulkDelete" data-key="usuarios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>${esc(tr('Excluir selecionados'))}</button>
+        <button type="button" class="btn btn-red" data-act="tblBulkDelete" data-key="usuarios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>${esc(tr('Excluir selecionados'))}</button>
       </div>
     </div>`;
   } else {
@@ -1886,7 +1899,7 @@ function usuariosTableHtml(users) {
     h += `<td data-col="nome_completo" style="${st.hidden.has('nome_completo') ? 'display:none' : ''}">${avatarCellHtml(u.nome_completo || u.username)}</td>`;
     h += `<td data-col="role" style="${st.hidden.has('role') ? 'display:none' : ''}"><span class="pill ${ROLE_PILL[u.role] || 'p-gray'}">${esc(tr(ROLE_LABEL[u.role] || 'Leitura'))}</span></td>`;
     h += `<td class="mono" data-col="criado_em" style="${st.hidden.has('criado_em') ? 'display:none' : ''}">${u.criado_em ? fmtDate(u.criado_em.slice(0, 10)) : '—'}</td>`;
-    h += `<td><div class="row-act" style="justify-content:flex-end"><button class="icon-btn" data-act="openEditUsuario" data-id="${u.id}" title="${esc(tr('Editar'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button><button class="icon-btn del" data-act="delUsuario" data-id="${u.id}" title="${esc(tr('Remover'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button></div></td></tr>`;
+    h += `<td><div class="row-act" style="justify-content:flex-end"><button class="icon-btn" data-act="openEditUsuario" data-id="${u.id}" title="${esc(tr('Editar'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /></svg></button><button class="icon-btn del" data-act="delUsuario" data-id="${u.id}" title="${esc(tr('Remover'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button></div></td></tr>`;
   });
   h += '</tbody></table></div>';
   h += tblPaginationHtml('usuarios', applied.length, st.page, pages);
@@ -1909,7 +1922,7 @@ async function renderRoles() {
     const mods = String(u.modulos_permitidos || '').split(',').map((s) => s.trim()).filter(Boolean);
     const modsTxt = u.role === 'admin' ? tr('Todos') : (mods.length ? mods.map((m) => tr(MODULO_LABELS[m] || m)).join(', ') : '—');
     h += `<tr><td class="mono">${esc(u.username)}</td><td>${esc(u.nome_completo || '—')}</td><td><span class="pill ${ROLE_PILL[u.role] || 'p-gray'}">${esc(tr(ROLE_LABEL[u.role] || 'Leitura'))}</span></td><td class="trunc" title="${esc(modsTxt)}">${esc(modsTxt)}</td>
-      <td><div class="row-act" style="justify-content:flex-end"><button class="icon-btn" data-act="openRolesModal" data-id="${u.id}" title="${esc(tr('Editar permissões'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></td></tr>`;
+      <td><div class="row-act" style="justify-content:flex-end"><button class="icon-btn" data-act="openRolesModal" data-id="${u.id}" title="${esc(tr('Editar permissões'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /></svg></button></div></td></tr>`;
   });
   h += '</tbody></table></div></div>';
   $('content').innerHTML = h;
@@ -2052,7 +2065,7 @@ async function renderCadastro() {
         <div class="cadastro-ico">${I[c.ico] || I.db}</div>
         <div class="cadastro-list-label">${esc(tr(c.label))}</div>
         <div class="cnt">${n}</div>
-        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6l-6 6" /></svg>
       </button>`;
     });
     h += '</div>';
@@ -2080,8 +2093,8 @@ function cadastroDrawerListHtml(cat) {
           return `<li class="tipo-row tipo-row-editing">
             <input type="text" class="tipo-edit-inp" id="tipoEditInp" value="${esc(t.nome)}">
             <div class="row-act">
-              <button class="icon-btn" data-act="salvarEdicaoTipo" data-cat="${cat}" data-id="${t.id}" title="${esc(tr('Salvar'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
-              <button class="icon-btn" data-act="cancelarEdicaoTipo" title="${esc(tr('Cancelar'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              <button class="icon-btn" data-act="salvarEdicaoTipo" data-cat="${cat}" data-id="${t.id}" title="${esc(tr('Salvar'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10 -10" /></svg></button>
+              <button class="icon-btn" data-act="cancelarEdicaoTipo" title="${esc(tr('Cancelar'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button>
             </div>
           </li>`;
         }
@@ -2091,8 +2104,8 @@ function cadastroDrawerListHtml(cat) {
             <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.nome)}</span>
           </label>
           <div class="row-act">
-            <button class="icon-btn" data-act="iniciarEdicaoTipo" data-id="${t.id}" title="${esc(tr('Editar'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>
-            <button class="icon-btn del" data-act="delTipo" data-cat="${cat}" data-id="${t.id}" title="${esc(tr('Excluir'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
+            <button class="icon-btn" data-act="iniciarEdicaoTipo" data-id="${t.id}" title="${esc(tr('Editar'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /></svg></button>
+            <button class="icon-btn del" data-act="delTipo" data-cat="${cat}" data-id="${t.id}" title="${esc(tr('Excluir'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button>
           </div>
         </li>`;
       }).join('')
@@ -2722,7 +2735,7 @@ function renderRelatorios() {
   let h = relatoriosFiltroBarHtml();
   h += '<div class="card" style="padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">';
   h += `<div><div style="font-size:13.5px;font-weight:600">${esc(tr('Relatório completo'))}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${esc(tr('Todos os artefatos reunidos em um único arquivo JSON'))}</div></div>`;
-  h += `<button class="btn btn-primary" data-act="exportJsonAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>${esc(tr('Exportar tudo (JSON)'))}</button>`;
+  h += `<button class="btn btn-primary" data-act="exportJsonAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 11l5 5l5 -5" /> <path d="M12 4l0 12" /></svg>${esc(tr('Exportar tudo (JSON)'))}</button>`;
   h += '</div>';
 
   h += '<div class="tiles tiles-wide">';
@@ -2733,8 +2746,8 @@ function renderRelatorios() {
       <div class="lab">${esc(tr(sch.title))}</div>
       <div class="hint">${esc(tr(sch.sub))}</div>
       <div class="report-actions">
-        <button class="btn btn-ghost" data-act="exportCsvRelatorio" data-key="${key}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>${esc(tr('CSV'))}</button>
-        <button class="btn btn-ghost" data-act="exportPdfRelatorio" data-key="${key}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>${esc(tr('PDF'))}</button>
+        <button class="btn btn-ghost" data-act="exportCsvRelatorio" data-key="${key}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4" /> <path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4" /> <path d="M7 16.5a1.5 1.5 0 0 0 -3 0v3a1.5 1.5 0 0 0 3 0" /> <path d="M10 20.25c0 .414 .336 .75 .75 .75h1.25a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-1a1 1 0 0 1 -1 -1v-1a1 1 0 0 1 1 -1h1.25a.75 .75 0 0 1 .75 .75" /> <path d="M16 15l2 6l2 -6" /></svg>${esc(tr('CSV'))}</button>
+        <button class="btn btn-ghost" data-act="exportPdfRelatorio" data-key="${key}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4" /> <path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4" /> <path d="M5 18h1.5a1.5 1.5 0 0 0 0 -3h-1.5v6" /> <path d="M17 18h2" /> <path d="M20 15h-3v6" /> <path d="M11 15v6h1a2 2 0 0 0 2 -2v-2a2 2 0 0 0 -2 -2h-1" /></svg>${esc(tr('PDF'))}</button>
         <button class="btn btn-ghost" data-act="openEmailReport" data-key="${key}">${I.mail}${esc(tr('E-mail'))}</button>
       </div>
     </div>`;
@@ -3181,7 +3194,7 @@ async function baixarManualApiEn() {
   }
 }
 
-const DL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>';
+const DL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 11l5 5l5 -5" /> <path d="M12 4l0 12" /></svg>';
 
 
 

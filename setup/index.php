@@ -438,7 +438,7 @@ if ($jaInstalado) {
       <a href="?lang=<?= $T['lang_other_code'] ?>" style="font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:3px 9px"><?= $T['lang_other_label'] ?></a>
     </div>
     <div class="mark" style="margin-bottom:18px">
-      <svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="#A9802E" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.7 2.7L16 9.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="#A9802E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /> <path d="M9 12l2 2l4 -4" /></svg>
     </div>
     <h2 style="margin:0 0 10px;font-size:18px"><?= htmlspecialchars($T['already_h2'], ENT_QUOTES, 'UTF-8') ?></h2>
     <p style="color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 18px"><?= $T['already_p1'] ?></p>
@@ -654,7 +654,7 @@ $langAction = '?lang=' . $lang;
         try { localStorage.removeItem('gov_token'); } catch (e) {}
       </script>
       <div style="text-align:center">
-        <svg class="sucesso-icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.7 2.7L16 9.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg class="sucesso-icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /> <path d="M9 12l2 2l4 -4" /></svg>
         <h1 style="font-size:19px;margin:0 0 8px"><?= htmlspecialchars($T['success_h1'], ENT_QUOTES, 'UTF-8') ?></h1>
         <p style="color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 18px">
           <?= htmlspecialchars(sprintf($T['success_user'], $valores['admin_username']), ENT_QUOTES, 'UTF-8') ?>

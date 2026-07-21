@@ -281,27 +281,27 @@ header('Content-Type: text/html; charset=utf-8');
     <div class="brand">
       <div class="brand-row">
         <div class="mark"><?= $logoSvg ?><span class="brand-title"><?= $tituloAtributo ?></span></div>
-        <button class="side-collapse-btn" id="sideCollapseBtn" title="Recolher menu" aria-label="Recolher menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="side-collapse-btn" id="sideCollapseBtn" title="Recolher menu" aria-label="Recolher menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6l6 6" /></svg></button>
       </div>
     </div>
     <nav class="side-nav" id="nav">
-      <button class="nav-item active" data-view="overview" title="Dashboard" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span class="lbl" data-i18n>Dashboard</span></button>
-      <button class="nav-item" data-view="acessos" title="Acessos" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="lbl" data-i18n>Acessos</span></button>
-      <button class="nav-item" data-view="mudancas" title="Mudanças" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg><span class="lbl" data-i18n>Mudanças</span></button>
-      <button class="nav-item" data-view="backup" title="Backup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg><span class="lbl">Backup</span></button>
-      <button class="nav-item" data-view="jobs" title="Jobs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m7 9 3 2-3 2"/><path d="M13 13h4"/></svg><span class="lbl">Jobs</span></button>
-      <button class="nav-item" data-view="dicionario" title="Dicionário" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="lbl" data-i18n>Dicionário</span></button>
-      <button class="nav-item" data-view="integracoes" title="Integrações" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l4 4-4 4"/><path d="M20 7H4"/><path d="M8 21l-4-4 4-4"/><path d="M4 17h16"/></svg><span class="lbl" data-i18n>Integrações</span></button>
-      <button class="nav-item" data-view="relatorios" title="Relatórios" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg><span class="lbl" data-i18n>Relatórios</span></button>
-      <button class="nav-item" data-view="documentacao" title="Documentação" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span class="lbl" data-i18n>Documentação</span></button>
+      <button class="nav-item active" data-view="overview" title="Dashboard" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1" /> <path d="M5 16h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1" /> <path d="M15 12h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1" /> <path d="M15 4h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1" /></svg><span class="lbl" data-i18n>Dashboard</span></button>
+      <button class="nav-item" data-view="acessos" title="Acessos" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" /> <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /> <path d="M8 11v-4a4 4 0 1 1 8 0v4" /></svg><span class="lbl" data-i18n>Acessos</span></button>
+      <button class="nav-item" data-view="mudancas" title="Mudanças" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /> <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg><span class="lbl" data-i18n>Mudanças</span></button>
+      <button class="nav-item" data-view="backup" title="Backup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0" /> <path d="M4 6v6a8 3 0 0 0 16 0v-6" /> <path d="M4 12v6a8 3 0 0 0 16 0v-6" /></svg><span class="lbl">Backup</span></button>
+      <button class="nav-item" data-view="jobs" title="Jobs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l3 3l-3 3" /> <path d="M13 15l3 0" /> <path d="M3 6a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2l0 -12" /></svg><span class="lbl">Jobs</span></button>
+      <button class="nav-item" data-view="dicionario" title="Dicionário" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /> <path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /> <path d="M3 6l0 13" /> <path d="M12 6l0 13" /> <path d="M21 6l0 13" /></svg><span class="lbl" data-i18n>Dicionário</span></button>
+      <button class="nav-item" data-view="integracoes" title="Integrações" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h14l-4 -4" /> <path d="M17 14h-14l4 4" /></svg><span class="lbl" data-i18n>Integrações</span></button>
+      <button class="nav-item" data-view="relatorios" title="Relatórios" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4" /> <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /> <path d="M9 9l1 0" /> <path d="M9 13l6 0" /> <path d="M9 17l6 0" /></svg><span class="lbl" data-i18n>Relatórios</span></button>
+      <button class="nav-item" data-view="documentacao" title="Documentação" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-11a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1m3 0v18" /> <path d="M13 8l2 0" /> <path d="M13 12l2 0" /></svg><span class="lbl" data-i18n>Documentação</span></button>
       <div class="nav-label lbl" id="navAdminLabel" style="display:none" data-i18n>Administração</div>
-      <button class="nav-item" data-view="cadastro" id="navCadastro" title="Cadastro" data-i18n-title style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="lbl" data-i18n>Cadastro</span></button>
-      <button class="nav-item" data-view="usuarios" id="navUsuarios" title="Usuários" data-i18n-title style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span class="lbl" data-i18n>Usuários</span></button>
-      <button class="nav-item" data-view="roles" id="navRoles" title="Roles" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="lbl">Roles</span></button>
-      <button class="nav-item" data-view="email" id="navEmail" title="E-mail" data-i18n-title style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 8.97 6.36a2 2 0 0 0 2.06 0L22 7"/></svg><span class="lbl" data-i18n>E-mail</span></button>
-      <button class="nav-item" data-view="configProjeto" id="navConfigProjeto" title="Configurações" data-i18n-title style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9A1.65 1.65 0 0 0 10 3.09V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="lbl" data-i18n>Configurações</span></button>
-      <button class="nav-item" data-view="auditoria" id="navAuditoria" title="Auditoria" data-i18n-title style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V7z"/><path d="M9 12l2 2 4-4"/></svg><span class="lbl" data-i18n>Auditoria</span></button>
-      <button class="nav-item" data-view="seguranca" id="navSeguranca" title="Segurança" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="lbl">Segurança</span></button>
+      <button class="nav-item" data-view="cadastro" id="navCadastro" title="Cadastro" data-i18n-title style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3l8 -8" /> <path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9" /></svg><span class="lbl" data-i18n>Cadastro</span></button>
+      <button class="nav-item" data-view="usuarios" id="navUsuarios" title="Usuários" data-i18n-title style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /> <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /> <path d="M16 3.13a4 4 0 0 1 0 7.75" /> <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg><span class="lbl" data-i18n>Usuários</span></button>
+      <button class="nav-item" data-view="roles" id="navRoles" title="Roles" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" /></svg><span class="lbl">Roles</span></button>
+      <button class="nav-item" data-view="email" id="navEmail" title="E-mail" data-i18n-title style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10" /> <path d="M3 7l9 6l9 -6" /></svg><span class="lbl" data-i18n>E-mail</span></button>
+      <button class="nav-item" data-view="configProjeto" id="navConfigProjeto" title="Configurações" data-i18n-title style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065" /> <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg><span class="lbl" data-i18n>Configurações</span></button>
+      <button class="nav-item" data-view="auditoria" id="navAuditoria" title="Auditoria" data-i18n-title style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.46 20.846a12 12 0 0 1 -7.96 -14.846a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3a12 12 0 0 1 -.09 7.06" /> <path d="M15 19l2 2l4 -4" /></svg><span class="lbl" data-i18n>Auditoria</span></button>
+      <button class="nav-item" data-view="seguranca" id="navSeguranca" title="Segurança" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" /> <path d="M11 11a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /> <path d="M12 12l0 2.5" /></svg><span class="lbl">Segurança</span></button>
     </nav>
     <div class="side-foot">
       <div class="user-chip" id="userChip" title="Editar meu perfil" data-i18n-title style="cursor:pointer">
@@ -310,28 +310,28 @@ header('Content-Type: text/html; charset=utf-8');
           <div class="nm" id="userName">—</div>
         </div>
       </div>
-      <button id="changePassBtn" title="Trocar senha" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="lbl" data-i18n>Trocar senha</span></button>
-      <button id="logoutBtn" title="Sair" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="lbl" data-i18n>Sair</span></button>
+      <button id="changePassBtn" title="Trocar senha" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" /> <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /> <path d="M8 11v-4a4 4 0 1 1 8 0v4" /></svg><span class="lbl" data-i18n>Trocar senha</span></button>
+      <button id="logoutBtn" title="Sair" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /> <path d="M9 12h12l-3 -3" /> <path d="M18 15l3 -3" /></svg><span class="lbl" data-i18n>Sair</span></button>
       <div id="dbInfo" class="db-info lbl" style="display:none" title=""></div>
     </div>
   </aside>
 
   <div class="main">
     <div class="mfa-banner" id="mfaBanner" hidden>
-      <div class="mfa-banner-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <div class="mfa-banner-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" /></svg></div>
       <div class="mfa-banner-txt"><strong data-i18n>Proteja sua conta</strong><span data-i18n>Ative a verificação em duas etapas para aumentar a segurança do seu acesso.</span></div>
       <button class="btn btn-primary" data-act="irMfaBannerPerfil" data-i18n>Ativar agora</button>
     </div>
     <div class="topbar">
-      <button class="btn btn-ghost menu-toggle" id="menuToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="btn btn-ghost menu-toggle" id="menuToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l16 0" /> <path d="M4 12l16 0" /> <path d="M4 18l16 0" /></svg></button>
       <div class="tt"><h2 id="viewTitle">Dashboard</h2><div class="sub" id="viewSub">Resumo do seu ambiente de dados</div></div>
-      <div class="search" id="searchBox" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="search" placeholder="Buscar..." data-i18n-ph></div>
+      <div class="search" id="searchBox" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /> <path d="M21 21l-6 -6" /></svg><input type="text" id="search" placeholder="Buscar..." data-i18n-ph></div>
       <button class="btn btn-ghost icon-only" id="themeToggle" title="Alternar tema claro/escuro" data-i18n-title aria-label="Alternar tema">
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /> <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" /></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008" /></svg>
       </button>
       <button class="btn btn-ghost lang-toggle" id="langToggle" title="Mudar idioma / Switch language" aria-label="Mudar idioma"><span id="langToggleLabel">EN</span></button>
-      <button class="btn btn-primary" id="addBtn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span data-i18n>Adicionar</span></button>
+      <button class="btn btn-primary" id="addBtn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5l0 14" /> <path d="M5 12l14 0" /></svg><span data-i18n>Adicionar</span></button>
     </div>
     <div class="content" id="content"></div>
   </div>
@@ -339,7 +339,7 @@ header('Content-Type: text/html; charset=utf-8');
 
 <div class="overlay" id="overlay">
   <div class="modal">
-    <div class="modal-h"><h3 id="modalTitle">Novo registro</h3><button class="x" id="modalClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-h"><h3 id="modalTitle">Novo registro</h3><button class="x" id="modalClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button></div>
     <div class="modal-b" id="modalBody"></div>
     <div class="modal-f"><button class="btn btn-ghost" id="modalCancel" data-i18n>Cancelar</button><button class="btn btn-primary" id="modalSave" data-i18n>Salvar registro</button></div>
   </div>
@@ -347,7 +347,7 @@ header('Content-Type: text/html; charset=utf-8');
 
 <div class="overlay" id="pwOverlay">
   <div class="modal" style="max-width:380px">
-    <div class="modal-h"><h3 data-i18n>Trocar senha</h3><button class="x" id="pwClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-h"><h3 data-i18n>Trocar senha</h3><button class="x" id="pwClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button></div>
     <div class="modal-b" style="grid-template-columns:1fr">
       <div class="fld"><label data-i18n>Senha atual</label><input type="password" id="pwAtual"></div>
       <div class="fld"><label data-i18n>Nova senha</label><input type="password" id="pwNova"></div>
@@ -358,7 +358,7 @@ header('Content-Type: text/html; charset=utf-8');
 
 <div class="overlay" id="mfaToggleOverlay">
   <div class="modal" style="max-width:380px">
-    <div class="modal-h"><h3 data-i18n>Verificação em duas etapas</h3><button class="x" id="mfaToggleClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-h"><h3 data-i18n>Verificação em duas etapas</h3><button class="x" id="mfaToggleClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button></div>
     <div class="modal-b" style="grid-template-columns:1fr">
       <div class="fld"><label data-i18n>Senha atual</label><input type="password" id="mfaTogglePass"></div>
     </div>
@@ -368,7 +368,7 @@ header('Content-Type: text/html; charset=utf-8');
 
 <div class="overlay" id="userOverlay">
   <div class="modal" style="max-width:460px">
-    <div class="modal-h"><h3 id="userModalTitle" data-i18n>Novo usuário</h3><button class="x" id="userClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-h"><h3 id="userModalTitle" data-i18n>Novo usuário</h3><button class="x" id="userClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button></div>
     <div class="modal-b" style="grid-template-columns:1fr">
       <div class="fld"><label data-i18n>Login</label><input type="text" id="userLogin"></div>
       <div class="fld"><label data-i18n>Nome completo</label><input type="text" id="userNome"></div>
@@ -410,7 +410,7 @@ header('Content-Type: text/html; charset=utf-8');
 
 <div class="overlay" id="rolesOverlay">
   <div class="modal" style="max-width:460px">
-    <div class="modal-h"><h3 data-i18n>Editar permissões</h3><button class="x" id="rolesClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-h"><h3 data-i18n>Editar permissões</h3><button class="x" id="rolesClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button></div>
     <div class="modal-b" style="grid-template-columns:1fr">
       <div class="fld"><label data-i18n>Usuário</label><input type="text" id="rolesUserLabel" disabled></div>
       <div class="fld"><label data-i18n>Papel</label><select id="rolesRoleSel"><option value="leitura" data-i18n>Leitura</option><option value="escrita" data-i18n>Escrita</option><option value="admin" data-i18n>Administrador</option><option value="master" data-i18n>Master</option></select></div>
@@ -425,7 +425,7 @@ header('Content-Type: text/html; charset=utf-8');
 
 <div class="overlay" id="emailOverlay">
   <div class="modal" style="max-width:380px">
-    <div class="modal-h"><h3 data-i18n>Enviar relatório por e-mail</h3><button class="x" id="emailClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-h"><h3 data-i18n>Enviar relatório por e-mail</h3><button class="x" id="emailClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button></div>
     <div class="modal-b" style="grid-template-columns:1fr">
       <div class="fld"><label data-i18n>E-mail de destino</label><input type="email" id="emailPara" placeholder="nome@empresa.com"></div>
     </div>
@@ -435,7 +435,7 @@ header('Content-Type: text/html; charset=utf-8');
 
 <div class="overlay" id="bulkObsOverlay">
   <div class="modal" style="max-width:460px">
-    <div class="modal-h"><h3 data-i18n>Atualizar observações em massa</h3><button class="x" id="bulkObsClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-h"><h3 data-i18n>Atualizar observações em massa</h3><button class="x" id="bulkObsClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button></div>
     <div class="modal-b" style="grid-template-columns:1fr">
       <p id="bulkObsInfo" style="margin:0;font-size:13px;color:var(--muted)"></p>
       <div class="fld"><label data-i18n>Observações</label><textarea id="bulkObsTexto" rows="5"></textarea></div>
@@ -466,7 +466,7 @@ header('Content-Type: text/html; charset=utf-8');
 
 <div class="overlay" id="importResultOverlay">
   <div class="modal" style="max-width:440px">
-    <div class="modal-h"><h3 data-i18n>Importação concluída</h3><button class="x" id="importResultClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-h"><h3 data-i18n>Importação concluída</h3><button class="x" id="importResultClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button></div>
     <div class="modal-b" style="grid-template-columns:1fr;gap:14px">
       <div class="import-result-grid">
         <div class="import-result-card ok">
@@ -490,13 +490,13 @@ header('Content-Type: text/html; charset=utf-8');
     <div class="drawer-h">
       <div class="cadastro-ico" id="cadastroDrawerIco"></div>
       <h3 id="cadastroDrawerTitle">—</h3>
-      <button class="x" id="cadastroDrawerClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="x" id="cadastroDrawerClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button>
     </div>
     <div class="drawer-b" id="cadastroDrawerBody"></div>
   </div>
 </div>
 
-<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span id="toastMsg"></span></div>
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10 -10" /></svg><span id="toastMsg"></span></div>
 <script src="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>/js/api.js?v=<?= @filemtime(__DIR__ . '/js/api.js') ?: time() ?>"></script>
 <script src="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>/js/vendor/jspdf.umd.min.js"></script>
 <script src="<?= htmlspecialchars($basePath, ENT_QUOTES, 'UTF-8') ?>/js/vendor/jspdf.plugin.autotable.min.js"></script>
