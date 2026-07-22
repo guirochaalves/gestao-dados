@@ -113,26 +113,6 @@
   --side-foot-hover-bg:rgba(255,255,255,.1); --side-foot-hover-ink:#F5F1E9;
   --side-chip-bg:rgba(255,255,255,.05); --side-badge-bg:rgba(255,255,255,.12); --side-badge-ink:#E4DECF;
 }
-[data-theme="light"][data-side="amarelo"],[data-theme="dark"][data-side="amarelo"]{
-  --side-bg:#7A5A08; --side-border:rgba(255,255,255,.1); --side-strong:#FFFDE7;
-  --side-ink:#F9F0C4; --side-muted:#C9AB52;
-  --side-hover-bg:rgba(255,255,255,.08); --side-hover-ink:#FFFDE7;
-  --side-active-bg:rgba(255,255,255,.22); --side-active-ink:#3D2C00;
-  --side-active-badge-bg:rgba(255,255,255,.22); --side-active-badge-ink:#fff;
-  --side-foot-bg:rgba(0,0,0,.12); --side-foot-ink:#F9F0C4;
-  --side-foot-hover-bg:rgba(255,255,255,.1); --side-foot-hover-ink:#FFFDE7;
-  --side-chip-bg:rgba(255,255,255,.08); --side-badge-bg:rgba(255,255,255,.15); --side-badge-ink:#FFFDE7;
-}
-[data-theme="light"][data-side="vermelho"],[data-theme="dark"][data-side="vermelho"]{
-  --side-bg:#8B1A1A; --side-border:rgba(255,255,255,.1); --side-strong:#FFF5F5;
-  --side-ink:#FFD0CC; --side-muted:#C97A74;
-  --side-hover-bg:rgba(255,255,255,.08); --side-hover-ink:#FFF5F5;
-  --side-active-bg:rgba(255,255,255,.22); --side-active-ink:#3D0000;
-  --side-active-badge-bg:rgba(255,255,255,.22); --side-active-badge-ink:#fff;
-  --side-foot-bg:rgba(0,0,0,.12); --side-foot-ink:#FFD0CC;
-  --side-foot-hover-bg:rgba(255,255,255,.1); --side-foot-hover-ink:#FFF5F5;
-  --side-chip-bg:rgba(255,255,255,.08); --side-badge-bg:rgba(255,255,255,.15); --side-badge-ink:#FFF5F5;
-}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{font-family:var(--sans);background:var(--content);color:var(--ink);font-size:15px;line-height:1.55;letter-spacing:-.1px;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
@@ -840,3 +820,80 @@ body,button,input,select,textarea{font-family:var(--sans)}
 
 .user-foto-edit { display: flex; align-items: center; gap: 10px; }
 .user-foto-edit .av { width: 52px; height: 52px; font-size: 18px; flex: none; }
+
+
+
+[data-side="slate"],[data-side="grafite"]{
+  --side-hover-bg:color-mix(in srgb,var(--accent) 30%,transparent);
+  --side-hover-ink:#FFFFFF;
+  --side-foot-hover-bg:color-mix(in srgb,var(--accent) 30%,transparent);
+  --side-foot-hover-ink:#FFFFFF;
+}
+
+/* --- Realce do menu por tema de cor --------------------------------------
+   Os tres estilos da barra (Claro, Suave, Grafite) definem o fundo; a cor do
+   realce vem do tema escolhido em "Tema de cores". As combinacoes estao
+   escritas uma a uma, com valores fixos, para o contraste ser conferido em
+   cada par -- e porque assim nao dependemos de color-mix no navegador.
+   Ao acrescentar um tema novo em TEMA_CORES (js/app.js), acrescente aqui o
+   bloco correspondente. ---------------------------------------------------- */
+[data-side="claro"]:not([data-color]),[data-color="padrao"][data-side="claro"]{
+  --side-hover-bg:#F5EBD6; --side-hover-ink:#7A5A08;
+  --side-active-bg:#A9802E; --side-active-ink:#FFFFFF;
+  --side-foot-hover-bg:#F5EBD6; --side-foot-hover-ink:#7A5A08;
+}
+[data-side="slate"]:not([data-color]),[data-side="grafite"]:not([data-color]),[data-color="padrao"][data-side="slate"],[data-color="padrao"][data-side="grafite"]{
+  --side-hover-bg:rgba(216,180,92,.28); --side-hover-ink:#FFFFFF;
+  --side-active-bg:#A9802E; --side-active-ink:#FFFFFF;
+  --side-foot-hover-bg:rgba(216,180,92,.28); --side-foot-hover-ink:#FFFFFF;
+}
+[data-color="azul"][data-side="claro"]{
+  --side-hover-bg:#DCE8F8; --side-hover-ink:#1E437A;
+  --side-active-bg:#2C5FA8; --side-active-ink:#FFFFFF;
+  --side-foot-hover-bg:#DCE8F8; --side-foot-hover-ink:#1E437A;
+}
+[data-color="azul"][data-side="slate"],[data-color="azul"][data-side="grafite"]{
+  --side-hover-bg:rgba(91,155,224,.28); --side-hover-ink:#FFFFFF;
+  --side-active-bg:#2C5FA8; --side-active-ink:#FFFFFF;
+  --side-foot-hover-bg:rgba(91,155,224,.28); --side-foot-hover-ink:#FFFFFF;
+}
+[data-color="verde"][data-side="claro"]{
+  --side-hover-bg:#DCF1E6; --side-hover-ink:#15623F;
+  --side-active-bg:#1E8A5C; --side-active-ink:#FFFFFF;
+  --side-foot-hover-bg:#DCF1E6; --side-foot-hover-ink:#15623F;
+}
+[data-color="verde"][data-side="slate"],[data-color="verde"][data-side="grafite"]{
+  --side-hover-bg:rgba(63,199,135,.28); --side-hover-ink:#FFFFFF;
+  --side-active-bg:#1E8A5C; --side-active-ink:#FFFFFF;
+  --side-foot-hover-bg:rgba(63,199,135,.28); --side-foot-hover-ink:#FFFFFF;
+}
+[data-color="violeta"][data-side="claro"]{
+  --side-hover-bg:#EEE3F9; --side-hover-ink:#5B3791;
+  --side-active-bg:#7C4FBF; --side-active-ink:#FFFFFF;
+  --side-foot-hover-bg:#EEE3F9; --side-foot-hover-ink:#5B3791;
+}
+[data-color="violeta"][data-side="slate"],[data-color="violeta"][data-side="grafite"]{
+  --side-hover-bg:rgba(172,141,227,.28); --side-hover-ink:#FFFFFF;
+  --side-active-bg:#7C4FBF; --side-active-ink:#FFFFFF;
+  --side-foot-hover-bg:rgba(172,141,227,.28); --side-foot-hover-ink:#FFFFFF;
+}
+[data-color="amarelo"][data-side="claro"]{
+  --side-hover-bg:#FBF0CC; --side-hover-ink:#7A5A08;
+  --side-active-bg:#B8860B; --side-active-ink:#FFFFFF;
+  --side-foot-hover-bg:#FBF0CC; --side-foot-hover-ink:#7A5A08;
+}
+[data-color="amarelo"][data-side="slate"],[data-color="amarelo"][data-side="grafite"]{
+  --side-hover-bg:rgba(232,200,74,.28); --side-hover-ink:#FFFFFF;
+  --side-active-bg:#B8860B; --side-active-ink:#FFFFFF;
+  --side-foot-hover-bg:rgba(232,200,74,.28); --side-foot-hover-ink:#FFFFFF;
+}
+[data-color="vermelho"][data-side="claro"]{
+  --side-hover-bg:#FADBD8; --side-hover-ink:#922B21;
+  --side-active-bg:#C0392B; --side-active-ink:#FFFFFF;
+  --side-foot-hover-bg:#FADBD8; --side-foot-hover-ink:#922B21;
+}
+[data-color="vermelho"][data-side="slate"],[data-color="vermelho"][data-side="grafite"]{
+  --side-hover-bg:rgba(229,115,115,.28); --side-hover-ink:#FFFFFF;
+  --side-active-bg:#C0392B; --side-active-ink:#FFFFFF;
+  --side-foot-hover-bg:rgba(229,115,115,.28); --side-foot-hover-ink:#FFFFFF;
+}

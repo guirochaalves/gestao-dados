@@ -753,16 +753,21 @@ function aplicarTemaCor(cor) {
   localStorage.setItem('colorTheme', c);
 }
 
+// Barra lateral: so o fundo. O realce dos itens (hover e ativo) vem do tema
+// de cores, pelas combinacoes [data-color][data-side] do CSS.
 const SIDE_ESTILOS = [
   { id: 'claro', label: 'Claro', cor: '#FFFFFF' },
   { id: 'slate', label: 'Suave', cor: '#1E2530' },
   { id: 'grafite', label: 'Grafite', cor: '#2A2622' },
-  { id: 'amarelo', label: 'Amarelo', cor: '#7A5A08' },
-  { id: 'vermelho', label: 'Vermelho', cor: '#8B1A1A' },
 ];
 
+// Estilos que sairam de versoes anteriores caem num equivalente, em vez de
+// deixar a barra sem estilo nenhum.
+const SIDE_ANTIGOS = { amarelo: 'grafite', vermelho: 'grafite' };
+
 function aplicarEstiloSide(estilo) {
-  const e = estilo || 'claro';
+  let e = estilo || 'claro';
+  if (SIDE_ANTIGOS[e]) e = SIDE_ANTIGOS[e];
   document.documentElement.setAttribute('data-side', e);
   localStorage.setItem('sideStyle', e);
 }

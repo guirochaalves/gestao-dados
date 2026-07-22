@@ -896,13 +896,22 @@ function despachar(string $metodo, string $caminho): void
         if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             responderErro(422, 'E-mail invalido.');
         }
-        $temasValidos = ['padrao', 'azul', 'verde', 'violeta'];
+        // Estas duas listas precisam acompanhar TEMA_CORES e SIDE_ESTILOS em
+        // js/app.js: um valor de fora cai no padrao, e a escolha do usuario
+        // some silenciosamente ao recarregar a pagina.
+        $temasValidos = ['padrao', 'azul', 'verde', 'violeta', 'amarelo', 'vermelho'];
         $corTema = (string) ($body['cor_tema'] ?? $user['cor_tema'] ?? 'padrao');
         if (!in_array($corTema, $temasValidos, true)) {
             $corTema = 'padrao';
         }
-        $estilosValidos = ['claro', 'slate'];
+        // A barra lateral define so o fundo; o realce vem do tema de cores.
+        $estilosValidos = ['claro', 'slate', 'grafite'];
         $estiloSide = (string) ($body['estilo_side'] ?? $user['estilo_side'] ?? 'claro');
+        // Estilos de versoes anteriores continuam aceitos, ja convertidos.
+        $estilosAntigos = ['amarelo' => 'grafite', 'vermelho' => 'grafite'];
+        if (isset($estilosAntigos[$estiloSide])) {
+            $estiloSide = $estilosAntigos[$estiloSide];
+        }
         if (!in_array($estiloSide, $estilosValidos, true)) {
             $estiloSide = 'claro';
         }
