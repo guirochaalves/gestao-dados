@@ -199,7 +199,9 @@ function crudExcluirLote(string $tabela, int $tamanhoLote, ?array $ids = null): 
     } else {
         // sqlite e pgsql nao aceitam LIMIT/TOP no DELETE -- seleciona os
         // ids do lote numa subconsulta e apaga so esses.
-        $sql = "DELETE FROM {$tabelaSql} WHERE {$idCol} IN (SELECT {$idCol} FROM {$tabelaSql} LIMIT {$tamanhoLote})";
+        // ORDER BY id torna deterministico quais linhas caem no lote (as
+        // mais antigas primeiro), em vez de depender da ordem fisica do banco.
+        $sql = "DELETE FROM {$tabelaSql} WHERE {$idCol} IN (SELECT {$idCol} FROM {$tabelaSql} ORDER BY {$idCol} LIMIT {$tamanhoLote})";
     }
     return (int) $pdo->exec($sql);
 }

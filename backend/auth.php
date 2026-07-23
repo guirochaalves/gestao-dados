@@ -522,31 +522,48 @@ function mfaChecarReenvio(string $token): ?string
         return 'Token invalido.';
     }
 
+    // Checagem e incremento num UNICO UPDATE condicional: o registro so avanca
+    // quando o teto e o cooldown ainda permitem. Isso fecha a janela de corrida
+    // (TOCTOU) entre duas requisicoes de reenvio quase simultaneas -- sem o
+    // UPDATE atomico, ambas poderiam ler o mesmo contador e furar o limite.
+    //
+    // O corte de tempo e calculado em PHP e comparado como string 'Y-m-d H:i:s'
+    // (mesma formatacao gravada em ultimo_reenvio), para nao depender da funcao
+    // de data de cada motor (DATE_SUB/DATEADD/datetime()).
+    $agora = date('Y-m-d H:i:s');
+    $corte = date('Y-m-d H:i:s', time() - MFA_REENVIO_COOLDOWN_SEG);
+    $ultimoCol = quoteIdent('ultimo_reenvio');
+    $reenviosCol = quoteIdent('reenvios');
+
+    $upd = $pdo->prepare(
+        'UPDATE ' . $tabela .
+        ' SET ' . $reenviosCol . ' = ' . $reenviosCol . ' + 1, ' . $ultimoCol . ' = ?' .
+        ' WHERE ' . quoteIdent('token') . ' = ?' .
+        ' AND ' . $reenviosCol . ' < ?' .
+        ' AND (' . $ultimoCol . ' IS NULL OR ' . $ultimoCol . " = '' OR " . $ultimoCol . ' <= ?)'
+    );
+    $upd->execute([$agora, $token, MFA_REENVIO_MAX, $corte]);
+
+    if ($upd->rowCount() >= 1) {
+        return null;   // avancou: reenvio liberado
+    }
+
+    // rowCount 0: nada avancou. Um SELECT (so para a mensagem, nao para a
+    // decisao, que ja foi tomada acima) diz se foi teto, cooldown ou token
+    // invalido.
     $reenvios      = (int) ($row['reenvios'] ?? 0);
     $ultimoReenvio = (string) ($row['ultimo_reenvio'] ?? '');
-
     if ($reenvios >= MFA_REENVIO_MAX) {
         return 'Limite de reenvios atingido. Faca login novamente para receber um novo codigo.';
     }
-
     if ($ultimoReenvio !== '') {
-        $segundosDesde = time() - (int) strtotime($ultimoReenvio);
-        if ($segundosDesde < MFA_REENVIO_COOLDOWN_SEG) {
-            $faltam = MFA_REENVIO_COOLDOWN_SEG - $segundosDesde;
+        $faltam = MFA_REENVIO_COOLDOWN_SEG - (time() - (int) strtotime($ultimoReenvio));
+        if ($faltam > 0) {
             return "Aguarde {$faltam} segundo(s) antes de solicitar um novo envio.";
         }
     }
-
-    // Incrementa antes do envio para evitar flood em chamadas concorrentes.
-    $agora = date('Y-m-d H:i:s');
-    $pdo->prepare(
-        'UPDATE ' . $tabela .
-        ' SET ' . quoteIdent('reenvios') . ' = ' . quoteIdent('reenvios') . ' + 1,' .
-        ' ' . quoteIdent('ultimo_reenvio') . ' = ?' .
-        ' WHERE ' . quoteIdent('token') . ' = ?'
-    )->execute([$agora, $token]);
-
-    return null;
+    // Corrida perdida para outra requisicao concorrente: trata como cooldown.
+    return 'Aguarde alguns segundos antes de solicitar um novo envio.';
 }
 
 /**

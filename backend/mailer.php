@@ -325,13 +325,19 @@ function smtpEnviar(array $cfg, string $para, string $assunto, string $corpoText
         "MIME-Version: 1.0\r\n";
 
     if ($anexo !== null) {
+        // Nome e tipo do anexo entram em cabecalhos MIME: remove CR/LF e aspas
+        // duplas para nao permitir injecao de cabecalho/corpo (mesmo cuidado ja
+        // aplicado ao nome do remetente). Hoje o unico chamador passa valores
+        // fixos, mas isso protege contra regressao se um dia derivarem de entrada.
+        $anexoNome = (string) preg_replace('/[\r\n"]/', '', (string) $anexo['nome']);
+        $anexoTipo = (string) preg_replace('/[\r\n"]/', '', (string) $anexo['tipo']);
         $fronteira = 'gdt_' . bin2hex(random_bytes(12));
         $cabecalhos .= "Content-Type: multipart/mixed; boundary=\"{$fronteira}\"\r\n\r\n";
         $corpo = "--{$fronteira}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n" .
             $limparPontoInicial($corpoTexto) . "\r\n\r\n";
-        $corpo .= "--{$fronteira}\r\nContent-Type: {$anexo['tipo']}; name=\"{$anexo['nome']}\"\r\n" .
+        $corpo .= "--{$fronteira}\r\nContent-Type: {$anexoTipo}; name=\"{$anexoNome}\"\r\n" .
             "Content-Transfer-Encoding: base64\r\n" .
-            "Content-Disposition: attachment; filename=\"{$anexo['nome']}\"\r\n\r\n";
+            "Content-Disposition: attachment; filename=\"{$anexoNome}\"\r\n\r\n";
         $corpo .= chunk_split(base64_encode((string) $anexo['conteudo']));
         $corpo .= "--{$fronteira}--\r\n";
     } else {

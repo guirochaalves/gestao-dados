@@ -140,8 +140,12 @@ if (in_array($primeiroSegmento, ['css', 'js', 'img'], true)) {
     $caminhoReal = realpath(__DIR__ . $uriPath);
 
     // Confere que o arquivo resolvido continua DENTRO da pasta do projeto
-    // (protege contra "../../etc/passwd" e afins).
-    if ($caminhoReal !== false && $raiz !== false && str_starts_with($caminhoReal, $raiz) && is_file($caminhoReal)) {
+    // (protege contra "../../etc/passwd" e afins). Compara contra a raiz JA COM
+    // o separador final, para uma pasta irma de nome parecido (ex.: um
+    // "/projeto-x" ao lado de "/projeto") nao passar pela verificacao por
+    // prefixo.
+    $raizComBarra = $raiz === false ? false : rtrim($raiz, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+    if ($caminhoReal !== false && $raizComBarra !== false && str_starts_with($caminhoReal, $raizComBarra) && is_file($caminhoReal)) {
         $mimePorExtensao = [
             'css' => 'text/css; charset=utf-8',
             'js' => 'application/javascript; charset=utf-8',
