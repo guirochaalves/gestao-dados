@@ -1,6 +1,8 @@
 # Portal de Gestão de Dados
 
-Portal web para gerenciar acessos, mudanças, política de backup, testes de restore, dicionário de dados, integrações de sistemas e jobs e rotinas agendadas, com uma seção de Relatórios pra exportar tudo. Backend em **PHP puro — sem framework, sem Composer, sem nenhuma dependência externa** — e dados armazenados em banco de dados.
+Portal web para gerenciar um cadastro central de bancos de dados, acessos, mudanças, política de backup, testes de restore, dicionário de dados, integrações de sistemas e jobs e rotinas agendadas, com uma seção de Relatórios pra exportar tudo. Backend em **PHP puro — sem framework, sem Composer, sem nenhuma dependência externa** — e dados armazenados em banco de dados.
+
+O módulo **Bancos** é o cadastro central: cada banco é registrado uma vez (com hostname, motor, ambiente, endereços IPv4/IPv6 e portas) e reaproveitado nos demais módulos — em Acessos, Backup, Restore, Dicionário e Jobs você seleciona o banco em vez de redigitar servidor e nome, e o hostname é preenchido sozinho. Um banco é único pelo par hostname + nome.
 
 O projeto é **white-label / instalável**: não tem mais nome ou marca fixa no código. Quem instala escolhe o motor de banco, o título do projeto e o usuário administrador através de um assistente de instalação (`/setup`) — igual instalador de WordPress/phpMyAdmin. Nada disso fica "hardcoded".
 
@@ -75,7 +77,14 @@ Esse fluxo é pensado pra quando o projeto é **compartilhado/distribuído**: ca
 
 ## 4. Primeiro acesso
 
-Depois de instalar, entre com o login e a senha de administrador que você definiu no `/setup`. Como administrador você pode criar outros usuários (aba "Usuários", antiga "Usuários do Portal") com papel `admin` (gerencia tudo, inclusive outros usuários) ou `leitura` (usa o portal mas não cria/remove contas).
+Depois de instalar, entre com o login e a senha de administrador que você definiu no `/setup`. Como administrador você pode criar outros usuários (aba "Usuários") e definir o papel de cada um:
+
+- `leitura` — consulta os módulos liberados para a conta.
+- `escrita` — consulta e mantém registros dos módulos liberados.
+- `admin` — tudo do escrita, mais usuários, listas (Cadastro) e configuração.
+- `master` — tudo do admin, mais a trilha de auditoria e ações sobre outro master.
+
+Cada conta também tem uma lista de módulos liberados: o papel diz o que a pessoa pode fazer; a lista diz onde.
 
 ## 5. O que muda em relação ao arquivo HTML original
 
@@ -86,6 +95,7 @@ Depois de instalar, entre com o login e a senha de administrador que você defin
 - Os nomes de alguns campos internos mudaram para bater com o banco: o "ID" da aba Mudanças é o campo `codigo`; em Dicionário de dados, "Schema" é `schema_nome` e "Permite nulo?" é `permite_nulo`. Isso não muda nada na tela, só é bom saber se algum dia for consultar o banco direto via SQL.
 - O backend não usa nenhuma biblioteca/framework — login (JWT) e senha (bcrypt) são feitos só com funções nativas do PHP, pra manter o projeto o mais simples possível de entender e manter.
 - Não existe mais usuário administrador padrão criado automaticamente — quem instala escolhe login e senha do admin no `/setup`.
+- A documentação (manual de uso, manual da API e diagrama/dicionário do banco) fica em `docs/`, em português e inglês, e também pode ser baixada de dentro do portal na aba "Documentação". Os PDFs são gerados a partir do código, então acompanham as mudanças da ferramenta.
 
 ## 6. Dúvidas comuns
 
