@@ -867,3 +867,21 @@ body,button,input,select,textarea{font-family:var(--sans)}
 .nav-item svg { color: var(--accent); }
 .nav-item.active svg { color: var(--side-active-ink); }
 .view-ico svg { color: var(--accent); }
+
+
+/* --- Barra de rolagem personalizada -------------------------------------
+   Fina e arredondada, no lugar do cinza padrao do sistema. O indicador usa
+   --border-2 (neutro do tema) e fica na cor --accent ao passar o mouse, entao
+   acompanha claro/escuro e o "Tema de cores". Firefox usa as duas primeiras
+   linhas; Chrome/Edge/Safari usam os pseudo-elementos ::-webkit-scrollbar. */
+* { scrollbar-width: thin; scrollbar-color: var(--border-2) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* Na barra lateral o fundo e mais escuro nos temas Suave/Grafite: o indicador
+   usa um branco translucido para nao sumir. */
+.side::-webkit-scrollbar-thumb { background: var(--side-border); }
+.side { scrollbar-color: var(--side-border) transparent; }
