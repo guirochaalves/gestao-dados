@@ -857,3 +857,13 @@ body,button,input,select,textarea{font-family:var(--sans)}
   --side-active-bg:#C0392B; --side-active-ink:#FFFFFF;
   --side-foot-hover-bg:rgba(229,115,115,.28); --side-foot-hover-ink:#FFFFFF;
 }
+
+
+/* --- Icones duotone tingidos pelo tema (menu lateral + icone da secao) -----
+   O traco usa currentColor = --accent, e o preenchimento interno de cada icone
+   (fill="currentColor" fill-opacity no index.php) vem da mesma cor. Assim o
+   duotone acompanha o "Tema de cores" sem um icone por cor. O item ativo volta
+   ao branco (--side-active-ink) para contrastar com o fundo colorido. */
+.nav-item svg { color: var(--accent); }
+.nav-item.active svg { color: var(--side-active-ink); }
+.view-ico svg { color: var(--accent); }
