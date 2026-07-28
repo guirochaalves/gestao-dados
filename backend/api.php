@@ -1087,13 +1087,20 @@ function despachar(string $metodo, string $caminho): void
         $modulosTexto = implode(',', $modulosValidos);
 
         $agora = date('Y-m-d H:i:s');
+        $loginRede    = trim((string) ($body['login_rede'] ?? ''));
+        $departamento = trim((string) ($body['departamento'] ?? ''));
+        $funcao       = trim((string) ($body['funcao'] ?? ''));
+
         $colunas = implode(', ', array_map('quoteIdent', [
-            'username', 'nome_completo', 'email', 'role', 'password_hash', 'modulos_permitidos', 'must_change_password', 'criado_em', 'atualizado_em',
+            'username', 'nome_completo', 'email', 'login_rede', 'departamento', 'funcao', 'role', 'password_hash', 'modulos_permitidos', 'must_change_password', 'criado_em', 'atualizado_em',
         ]));
         $valores = [
             $username,
             $body['nome_completo'] ?? null,
             $email !== '' ? $email : null,
+            $loginRede !== '' ? $loginRede : null,
+            $departamento !== '' ? $departamento : null,
+            $funcao !== '' ? $funcao : null,
             $role,
             hashPassword($password),
             $modulosTexto,
@@ -1101,7 +1108,7 @@ function despachar(string $metodo, string $caminho): void
             $agora,
             $agora,
         ];
-        $sql = 'INSERT INTO ' . quoteIdent(tableName('usuarios')) . " ({$colunas}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = 'INSERT INTO ' . quoteIdent(tableName('usuarios')) . " ({$colunas}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         if (dbDriver() === 'pgsql') {
             $sql .= ' RETURNING ' . quoteIdent('id');
@@ -1178,6 +1185,12 @@ function despachar(string $metodo, string $caminho): void
         if (array_key_exists('ativo', $body)) {
             $sets[] = quoteIdent('ativo') . ' = ?';
             $vals[] = (int) ($body['ativo'] ?? 1);
+        }
+        foreach (['login_rede', 'departamento', 'funcao'] as $campoOrg) {
+            if (array_key_exists($campoOrg, $body)) {
+                $sets[] = quoteIdent($campoOrg) . ' = ?';
+                $vals[] = trim((string) ($body[$campoOrg] ?? '')) ?: null;
+            }
         }
         if (array_key_exists('password', $body) && (string) ($body['password'] ?? '') !== '') {
             $novaSenha = (string) $body['password'];

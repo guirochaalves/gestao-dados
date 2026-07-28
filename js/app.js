@@ -544,6 +544,7 @@ const I18N = {
     'Host / endereço': 'Host / address',
     'Porta': 'Port',
     'Ambiente': 'Environment',
+    'Login de rede': 'Network login', 'Departamento': 'Department', 'Função': 'Role / position',
     'Cancelar': 'Cancel', 'Salvar registro': 'Save record', 'Novo registro': 'New record', 'Editar': 'Edit',
     'Salvar nova senha': 'Save new password', 'Senha atual': 'Current password', 'Nova senha': 'New password',
     'Novo usuário': 'New user', 'Login': 'Login', 'Nome completo': 'Full name',
@@ -2184,6 +2185,9 @@ const USUARIOS_COLS = [
   { k: 'username', l: 'Login' },
   { k: 'email', l: 'E-mail' },
   { k: 'nome_completo', l: 'Nome' },
+  { k: 'login_rede', l: 'Login de rede' },
+  { k: 'departamento', l: 'Departamento' },
+  { k: 'funcao', l: 'Função' },
   { k: 'role', l: 'Papel' },
   { k: 'criado_em', l: 'Criado em' },
 ];
@@ -2306,6 +2310,9 @@ function openUserModal(u) {
   $('userLogin').style.opacity = u ? '0.6' : '';
   $('userNome').value = u ? (u.nome_completo || '') : '';
   $('userEmail').value = u ? (u.email || '') : '';
+  $('userLoginRede').value = u ? (u.login_rede || '') : '';
+  $('userDepartamento').value = u ? (u.departamento || '') : '';
+  $('userFuncao').value = u ? (u.funcao || '') : '';
   $('userSenha').value = '';
   $('userSenhaHint').textContent = u ? tr('Deixe em branco para manter a senha atual.') : tr('Mínimo 8 caracteres, com letra e número.');
   $('userAtivoWrap').style.display = u ? '' : 'none';
@@ -2326,7 +2333,7 @@ function openUserModal(u) {
   }
   $('userOverlay').classList.add('show');
 }
-function closeUserModal() { $('userOverlay').classList.remove('show'); userEditId = null; $('userLogin').value = ''; $('userLogin').readOnly = false; $('userLogin').style.opacity = ''; $('userNome').value = ''; $('userEmail').value = ''; $('userSenha').value = ''; $('userRoleSel').value = 'leitura'; $('userAtivoWrap').style.display = 'none'; $('userRoleWrap').style.display = ''; $('userSave').textContent = tr('Criar usuário'); }
+function closeUserModal() { $('userOverlay').classList.remove('show'); userEditId = null; $('userLogin').value = ''; $('userLogin').readOnly = false; $('userLogin').style.opacity = ''; $('userNome').value = ''; $('userEmail').value = ''; $('userLoginRede').value = ''; $('userDepartamento').value = ''; $('userFuncao').value = ''; $('userSenha').value = ''; $('userRoleSel').value = 'leitura'; $('userAtivoWrap').style.display = 'none'; $('userRoleWrap').style.display = ''; $('userSave').textContent = tr('Criar usuário'); }
 $('userClose').addEventListener('click', closeUserModal);
 $('userCancel').addEventListener('click', closeUserModal);
 $('userRoleSel').addEventListener('change', (e) => toggleModulosWrap('userModulosWrap', e.target.value));
@@ -2338,6 +2345,10 @@ $('userSave').addEventListener('click', async () => {
       const email = $('userEmail').value.trim();
       if (nome) body.nome_completo = nome;
       if (email) body.email = email;
+      // Enviados sempre (com array_key_exists no backend), para permitir limpar.
+      body.login_rede = $('userLoginRede').value.trim();
+      body.departamento = $('userDepartamento').value.trim();
+      body.funcao = $('userFuncao').value.trim();
       body.ativo = Number($('userAtivo').value);
       if ($('userSenha').value) body.password = $('userSenha').value;
       await api.put('/usuarios/' + userEditId, body);
@@ -2347,6 +2358,9 @@ $('userSave').addEventListener('click', async () => {
         username: $('userLogin').value.trim(),
         nome_completo: $('userNome').value.trim(),
         email: $('userEmail').value.trim(),
+        login_rede: $('userLoginRede').value.trim(),
+        departamento: $('userDepartamento').value.trim(),
+        funcao: $('userFuncao').value.trim(),
         password: $('userSenha').value,
         role: $('userRoleSel').value,
         modulos: readModulosChecklist('userModulosChk'),

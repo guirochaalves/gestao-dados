@@ -397,6 +397,9 @@ header('Content-Type: text/html; charset=utf-8');
       <div class="fld"><label data-i18n>Login</label><input type="text" id="userLogin"></div>
       <div class="fld"><label data-i18n>Nome completo</label><input type="text" id="userNome"></div>
       <div class="fld"><label data-i18n>E-mail</label><input type="email" id="userEmail"></div>
+      <div class="fld"><label data-i18n>Login de rede</label><input type="text" id="userLoginRede" placeholder="DOMINIO\\usuario"></div>
+      <div class="fld"><label data-i18n>Departamento</label><input type="text" id="userDepartamento"></div>
+      <div class="fld"><label data-i18n>Função</label><input type="text" id="userFuncao"></div>
       <div class="fld">
         <label data-i18n>Senha</label>
         <input type="password" id="userSenha" placeholder="">

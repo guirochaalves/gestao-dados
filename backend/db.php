@@ -837,6 +837,11 @@ function migrate(): void
     // cadastrados.
     ensureColumn($pdo, tableName('usuarios'), 'modulos_permitidos', $txt);
     ensureColumn($pdo, tableName('usuarios'), 'email', 'VARCHAR(150)');
+    // Dados organizacionais do usuario (informativos): login de rede (AD/dominio),
+    // departamento e funcao. Separados do 'username' (login do portal).
+    ensureColumn($pdo, tableName('usuarios'), 'login_rede', 'VARCHAR(150)');
+    ensureColumn($pdo, tableName('usuarios'), 'departamento', 'VARCHAR(120)');
+    ensureColumn($pdo, tableName('usuarios'), 'funcao', 'VARCHAR(120)');
     ensureColumn($pdo, tableName('usuarios'), 'mfa_ativo', 'INT NOT NULL DEFAULT 0');
     ensureColumn($pdo, tableName('usuarios'), 'cor_tema', "VARCHAR(20) NOT NULL DEFAULT 'padrao'");
     ensureColumn($pdo, tableName('usuarios'), 'estilo_side', "VARCHAR(20) NOT NULL DEFAULT 'claro'");
