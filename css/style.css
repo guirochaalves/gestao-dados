@@ -913,3 +913,9 @@ tr.row-sem-acesso > td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
 .role-info-ico { width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; }
 .role-info-ico svg { width: 22px; height: 22px; }
 .role-info-card .role-info-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin-top: 2px; }
+
+/* Barra de busca da tela de Roles (por usuario e por artefato liberado). */
+.roles-search { position: relative; margin-bottom: 16px; }
+.roles-search-ico { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--muted); pointer-events: none; }
+.roles-search input { width: 100%; border: 1px solid var(--border-2); border-radius: var(--r-sm); padding: 10px 12px 10px 38px; font-family: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface); }
+.roles-search input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }

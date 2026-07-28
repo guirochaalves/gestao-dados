@@ -664,6 +664,7 @@ const I18N = {
     'Sequência': 'Sequence', 'Nome do objeto': 'Object name',
     'Alterações em produção com aprovação e rollback': 'Production changes with approval and rollback',
     'O que cada papel pode fazer': 'What each role can do', 'Master': 'Master',
+    'Buscar por usuário ou artefato liberado...': 'Search by user or allowed artifact...', 'Nenhum usuário encontrado': 'No user found',
     'Visualiza os artefatos liberados, sem criar, editar ou excluir registros.': 'Views the allowed records, without creating, editing or deleting them.',
     'Cria, edita e exclui registros nos artefatos liberados para o usuário.': 'Creates, edits and deletes records in the records allowed for the user.',
     'Acesso total: todos os artefatos, usuários, cadastro, e-mail e configurações do projeto.': 'Full access: all records, users, registry, email and project settings.',
@@ -2277,15 +2278,43 @@ async function renderRoles() {
   let users;
   try { users = await api.get('/usuarios'); cache.usuarios = users; } catch (e) { $('content').innerHTML = `<div class="card"><div class="empty"><p>${esc(e.message)}</p></div></div>`; return; }
   if (!users.length) { $('content').innerHTML = `<div class="card"><div class="empty">${I.shield}<p>${esc(tr('Nenhum usuário cadastrado'))}</p></div></div>`; return; }
+  $('content').innerHTML = `<div class="roles-search"><svg class="roles-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg><input type="text" id="rolesSearch" placeholder="${esc(tr('Buscar por usuário ou artefato liberado...'))}" data-oninput="filtrarRoles"></div><div id="rolesTable">${rolesTableHtml(users, '')}</div>`;
+}
+
+// Filtra por login/nome, papel e pelos artefatos liberados. Admin/master casam
+// com qualquer artefato, ja que tem acesso a todos.
+function rolesFiltrar(users, q) {
+  q = String(q || '').trim().toLowerCase();
+  if (!q) return users;
+  return users.filter((u) => {
+    const nome = String(u.nome_completo || '').toLowerCase();
+    const login = String(u.username || '').toLowerCase();
+    const roleLabel = tr(ROLE_LABEL[u.role] || '').toLowerCase();
+    const acessoTotal = u.role === 'admin' || u.role === 'master';
+    const modsLabels = acessoTotal
+      ? [tr('Todos').toLowerCase(), ...MODULOS_KEYS.map((m) => tr(MODULO_LABELS[m] || m).toLowerCase())]
+      : String(u.modulos_permitidos || '').split(',').map((m) => m.trim()).filter(Boolean).map((m) => tr(MODULO_LABELS[m] || m).toLowerCase());
+    return nome.includes(q) || login.includes(q) || roleLabel.includes(q) || modsLabels.some((m) => m.includes(q));
+  });
+}
+
+function rolesTableHtml(users, q) {
+  const filtrados = rolesFiltrar(users, q);
+  if (!filtrados.length) return `<div class="card"><div class="empty">${I.shield}<p>${esc(tr('Nenhum usuário encontrado'))}</p></div></div>`;
   let h = `<div class="card"><div class="tbl-wrap"><table><thead><tr><th>${esc(tr('Login'))}</th><th>${esc(tr('Nome'))}</th><th>${esc(tr('Papel'))}</th><th>${esc(tr('Artefatos permitidos'))}</th><th style="text-align:right">${esc(tr('Ações'))}</th></tr></thead><tbody>`;
-  users.forEach((u) => {
-    const mods = String(u.modulos_permitidos || '').split(',').map((s) => s.trim()).filter(Boolean);
-    const modsTxt = u.role === 'admin' ? tr('Todos') : (mods.length ? mods.map((m) => tr(MODULO_LABELS[m] || m)).join(', ') : '—');
+  filtrados.forEach((u) => {
+    const mods = String(u.modulos_permitidos || '').split(',').map((x) => x.trim()).filter(Boolean);
+    const modsTxt = (u.role === 'admin' || u.role === 'master') ? tr('Todos') : (mods.length ? mods.map((m) => tr(MODULO_LABELS[m] || m)).join(', ') : '—');
     h += `<tr><td class="mono">${esc(u.username)}</td><td>${esc(u.nome_completo || '—')}</td><td><span class="pill ${ROLE_PILL[u.role] || 'p-gray'}">${esc(tr(ROLE_LABEL[u.role] || 'Leitura'))}</span></td><td class="trunc" title="${esc(modsTxt)}">${esc(modsTxt)}</td>
       <td><div class="row-act" style="justify-content:flex-end"><button class="icon-btn" data-act="openRolesModal" data-id="${u.id}" title="${esc(tr('Editar permissões'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /></svg></button></div></td></tr>`;
   });
   h += '</tbody></table></div></div>';
-  $('content').innerHTML = h;
+  return h;
+}
+
+function filtrarRoles(input) {
+  const el = $('rolesTable');
+  if (el) el.innerHTML = rolesTableHtml(cache.usuarios || [], input.value);
 }
 
 async function delUsuario(id) {
@@ -4126,6 +4155,7 @@ const INPUT_ACTIONS = {
   syncAgendas,
   perfilFotoEnviar,
   userFotoEnviar,
+  filtrarRoles,
 };
 
 document.addEventListener('click', (e) => {
