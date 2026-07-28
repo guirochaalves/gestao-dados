@@ -885,3 +885,9 @@ body,button,input,select,textarea{font-family:var(--sans)}
    usa um branco translucido para nao sumir. */
 .side::-webkit-scrollbar-thumb { background: var(--side-border); }
 .side { scrollbar-color: var(--side-border) transparent; }
+
+
+/* Papel + Artefatos permitidos ficam agrupados em #userRoleWrap (um so item do
+   grid do modal), entao nao herdam o gap entre campos -- damos aqui, para o
+   rotulo "Artefatos permitidos" nao colar no seletor de papel. */
+#userRoleWrap { display: flex; flex-direction: column; gap: 14px; }
