@@ -545,6 +545,7 @@ const I18N = {
     'Porta': 'Port',
     'Ambiente': 'Environment',
     'Login de rede': 'Network login', 'Departamento': 'Department', 'Função': 'Role / position',
+    'Nome completo': 'Full name', 'CSV precisa ter a coluna "Login" (veja o modelo)': 'CSV must have the "Login" column (see the template)',
     'Cancelar': 'Cancel', 'Salvar registro': 'Save record', 'Novo registro': 'New record', 'Editar': 'Edit',
     'Salvar nova senha': 'Save new password', 'Senha atual': 'Current password', 'Nova senha': 'New password',
     'Novo usuário': 'New user', 'Login': 'Login', 'Nome completo': 'Full name',
@@ -2226,6 +2227,8 @@ function usuariosTableHtml(users) {
       <button type="button" class="dd-opt${!st.sortCol ? ' sel' : ''}" data-act="tblSetSort" data-key="usuarios" data-col="">${esc(tr('Padrão'))}</button>
       ${cols.map((f) => `<button type="button" class="dd-opt${st.sortCol === f.k ? ' sel' : ''}" data-act="tblSetSort" data-key="usuarios" data-col="${f.k}">${esc(tr(f.l))}${st.sortCol === f.k ? (st.sortDir === 'asc' ? ' ↑' : ' ↓') : ''}</button>`).join('')}
     </div></div>`;
+    h += `<button type="button" class="btn btn-ghost icon-only tt-wrap" data-act="usuariosTemplateCsv" data-tt="${esc(tr('Baixe o modelo antes de importar'))}" aria-label="${esc(tr('Baixar modelo de importação (CSV)'))}">${I.help}</button>`;
+    h += `<button type="button" class="btn btn-ghost" data-act="usuariosImportarClick">${I.upload}${esc(tr('Importar'))}</button>`;
     h += '</div></div>';
   }
   h += '<div class="tbl-wrap"><table><thead><tr>';
@@ -2907,6 +2910,87 @@ async function dicImportarArquivo(file) {
   fecharImportProgress();
 
   if (ok) await navTo(view);
+  abrirImportResult(ok, erros);
+}
+
+// ---------------------------------------------------------------------------
+// Importacao em lote de Usuarios -- mesmo padrao do Dicionario (CSV ";" com
+// cabecalho). Cada linha vira um usuario com papel Leitura e NENHUM modulo
+// liberado, ou seja, sem acesso a nada ate um administrador conceder. A senha
+// vai em branco: o backend gera uma temporaria, marca troca no primeiro acesso
+// e, se o SMTP estiver configurado e houver e-mail, envia as credenciais.
+// ---------------------------------------------------------------------------
+const USUARIOS_IMPORT_COLS = [
+  { k: 'username', l: 'Login' },
+  { k: 'nome_completo', l: 'Nome completo' },
+  { k: 'email', l: 'E-mail' },
+  { k: 'login_rede', l: 'Login de rede' },
+  { k: 'departamento', l: 'Departamento' },
+  { k: 'funcao', l: 'Função' },
+];
+
+function usuariosTemplateCsv() {
+  const exemplo = {
+    username: 'bdias', nome_completo: 'Bruno Dias', email: 'bruno.dias@empresa.com',
+    login_rede: 'CORP\\bdias', departamento: 'TI - Banco de Dados', funcao: 'DBA Pleno',
+  };
+  const head = USUARIOS_IMPORT_COLS.map((f) => tr(f.l)).join(';');
+  const linha = USUARIOS_IMPORT_COLS.map((f) => exemplo[f.k] || '').join(';');
+  const csv = '\ufeff' + [head, linha].join('\n');
+  dl(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'modelo_usuarios.csv');
+  toast('Modelo CSV baixado');
+}
+
+function usuariosImportarClick() {
+  let inp = $('usuImportInput');
+  if (!inp) {
+    inp = document.createElement('input');
+    inp.type = 'file'; inp.id = 'usuImportInput'; inp.accept = '.csv'; inp.hidden = true;
+    document.body.appendChild(inp);
+    inp.addEventListener('change', () => { if (inp.files[0]) usuariosImportarArquivo(inp.files[0]); inp.value = ''; });
+  }
+  inp.click();
+}
+
+async function usuariosImportarArquivo(file) {
+  const texto = await file.text();
+  const linhas = parseCsvSimples(texto);
+  if (linhas.length < 2) { toast('Arquivo vazio ou sem linhas de dados', true); return; }
+
+  const cols = USUARIOS_IMPORT_COLS;
+  const head = linhas[0].map(normalizarHead);
+  const idx = {};
+  cols.forEach((f) => {
+    let i = head.indexOf(normalizarHead(f.k));
+    if (i === -1) i = head.indexOf(normalizarHead(f.l));
+    if (i === -1) i = head.indexOf(normalizarHead(tr(f.l)));
+    if (i !== -1) idx[f.k] = i;
+  });
+  if (idx.username === undefined) {
+    toast('CSV precisa ter a coluna "Login" (veja o modelo)', true);
+    return;
+  }
+
+  const total = linhas.length - 1;
+  abrirImportProgress(total);
+
+  let ok = 0; const erros = [];
+  for (let li = 1; li < linhas.length; li++) {
+    const campos = linhas[li];
+    if (campos.every((c) => c === '')) { atualizarImportProgress(li, total); continue; }
+    // Papel Leitura e sem modulos: entra sem acesso a nada. Senha em branco:
+    // o backend gera a temporaria.
+    const rec = { role: 'leitura', modulos: [], password: '' };
+    cols.forEach((f) => { rec[f.k] = idx[f.k] !== undefined ? (campos[idx[f.k]] || '') : ''; });
+
+    if (!rec.username) { erros.push(`Linha ${li + 1}: "Login" é obrigatório`); atualizarImportProgress(li, total); continue; }
+
+    try { await api.post('/usuarios', rec); ok++; } catch (e) { erros.push(`Linha ${li + 1} (${rec.username}): ${e.message}`); }
+    atualizarImportProgress(li, total);
+  }
+
+  fecharImportProgress();
+  if (ok) await navTo('usuarios');
   abrirImportResult(ok, erros);
 }
 
@@ -3940,6 +4024,8 @@ const ACTIONS = {
   // Dicionario de dados -- importacao em lote (CSV)
   dicTemplateCsv,
   dicImportarClick,
+  usuariosTemplateCsv,
+  usuariosImportarClick,
   // tagselect (campo "Nivel de acesso" e similares)
   bancoRefChange,
   openTagDropdown,
