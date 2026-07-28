@@ -547,6 +547,8 @@ const I18N = {
     'Login de rede': 'Network login', 'Departamento': 'Department', 'Função': 'Role / position',
     'Nome completo': 'Full name', 'CSV precisa ter a coluna "Login" (veja o modelo)': 'CSV must have the "Login" column (see the template)',
     'sem acesso': 'no access', 'Sem nenhum módulo liberado': 'No module granted',
+    'Acesso total a todos os módulos': 'Full access to all modules',
+    'Acesso total, incluindo a trilha de auditoria': 'Full access, including the audit trail',
     'Cancelar': 'Cancel', 'Salvar registro': 'Save record', 'Novo registro': 'New record', 'Editar': 'Edit',
     'Salvar nova senha': 'Save new password', 'Senha atual': 'Current password', 'Nova senha': 'New password',
     'Novo usuário': 'New user', 'Login': 'Login', 'Nome completo': 'Full name',
@@ -2172,8 +2174,12 @@ const ROLE_DESC = {
 };
 
 function roleInfoBoxHtml() {
-  const rows = ['leitura', 'escrita', 'admin', 'master'].map((r) => `<div class="role-info-row"><span class="pill ${ROLE_PILL[r]}">${esc(tr(ROLE_LABEL[r]))}</span><span class="role-info-desc">${esc(tr(ROLE_DESC[r]))}</span></div>`).join('');
-  return `<div class="card role-info-box"><div class="role-info-h">${esc(tr('O que cada papel pode fazer'))}</div>${rows}</div>`;
+  const cards = ['leitura', 'escrita', 'admin', 'master'].map((r) => `<div class="role-info-card">
+      <div class="role-info-ico ${ROLE_PILL[r]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /></svg></div>
+      <span class="pill ${ROLE_PILL[r]}">${esc(tr(ROLE_LABEL[r]))}</span>
+      <div class="role-info-desc">${esc(tr(ROLE_DESC[r]))}</div>
+    </div>`).join('');
+  return `<div class="card role-info-box"><div class="role-info-h">${esc(tr('O que cada papel pode fazer'))}</div><div class="role-info-grid">${cards}</div></div>`;
 }
 
 async function renderUsuarios() {
@@ -2228,7 +2234,7 @@ function usuariosTableHtml(users) {
       <button type="button" class="dd-opt${!st.sortCol ? ' sel' : ''}" data-act="tblSetSort" data-key="usuarios" data-col="">${esc(tr('Padrão'))}</button>
       ${cols.map((f) => `<button type="button" class="dd-opt${st.sortCol === f.k ? ' sel' : ''}" data-act="tblSetSort" data-key="usuarios" data-col="${f.k}">${esc(tr(f.l))}${st.sortCol === f.k ? (st.sortDir === 'asc' ? ' ↑' : ' ↓') : ''}</button>`).join('')}
     </div></div>`;
-    h += `<button type="button" class="btn btn-ghost icon-only tt-wrap" data-act="usuariosTemplateCsv" data-tt="${esc(tr('Baixe o modelo antes de importar'))}" aria-label="${esc(tr('Baixar modelo de importação (CSV)'))}">${I.help}</button>`;
+    h += `<button type="button" class="btn btn-ghost icon-only tt-wrap tt-down" data-act="usuariosTemplateCsv" data-tt="${esc(tr('Baixe o modelo antes de importar'))}" aria-label="${esc(tr('Baixar modelo de importação (CSV)'))}">${I.help}</button>`;
     h += `<button type="button" class="btn btn-ghost" data-act="usuariosImportarClick">${I.upload}${esc(tr('Importar'))}</button>`;
     h += '</div></div>';
   }
@@ -2280,7 +2286,6 @@ async function renderRoles() {
   });
   h += '</tbody></table></div></div>';
   $('content').innerHTML = h;
-  pintarFotosDaTabela(pageRows);   // as fotos chegam depois, sem travar a tabela
 }
 
 async function delUsuario(id) {
