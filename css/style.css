@@ -891,3 +891,9 @@ body,button,input,select,textarea{font-family:var(--sans)}
    grid do modal), entao nao herdam o gap entre campos -- damos aqui, para o
    rotulo "Artefatos permitidos" nao colar no seletor de papel. */
 #userRoleWrap { display: flex; flex-direction: column; gap: 14px; }
+
+
+/* Usuario sem nenhum modulo liberado (papel Leitura/Escrita) -- tipico de quem
+   entrou por importacao e aguarda o admin conceder acesso. Faixa amber discreta
+   a esquerda, so para saltar aos olhos na lista. */
+tr.row-sem-acesso > td:first-child { box-shadow: inset 3px 0 0 var(--amber); }

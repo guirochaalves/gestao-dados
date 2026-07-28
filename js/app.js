@@ -546,6 +546,7 @@ const I18N = {
     'Ambiente': 'Environment',
     'Login de rede': 'Network login', 'Departamento': 'Department', 'Função': 'Role / position',
     'Nome completo': 'Full name', 'CSV precisa ter a coluna "Login" (veja o modelo)': 'CSV must have the "Login" column (see the template)',
+    'sem acesso': 'no access', 'Sem nenhum módulo liberado': 'No module granted',
     'Cancelar': 'Cancel', 'Salvar registro': 'Save record', 'Novo registro': 'New record', 'Editar': 'Edit',
     'Salvar nova senha': 'Save new password', 'Senha atual': 'Current password', 'Nova senha': 'New password',
     'Novo usuário': 'New user', 'Login': 'Login', 'Nome completo': 'Full name',
@@ -2237,12 +2238,20 @@ function usuariosTableHtml(users) {
   h += `<th style="text-align:right">${esc(tr('Ações'))}</th></tr></thead><tbody>`;
   if (!pageRows.length) h += `<tr><td colspan="${cols.length + 2}" style="text-align:center;color:var(--muted);padding:26px">${esc(tr('Nenhum registro encontrado'))}</td></tr>`;
   pageRows.forEach((u) => {
-    h += `<tr class="${st.sel.has(String(u.id)) ? 'row-sel' : ''}">`;
+    // "Sem acesso": papel Leitura/Escrita sem nenhum modulo liberado -- caso
+    // tipico de quem entrou por importacao e ainda aguarda um admin conceder
+    // acesso. Admin/master tem acesso total e nunca recebem a marca.
+    const semModulos = !String(u.modulos_permitidos || '').trim();
+    const semAcesso = (u.role === 'leitura' || u.role === 'escrita') && semModulos;
+    h += `<tr class="${st.sel.has(String(u.id)) ? 'row-sel' : ''}${semAcesso ? ' row-sem-acesso' : ''}">`;
     h += `<td class="td-check"><input type="checkbox" data-act="tblToggleRow" data-key="usuarios" data-id="${u.id}" ${st.sel.has(String(u.id)) ? 'checked' : ''}></td>`;
     h += `<td class="mono" data-col="username" style="${st.hidden.has('username') ? 'display:none' : ''}">${esc(u.username)}</td>`;
     h += `<td data-col="email" style="${st.hidden.has('email') ? 'display:none' : ''}">${esc(u.email || '—')}</td>`;
     h += `<td data-col="nome_completo" style="${st.hidden.has('nome_completo') ? 'display:none' : ''}">${avatarCellHtml(u.nome_completo || u.username, u.id)}</td>`;
-    h += `<td data-col="role" style="${st.hidden.has('role') ? 'display:none' : ''}"><span class="pill ${ROLE_PILL[u.role] || 'p-gray'}">${esc(tr(ROLE_LABEL[u.role] || 'Leitura'))}</span></td>`;
+    h += `<td class="mono" data-col="login_rede" style="${st.hidden.has('login_rede') ? 'display:none' : ''}">${esc(u.login_rede || '—')}</td>`;
+    h += `<td data-col="departamento" style="${st.hidden.has('departamento') ? 'display:none' : ''}">${esc(u.departamento || '—')}</td>`;
+    h += `<td data-col="funcao" style="${st.hidden.has('funcao') ? 'display:none' : ''}">${esc(u.funcao || '—')}</td>`;
+    h += `<td data-col="role" style="${st.hidden.has('role') ? 'display:none' : ''}"><span class="pill ${ROLE_PILL[u.role] || 'p-gray'}">${esc(tr(ROLE_LABEL[u.role] || 'Leitura'))}</span>${semAcesso ? `<span class="pill p-amber" style="margin-left:6px" title="${esc(tr('Sem nenhum módulo liberado'))}">${esc(tr('sem acesso'))}</span>` : ''}</td>`;
     h += `<td class="mono" data-col="criado_em" style="${st.hidden.has('criado_em') ? 'display:none' : ''}">${u.criado_em ? fmtDate(u.criado_em.slice(0, 10)) : '—'}</td>`;
     h += `<td><div class="row-act" style="justify-content:flex-end"><button class="icon-btn" data-act="openEditUsuario" data-id="${u.id}" title="${esc(tr('Editar'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /></svg></button><button class="icon-btn del" data-act="delUsuario" data-id="${u.id}" title="${esc(tr('Remover'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button></div></td></tr>`;
   });
