@@ -919,3 +919,11 @@ tr.row-sem-acesso > td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
 .roles-search-ico { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--muted); pointer-events: none; }
 .roles-search input { width: 100%; border: 1px solid var(--border-2); border-radius: var(--r-sm); padding: 10px 12px 10px 38px; font-family: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface); }
 .roles-search input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+
+/* No hover do nome (painel do usuario), o texto acompanha --side-hover-ink como
+   os botoes abaixo ja fazem -- senao o nome/role ficam lavados sobre o fundo
+   claro do hover. */
+.user-panel .user-chip:hover .nm { color: var(--side-hover-ink); }
+.user-panel .user-chip:hover .rl { color: var(--side-hover-ink); opacity: .72; }
+.user-panel .user-chip:hover .uc-chev { color: var(--side-hover-ink); opacity: .72; }

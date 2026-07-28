@@ -310,7 +310,7 @@ header('Content-Type: text/html; charset=utf-8');
     </nav>
     <div class="side-foot">
       <div class="user-panel">
-      <div class="user-chip" id="userChip" title="Editar meu perfil" data-i18n-title style="cursor:pointer">
+      <div class="user-chip" id="userChip" style="cursor:pointer">
         <div class="av js-user-av" id="userAvatar">?</div>
         <div class="info lbl">
           <div class="nm js-user-nm" id="userName">—</div>
@@ -318,8 +318,8 @@ header('Content-Type: text/html; charset=utf-8');
         </div>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="uc-chev lbl" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6l6 -6" /></svg>
       </div>
-      <button id="changePassBtn" class="up-act" title="Trocar senha" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" fill="currentColor" fill-opacity="0.2" /> <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /> <path d="M8 11v-4a4 4 0 1 1 8 0v4" /></svg><span class="lbl" data-i18n>Trocar senha</span></button>
-      <button id="logoutBtn" class="up-act" title="Sair" data-i18n-title><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /> <path d="M9 12h12l-3 -3" /> <path d="M18 15l3 -3" /></svg><span class="lbl" data-i18n>Sair</span></button>
+      <button id="changePassBtn" class="up-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" fill="currentColor" fill-opacity="0.2" /> <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /> <path d="M8 11v-4a4 4 0 1 1 8 0v4" /></svg><span class="lbl" data-i18n>Trocar senha</span></button>
+      <button id="logoutBtn" class="up-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /> <path d="M9 12h12l-3 -3" /> <path d="M18 15l3 -3" /></svg><span class="lbl" data-i18n>Sair</span></button>
       </div>
       <div id="dbInfo" class="db-info lbl" style="display:none" title=""></div>
     </div>
