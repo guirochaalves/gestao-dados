@@ -3159,8 +3159,7 @@ async function exportPdf(key, filtros) {
   const nomeProjeto = window.NOME_PROJETO || 'Portal de Dados';
   const titulo = tr(sch.title);
   const agora = new Date();
-  const geradoEm = r.dataCert ? fmtDate(String(r.dataCert).slice(0, 10)) : (fmtDate(agora.toISOString().slice(0, 10)) + ' ' + agora.toTimeString().slice(0, 5));
-  const execNome = r.executor || (currentUser.nome_completo || currentUser.username);
+  const geradoEm = fmtDate(agora.toISOString().slice(0, 10)) + ' ' + agora.toTimeString().slice(0, 5);
   let periodo = '';
   if (filtros && (filtros.inicio || filtros.fim)) {
     periodo = tr('Período') + ': ' + (filtros.inicio ? fmtDate(filtros.inicio) : '—') + ' ' + tr('até') + ' ' + (filtros.fim ? fmtDate(filtros.fim) : '—');
@@ -4106,7 +4105,8 @@ async function certGerarPdf(r) {
   const accent = hexToRgb(getComputedStyle(document.documentElement).getPropertyValue('--accent'));
   const nomeProjeto = window.NOME_PROJETO || 'Portal de Dados';
   const agora = new Date();
-  const geradoEm = fmtDate(agora.toISOString().slice(0, 10)) + ' ' + agora.toTimeString().slice(0, 5);
+  const geradoEm = r.dataCert ? fmtDate(String(r.dataCert).slice(0, 10)) : (fmtDate(agora.toISOString().slice(0, 10)) + ' ' + agora.toTimeString().slice(0, 5));
+  const execNome = r.executor || (currentUser.nome_completo || currentUser.username);
   const total = r.naoDoc.length + r.defasados.length;
   const logoPng = await obterLogoPdf();
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
