@@ -557,7 +557,7 @@ const I18N = {
     'Copiar': 'Copy',
     'Consulta copiada': 'Query copied',
     '2. Envie o CSV e cruze': '2. Upload the CSV and cross-check',
-    'Escolher CSV das permissões reais': 'Choose the real-permissions CSV',
+    'Escolher CSV das permissões reais': 'Choose the real-permissions CSV', 'Modelo CSV baixado': 'Template CSV downloaded', 'Baixar modelo (CSV)': 'Download template (CSV)', 'Modelo do CSV a enviar (usuário, permissão)': 'Template of the CSV to upload (user, permission)',
     'Selecione um banco.': 'Select a database.',
     'O CSV precisa ter as colunas de usuário e de permissão/papel.': 'The CSV must have the user and permission/role columns.',
     'Motor sem consulta pronta. Extraia as permissões (usuário, papel) e monte um CSV com essas duas colunas.': 'Engine without a ready query. Extract the permissions (user, role) and build a CSV with those two columns.',
@@ -3923,6 +3923,7 @@ async function renderCertificacao() {
     <div class="sec-h">${esc(tr('2. Envie o CSV e cruze'))}</div>
     <div class="email-cfg-actions" style="margin-top:0">
       <input type="file" id="certCsvInput" accept=".csv" hidden data-oninput="certArquivoEscolhido">
+      <button type="button" class="btn btn-ghost icon-only tt-wrap tt-down" data-act="certTemplateCsv" data-tt="${esc(tr('Modelo do CSV a enviar (usuário, permissão)'))}" aria-label="${esc(tr('Baixar modelo (CSV)'))}">${I.help}</button>
       <button type="button" class="btn btn-ghost" data-act="certEscolherCsv">${I.upload}${esc(tr('Escolher CSV das permissões reais'))}</button>
       <span id="certCsvNome" class="hint-inline"></span>
     </div>
@@ -3965,6 +3966,14 @@ function certCopiarQuery() {
   if (navigator.clipboard) navigator.clipboard.writeText(t).then(() => toast(tr('Consulta copiada')), () => {});
 }
 
+// Modelo do CSV que o usuario envia para o cruzamento: uma linha por par
+// (usuario, permissao). A coluna "tipo" e opcional -- so linhas ROLE entram.
+function certTemplateCsv() {
+  const csv = '\ufeff' + ['usuario;permissao;tipo', 'Maven;db_datareader;ROLE', 'Maven;db_datawriter;ROLE'].join('\n');
+  dl(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'modelo_certificacao.csv');
+  toast(tr('Modelo CSV baixado'));
+}
+
 function certEscolherCsv() { const i = $('certCsvInput'); if (i) i.click(); }
 
 async function certArquivoEscolhido(input) {
@@ -3997,9 +4006,18 @@ async function certArquivoEscolhido(input) {
   let acessos;
   try { acessos = await api.get('/acessos'); } catch (e) { toast(e.message, true); return; }
   const portal = new Set();
+  const bancoNome = certNorm(banco.nome);
+  const bancoSrv = certNorm(banco.servidor);
   acessos.forEach((a) => {
-    if (certNorm(a.servidor) !== certNorm(banco.servidor)) return;
-    if (banco.nome && !certNorm(a.objeto).includes(certNorm(banco.nome))) return;
+    // O banco (campo "objeto" em Acessos) e o identificador principal. Casa
+    // quando um contem o outro -- cobre acesso a objeto especifico do banco
+    // (ex.: "MAVEN_ANALYTICS.dbo.tabela") e o nome puro.
+    const obj = certNorm(a.objeto);
+    if (bancoNome && obj && !obj.includes(bancoNome) && !bancoNome.includes(obj)) return;
+    // Servidor so desempata quando os DOIS lados tem valor e diferem -- se um
+    // estiver vazio, nao exclui (evita perder acessos com servidor em branco).
+    const srv = certNorm(a.servidor);
+    if (srv && bancoSrv && srv !== bancoSrv) return;
     const u = certNorm(a.usuario);
     if (!u) return;
     String(a.nivel || '').split(',').forEach((niv) => { niv = certNorm(niv); if (niv) portal.add(u + '|' + niv); });
@@ -4599,6 +4617,7 @@ removeTag,
   // Certificacao de acessos
   certCopiarQuery,
   certMostrarQuery,
+  certTemplateCsv,
   certEscolherCsv,
   certGerarPdf,
   certSalvar,
