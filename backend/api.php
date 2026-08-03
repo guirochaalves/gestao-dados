@@ -1584,6 +1584,49 @@ function despachar(string $metodo, string $caminho): void
         }
     }
 
+    // ---- /certificacoes/email (envia o relatorio PDF por e-mail, admin) --
+    // O PDF e montado no navegador (jsPDF) e chega aqui em base64. O portal so
+    // valida, decodifica e anexa -- nao gera PDF no servidor.
+    if ($caminho === '/certificacoes/email' && $metodo === 'POST') {
+        $admin = exigirLogin();
+        exigirAdmin($admin);
+        $body = corpoRequisicao();
+        $para = trim((string) ($body['para'] ?? ''));
+        if ($para === '' || !filter_var($para, FILTER_VALIDATE_EMAIL)) {
+            responderErro(422, 'Informe um e-mail de destino valido.');
+        }
+        $b64 = (string) ($body['pdf'] ?? '');
+        $virgula = strpos($b64, ',');            // aceita "data:...;base64,XXXX"
+        if ($virgula !== false) {
+            $b64 = substr($b64, $virgula + 1);
+        }
+        if (strlen($b64) > 6_000_000) {          // ~4.5MB de PDF ja e bastante
+            responderErro(422, 'Anexo muito grande.');
+        }
+        $binario = base64_decode($b64, true);
+        if ($binario === false || substr($binario, 0, 4) !== '%PDF') {
+            responderErro(422, 'Anexo invalido (nao e um PDF).');
+        }
+        $cfgEmail = configEmail();
+        if ($cfgEmail === null) {
+            responderErro(400, 'Configure o servidor de e-mail em Administracao > E-mail antes de enviar.');
+        }
+        $banco = preg_replace('/[^A-Za-z0-9_.-]/', '_', (string) ($body['banco'] ?? 'certificacao'));
+        try {
+            smtpEnviar(
+                $cfgEmail,
+                $para,
+                'Certificacao de Acessos - ' . (string) ($body['banco'] ?? ''),
+                'Relatorio de certificacao de acessos em anexo, gerado pelo portal ' . projectTitle() . ' em ' . date('d/m/Y H:i') . '.',
+                ['nome' => 'certificacao_' . $banco . '.pdf', 'tipo' => 'application/pdf', 'conteudo' => $binario]
+            );
+        } catch (Throwable $e) {
+            responderErro(400, $e->getMessage());
+        }
+        registrarAuditoria('certificacoes', null, 'enviar_email', (string) $admin['username'], null, ['banco' => $body['banco'] ?? '', 'para' => $para]);
+        responderJson(['ok' => true]);
+    }
+
     if (preg_match('#^/certificacoes/(\d+)$#', $caminho, $m) && $metodo === 'DELETE') {
         // Registrar certificacao e coisa de administrador; EXCLUIR do historico
         // e restrito ao master -- preserva a trilha de certificacoes contra

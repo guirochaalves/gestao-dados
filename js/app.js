@@ -586,7 +586,7 @@ const I18N = {
     'Não doc.': 'Undoc.',
     'Defas.': 'Stale',
     'Remover esta certificação do histórico?': 'Remove this certification from history?',
-    'Remover (somente Master)': 'Remove (Master only)', 'Baixar relatório PDF': 'Download PDF report',
+    'Remover (somente Master)': 'Remove (Master only)', 'Baixar relatório PDF': 'Download PDF report', 'Enviar por e-mail': 'Send by e-mail', 'Certificação enviada por e-mail': 'Certification sent by e-mail',
     'Faça um cruzamento antes de gerar o relatório.': 'Run a cross-check before generating the report.',
     'Certificação removida': 'Certification removed',
     'Parecer': 'Opinion',
@@ -3319,19 +3319,29 @@ function openEmailReport(key) {
   $('emailPara').value = '';
   $('emailOverlay').classList.add('show');
 }
-function closeEmailReport() { $('emailOverlay').classList.remove('show'); emailReportKey = null; }
+function closeEmailReport() { $('emailOverlay').classList.remove('show'); emailReportKey = null; certEmailResultado = null; }
 $('emailClose').addEventListener('click', closeEmailReport);
 $('emailCancel').addEventListener('click', closeEmailReport);
 $('emailSend').addEventListener('click', async () => {
-  if (!emailReportKey) return;
   const para = $('emailPara').value.trim();
   if (!para) { toast('Informe um e-mail de destino', true); return; }
   const btn = $('emailSend');
   btn.disabled = true;
   try {
-    await api.post(`/relatorios/${emailReportKey}/email`, { para, inicio: relatoriosFiltros.inicio, fim: relatoriosFiltros.fim });
-    toast('Relatório enviado por e-mail');
-    closeEmailReport();
+    if (certEmailResultado) {
+      // Ramo certificacao: gera o PDF no navegador e envia como anexo.
+      const doc = await certConstruirPdf(certEmailResultado);
+      if (!doc) return;
+      const pdf = doc.output('datauristring');
+      await api.post('/certificacoes/email', { para, banco: certEmailResultado.banco, pdf });
+      toast('Certificação enviada por e-mail');
+      certEmailResultado = null;
+      closeEmailReport();
+    } else if (emailReportKey) {
+      await api.post(`/relatorios/${emailReportKey}/email`, { para, inicio: relatoriosFiltros.inicio, fim: relatoriosFiltros.fim });
+      toast('Relatório enviado por e-mail');
+      closeEmailReport();
+    }
   } catch (e) {
     toast(e.message, true);
   } finally {
@@ -4061,25 +4071,41 @@ function certHistoricoHtml(hist) {
     const exc = (Number(c.nao_documentados) || 0) + (Number(c.defasados) || 0);
     h += `<tr><td class="mono">${esc(c.banco)}</td><td>${esc(c.periodo || '—')}</td><td class="mono">${c.criado_em ? esc(fmtDate(c.criado_em.slice(0, 10))) : '—'}</td><td>${esc(c.executor || '—')}</td>
       <td>${esc(String(c.conformidade))}</td><td><span class="pill ${Number(c.nao_documentados) ? 'p-amber' : 'p-gray'}">${esc(String(c.nao_documentados))}</span></td><td>${esc(String(c.defasados))}</td>
-      <td><div class="row-act" style="justify-content:flex-end"><button class="icon-btn" data-act="certBaixarPdf" data-id="${c.id}" title="${esc(tr('Baixar relatório PDF'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 11l5 5l5 -5" /> <path d="M12 4l0 12" /></svg></button>${ehMaster ? `<button class="icon-btn del" data-act="certExcluir" data-id="${c.id}" title="${esc(tr('Remover (somente Master)'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button>` : ''}</div></td></tr>`;
+      <td><div class="row-act" style="justify-content:flex-end"><button class="icon-btn" data-act="certBaixarPdf" data-id="${c.id}" title="${esc(tr('Baixar relatório PDF'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 11l5 5l5 -5" /> <path d="M12 4l0 12" /></svg></button><button class="icon-btn" data-act="certEmail" data-id="${c.id}" title="${esc(tr('Enviar por e-mail'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10" /> <path d="M3 7l9 6l9 -6" /></svg></button>${ehMaster ? `<button class="icon-btn del" data-act="certExcluir" data-id="${c.id}" title="${esc(tr('Remover (somente Master)'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button>` : ''}</div></td></tr>`;
   });
   h += '</tbody></table></div></div>';
   return h;
 }
 
-async function certBaixarPdf(el) {
-  const c = certHistorico.find((x) => String(x.id) === String(el.dataset.id));
-  if (!c) return;
+// Reconstroi o objeto de resultado a partir de uma linha do historico.
+function certResultadoDoHistorico(id) {
+  const c = certHistorico.find((x) => String(x.id) === String(id));
+  if (!c) return null;
   let exc = {};
   try { exc = typeof c.excecoes === 'string' ? JSON.parse(c.excecoes || '{}') : (c.excecoes || {}); } catch (e) { exc = {}; }
-  await certGerarPdf({
+  return {
     banco: c.banco, servidor: c.servidor, motor: c.motor, periodo: c.periodo,
     executor: c.executor, dataCert: c.criado_em,
     usuariosBanco: Number(c.usuarios_banco) || 0,
     naoDoc: exc.nao_documentados || [],
     defasados: exc.defasados || [],
     ok: new Array(Number(c.conformidade) || 0).fill({}),
-  });
+  };
+}
+
+async function certBaixarPdf(el) {
+  const r = certResultadoDoHistorico(el.dataset.id);
+  if (r) await certGerarPdf(r);
+}
+
+// Abre o modal de e-mail em modo "certificacao": guarda o resultado a enviar.
+let certEmailResultado = null;
+function certEmail(el) {
+  certEmailResultado = certResultadoDoHistorico(el.dataset.id);
+  if (!certEmailResultado) return;
+  emailReportKey = null;         // garante que o handler use o ramo de certificacao
+  $('emailPara').value = '';
+  $('emailOverlay').classList.add('show');
 }
 
 async function certExcluir(el) {
@@ -4091,16 +4117,12 @@ async function certExcluir(el) {
 
 // Relatorio de certificacao em PDF (jsPDF + autoTable) -- formato pronto para
 // entrega a auditoria externa: escopo, metodologia, parecer e excecoes.
-async function certGerarPdf(r) {
-  // Chamado de duas formas: pela acao do botao "Gerar relatório PDF" (o
-  // despacho passa o ELEMENTO como argumento) ou por certBaixarPdf (passa um
-  // objeto de resultado). Se veio um elemento (tem nodeType), usa o cruzamento
-  // atual; senao, usa o resultado recebido.
-  if (r && r.nodeType) r = null;
-  r = r || certResultado;
-  if (!r) { toast(tr('Faça um cruzamento antes de gerar o relatório.'), true); return; }
+// Constroi o documento PDF da certificacao e devolve o objeto jsPDF (usado
+// tanto pelo download quanto pelo envio por e-mail). Devolve null se nao houver
+// resultado ou a biblioteca nao estiver carregada.
+async function certConstruirPdf(r) {
   const { jsPDF } = window.jspdf || {};
-  if (!jsPDF) { toast('Biblioteca de PDF não carregada.', true); return; }
+  if (!jsPDF) { toast('Biblioteca de PDF não carregada.', true); return null; }
 
   const accent = hexToRgb(getComputedStyle(document.documentElement).getPropertyValue('--accent'));
   const nomeProjeto = window.NOME_PROJETO || 'Portal de Dados';
@@ -4185,8 +4207,21 @@ async function certGerarPdf(r) {
   doc.text(tr('Executado por') + ' — ' + execNome, 14, yf + 5);
   doc.text(tr('Revisado / aprovado por'), pageW - 84, yf + 5);
 
-  const nome = 'certificacao_' + (r.banco || 'banco').replace(/[^a-z0-9]+/gi, '_') + '.pdf';
-  doc.save(nome);
+  return doc;
+}
+
+// Resolve o resultado (elemento do botao -> cruzamento atual; objeto -> ele).
+function certResolverResultado(r) {
+  if (r && r.nodeType) r = null;
+  return r || certResultado;
+}
+
+async function certGerarPdf(r) {
+  r = certResolverResultado(r);
+  if (!r) { toast(tr('Faça um cruzamento antes de gerar o relatório.'), true); return; }
+  const doc = await certConstruirPdf(r);
+  if (!doc) return;
+  doc.save('certificacao_' + (r.banco || 'banco').replace(/[^a-z0-9]+/gi, '_') + '.pdf');
 }
 
 
@@ -4568,6 +4603,7 @@ removeTag,
   certGerarPdf,
   certSalvar,
   certBaixarPdf,
+  certEmail,
   certExcluir,
 };
 
