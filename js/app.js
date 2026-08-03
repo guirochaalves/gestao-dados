@@ -586,7 +586,7 @@ const I18N = {
     'Não doc.': 'Undoc.',
     'Defas.': 'Stale',
     'Remover esta certificação do histórico?': 'Remove this certification from history?',
-    'Remover (somente Master)': 'Remove (Master only)', 'Baixar relatório PDF': 'Download PDF report', 'Enviar por e-mail': 'Send by e-mail', 'Certificação enviada por e-mail': 'Certification sent by e-mail',
+    'Remover (somente Master)': 'Remove (Master only)', 'Baixar relatório PDF': 'Download PDF report', 'Enviar por e-mail': 'Send by e-mail', 'Certificação enviada por e-mail': 'Certification sent by e-mail', 'Faça um cruzamento antes de enviar.': 'Run a cross-check before sending.',
     'Faça um cruzamento antes de gerar o relatório.': 'Run a cross-check before generating the report.',
     'Certificação removida': 'Certification removed',
     'Parecer': 'Opinion',
@@ -4070,6 +4070,7 @@ function certRenderResultado() {
     <div class="email-cfg-actions">
       <button type="button" class="btn btn-primary" data-act="certGerarPdf">${esc(tr('Gerar relatório PDF'))}</button>
       <button type="button" class="btn btn-ghost" data-act="certSalvar">${esc(tr('Salvar no histórico'))}</button>
+      <button type="button" class="btn btn-ghost" data-act="certEmailAtual">${I.mail}${esc(tr('Enviar por e-mail'))}</button>
       <span class="hint-inline">${total === 0 ? esc(tr('Sem exceções.')) : total + ' ' + esc(tr('exceção(ões) a tratar.'))}</span>
     </div>`;
 }
@@ -4127,6 +4128,16 @@ async function certBaixarPdf(el) {
 
 // Abre o modal de e-mail em modo "certificacao": guarda o resultado a enviar.
 let certEmailResultado = null;
+
+// Envia o cruzamento ATUAL (recem-feito, ainda nao salvo) por e-mail.
+function certEmailAtual() {
+  if (!certResultado) { toast(tr('Faça um cruzamento antes de enviar.'), true); return; }
+  certEmailResultado = certResultado;
+  emailReportKey = null;
+  $('emailPara').value = '';
+  $('emailOverlay').classList.add('show');
+}
+
 function certEmail(el) {
   certEmailResultado = certResultadoDoHistorico(el.dataset.id);
   if (!certEmailResultado) return;
@@ -4630,6 +4641,7 @@ removeTag,
   certEscolherCsv,
   certGerarPdf,
   certSalvar,
+  certEmailAtual,
   certBaixarPdf,
   certEmail,
   certExcluir,
