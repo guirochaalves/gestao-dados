@@ -3853,20 +3853,20 @@ function renderUserList(containerId, data) {
 // resultado (usuario, permissao) para CSV.
 const CERT_QUERIES = {
   'sql server': `-- SQL Server: papeis de banco por usuario (rode conectado ao banco)
-SELECT dp.name AS usuario, rp.name AS permissao, 'ROLE' AS tipo
+SELECT DB_NAME() AS banco, dp.name AS usuario, rp.name AS permissao, 'ROLE' AS tipo
 FROM sys.database_role_members drm
 JOIN sys.database_principals rp ON rp.principal_id = drm.role_principal_id
 JOIN sys.database_principals dp ON dp.principal_id = drm.member_principal_id
 WHERE dp.name NOT IN ('dbo','guest')
 ORDER BY usuario, permissao;`,
   'postgresql': `-- PostgreSQL: papeis (grupos) de que cada usuario e membro
-SELECT r.rolname AS usuario, g.rolname AS permissao, 'ROLE' AS tipo
+SELECT current_database() AS banco, r.rolname AS usuario, g.rolname AS permissao, 'ROLE' AS tipo
 FROM pg_auth_members m
 JOIN pg_roles r ON r.oid = m.member
 JOIN pg_roles g ON g.oid = m.roleid
 ORDER BY usuario, permissao;`,
   'mysql': `-- MySQL/MariaDB: privilegios por usuario no schema {BANCO}
-SELECT GRANTEE AS usuario, PRIVILEGE_TYPE AS permissao, 'ROLE' AS tipo
+SELECT '{BANCO}' AS banco, GRANTEE AS usuario, PRIVILEGE_TYPE AS permissao, 'ROLE' AS tipo
 FROM information_schema.SCHEMA_PRIVILEGES
 WHERE TABLE_SCHEMA = '{BANCO}'
 ORDER BY usuario, permissao;`,
@@ -3969,7 +3969,8 @@ function certCopiarQuery() {
 // Modelo do CSV que o usuario envia para o cruzamento: uma linha por par
 // (usuario, permissao). A coluna "tipo" e opcional -- so linhas ROLE entram.
 function certTemplateCsv() {
-  const csv = '\ufeff' + ['usuario;permissao;tipo', 'Maven;db_datareader;ROLE', 'Maven;db_datawriter;ROLE'].join('\n');
+  const b = (certBancoSelecionado() || {}).nome || 'MAVEN_ANALYTICS';
+  const csv = '\ufeff' + ['banco;usuario;permissao;tipo', b + ';Maven;db_datareader;ROLE', b + ';Maven;db_datawriter;ROLE'].join('\n');
   dl(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'modelo_certificacao.csv');
   toast(tr('Modelo CSV baixado'));
 }
@@ -3992,12 +3993,20 @@ async function certArquivoEscolhido(input) {
   const iu = cab.findIndex((c) => c.includes('usuario') || c.includes('login') || c.includes('grantee'));
   const ip = cab.findIndex((c) => c.includes('permissao') || c.includes('papel') || c.includes('role') || c.includes('privilege'));
   const it = cab.findIndex((c) => c === 'tipo' || c === 'type');
+  const ib = cab.findIndex((c) => c === 'banco' || c.includes('database'));
   if (iu === -1 || ip === -1) { toast(tr('O CSV precisa ter as colunas de usuário e de permissão/papel.'), true); return; }
+  const bancoNorm = certNorm(banco.nome);
   const real = new Set();
   const usuariosBanco = new Set();
   for (let i = 1; i < linhas.length; i++) {
     const ln = linhas[i];
     if (it !== -1 && certNorm(ln[it]) && certNorm(ln[it]) !== 'role') continue;
+    // Se o CSV traz a coluna banco, so cruza as linhas do banco selecionado
+    // (permite subir um export com varios bancos de uma vez).
+    if (ib !== -1 && bancoNorm) {
+      const b = certNorm(ln[ib]);
+      if (b && !b.includes(bancoNorm) && !bancoNorm.includes(b)) continue;
+    }
     const u = certNorm(ln[iu]), pp = certNorm(ln[ip]);
     if (u && pp) { real.add(u + '|' + pp); usuariosBanco.add(u); }
   }
