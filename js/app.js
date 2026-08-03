@@ -544,6 +544,62 @@ const I18N = {
     'Host / endereço': 'Host / address',
     'Porta': 'Port',
     'Ambiente': 'Environment',
+    'Arquivo vazio ou sem linhas de dados': 'Empty file or no data rows',
+    'Certificação de Acessos': 'Access Certification',
+    'Certificação': 'Certification',
+    'Cruza as permissões reais de um banco com o que está registrado em Acessos': 'Cross-checks the real permissions of a database against what is registered in Access',
+    'Nova certificação': 'New certification',
+    'Cadastre um banco no módulo Bancos antes de certificar.': 'Register a database in the Databases module before certifying.',
+    'Período de referência': 'Reference period',
+    'ex.: 1º semestre 2026': 'e.g. H1 2026',
+    '1. Extraia as permissões reais': '1. Extract the real permissions',
+    'Rode esta consulta no banco alvo (sob sua credencial de DBA) e exporte o resultado para CSV. O portal não se conecta ao banco.': 'Run this query on the target database (under your DBA credentials) and export the result to CSV. The portal does not connect to the database.',
+    'Copiar': 'Copy',
+    'Consulta copiada': 'Query copied',
+    '2. Envie o CSV e cruze': '2. Upload the CSV and cross-check',
+    'Escolher CSV das permissões reais': 'Choose the real-permissions CSV',
+    'Selecione um banco.': 'Select a database.',
+    'O CSV precisa ter as colunas de usuário e de permissão/papel.': 'The CSV must have the user and permission/role columns.',
+    'Motor sem consulta pronta. Extraia as permissões (usuário, papel) e monte um CSV com essas duas colunas.': 'Engine without a ready query. Extract the permissions (user, role) and build a CSV with those two columns.',
+    'Usuários no banco': 'Users in the database',
+    'Em conformidade': 'Compliant',
+    'Não documentados': 'Undocumented',
+    'Registros defasados': 'Stale records',
+    'Acessos não documentados': 'Undocumented access',
+    'existem no banco, sem registro': 'exist in the database, not registered',
+    'registrados no portal, ausentes no banco': 'registered in the portal, absent in the database',
+    'Papel / permissão': 'Role / permission',
+    'Risco': 'Risk',
+    'Alto': 'High',
+    'Médio': 'Medium',
+    'Gerar relatório PDF': 'Generate PDF report',
+    'Salvar no histórico': 'Save to history',
+    'Sem exceções.': 'No exceptions.',
+    'exceção(ões) a tratar.': 'exception(s) to address.',
+    'exceção(ões) a tratar': 'exception(s) to address',
+    'Sem exceções': 'No exceptions',
+    'Certificação salva no histórico': 'Certification saved to history',
+    'Histórico de certificações': 'Certification history',
+    'Nenhuma certificação registrada ainda.': 'No certification recorded yet.',
+    'Por': 'By',
+    'Conf.': 'Compl.',
+    'Não doc.': 'Undoc.',
+    'Defas.': 'Stale',
+    'Remover esta certificação do histórico?': 'Remove this certification from history?',
+    'Remover (somente Master)': 'Remove (Master only)', 'Baixar relatório PDF': 'Download PDF report',
+    'Certificação removida': 'Certification removed',
+    'Parecer': 'Opinion',
+    'Metodologia': 'Methodology',
+    'As permissões reais foram extraídas do dicionário do banco e comparadas, usuário a usuário e papel a papel, com os acessos registrados no portal. Nomes normalizados para o pareamento. Toda divergência é classificada como exceção.': 'The real permissions were extracted from the database catalog and compared, user by user and role by role, with the access registered in the portal. Names normalized for matching. Every divergence is classified as an exception.',
+    'Fonte real': 'Real source',
+    'Fonte registrada': 'Registered source',
+    'Portal de Gestão de Dados — Acessos': 'Data Management Portal — Access',
+    'Executado por': 'Executed by',
+    'Revisado / aprovado por': 'Reviewed / approved by',
+    'Acessos não documentados (existem no banco, sem registro)': 'Undocumented access (exist in the database, not registered)',
+    'Registros defasados (registrados no portal, ausentes no banco)': 'Stale records (registered in the portal, absent in the database)',
+    'Nenhuma ocorrência': 'No occurrences',
+    'Motor': 'Engine',
     'Login de rede': 'Network login', 'Departamento': 'Department', 'Função': 'Role / position',
     'Nome completo': 'Full name', 'CSV precisa ter a coluna "Login" (veja o modelo)': 'CSV must have the "Login" column (see the template)',
     'sem acesso': 'no access', 'Sem nenhum módulo liberado': 'No module granted',
@@ -965,6 +1021,7 @@ function afterLogin() {
   $('navConfigProjeto').style.display = isAdmin ? '' : 'none';
   $('navAuditoria').style.display = isMaster ? '' : 'none';
   $('navSeguranca').style.display = isAdmin ? '' : 'none';
+  $('navCertificacao').style.display = isAdmin ? '' : 'none';
   $('navAdminLabel').style.display = isAdmin ? '' : 'none';
   document.querySelectorAll('.nav-item[data-view]').forEach((b) => {
     const v = b.dataset.view;
@@ -1187,6 +1244,11 @@ async function navTo(v) {
     $('searchBox').style.display = 'none'; $('addBtn').style.display = 'none';
     showSkeleton();
     await renderSeguranca();
+  } else if (v === 'certificacao') {
+    $('viewTitle').textContent = tr('Certificação de Acessos'); $('viewSub').textContent = tr('Cruza as permissões reais de um banco com o que está registrado em Acessos');
+    $('searchBox').style.display = 'none'; $('addBtn').style.display = 'none';
+    showSkeleton();
+    await renderCertificacao();
   } else if (v === 'backup') {
     $('viewTitle').textContent = tr(SCHEMA.backup.title); $('viewSub').textContent = tr(SCHEMA.backup.sub);
     $('searchBox').style.display = ''; $('addBtn').style.display = canWrite('backup') ? '' : 'none';
@@ -3096,7 +3158,8 @@ async function exportPdf(key, filtros) {
   const nomeProjeto = window.NOME_PROJETO || 'Portal de Dados';
   const titulo = tr(sch.title);
   const agora = new Date();
-  const geradoEm = fmtDate(agora.toISOString().slice(0, 10)) + ' ' + agora.toTimeString().slice(0, 5);
+  const geradoEm = r.dataCert ? fmtDate(String(r.dataCert).slice(0, 10)) : (fmtDate(agora.toISOString().slice(0, 10)) + ' ' + agora.toTimeString().slice(0, 5));
+  const execNome = r.executor || (currentUser.nome_completo || currentUser.username);
   let periodo = '';
   if (filtros && (filtros.inicio || filtros.fim)) {
     periodo = tr('Período') + ': ' + (filtros.inicio ? fmtDate(filtros.inicio) : '—') + ' ' + tr('até') + ' ' + (filtros.fim ? fmtDate(filtros.fim) : '—');
@@ -3768,6 +3831,359 @@ function renderUserList(containerId, data) {
   el.innerHTML = `<div style="border-top:1px solid var(--border)">${rows}</div>`;
 }
 
+
+// ===========================================================================
+// Certificacao de Acessos -- cruza as permissoes REAIS de um banco (CSV
+// extraido pelo DBA) com o que esta registrado no modulo Acessos. O portal
+// nunca toca no banco: a extracao e um passo externo, sob a credencial do DBA.
+// Guarda o resumo de cada ciclo (contadores + excecoes) no historico.
+// ===========================================================================
+
+// Consulta de extracao por motor. O DBA roda no banco alvo e exporta o
+// resultado (usuario, permissao) para CSV.
+const CERT_QUERIES = {
+  'sql server': `-- SQL Server: papeis de banco por usuario (rode conectado ao banco)
+SELECT dp.name AS usuario, rp.name AS permissao, 'ROLE' AS tipo
+FROM sys.database_role_members drm
+JOIN sys.database_principals rp ON rp.principal_id = drm.role_principal_id
+JOIN sys.database_principals dp ON dp.principal_id = drm.member_principal_id
+WHERE dp.name NOT IN ('dbo','guest')
+ORDER BY usuario, permissao;`,
+  'postgresql': `-- PostgreSQL: papeis (grupos) de que cada usuario e membro
+SELECT r.rolname AS usuario, g.rolname AS permissao, 'ROLE' AS tipo
+FROM pg_auth_members m
+JOIN pg_roles r ON r.oid = m.member
+JOIN pg_roles g ON g.oid = m.roleid
+ORDER BY usuario, permissao;`,
+  'mysql': `-- MySQL/MariaDB: privilegios por usuario no schema {BANCO}
+SELECT GRANTEE AS usuario, PRIVILEGE_TYPE AS permissao, 'ROLE' AS tipo
+FROM information_schema.SCHEMA_PRIVILEGES
+WHERE TABLE_SCHEMA = '{BANCO}'
+ORDER BY usuario, permissao;`,
+};
+CERT_QUERIES['mariadb'] = CERT_QUERIES['mysql'];
+
+let certHistorico = [];     // historico carregado (para regenerar o PDF)
+let certResultado = null;   // ultimo cruzamento: {banco, servidor, motor, periodo, naoDoc, defasados, ok, usuariosBanco}
+
+function certNorm(x) {
+  return String(x || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function certQueryPara(banco) {
+  const q = CERT_QUERIES[certNorm(banco.motor)];
+  if (!q) return tr('Motor sem consulta pronta. Extraia as permissões (usuário, papel) e monte um CSV com essas duas colunas.');
+  return q.replace('{BANCO}', banco.nome || 'XYZ');
+}
+
+async function renderCertificacao() {
+  await fetchBancos();
+  let historico = [];
+  try { historico = await api.get('/certificacoes'); } catch (e) { historico = []; }
+  certHistorico = historico;
+  certResultado = null;
+
+  const opts = bancosCache.map((b) => `<option value="${b.id}">${esc(bancoLabel(b))}</option>`).join('');
+  const semBanco = bancosCache.length === 0;
+
+  let h = `<div class="card cert-main" style="padding:22px">
+    <div class="sec-h" style="margin-top:0">${esc(tr('Nova certificação'))}</div>`;
+
+  if (semBanco) {
+    h += `<div class="empty" style="padding:20px">${I.db}<p>${esc(tr('Cadastre um banco no módulo Bancos antes de certificar.'))}</p></div></div>`;
+    $('content').innerHTML = `<div class="cert-layout">${h}${certHistoricoHtml(historico)}</div>`;
+    return;
+  }
+
+  h += `<div class="email-cfg-grid">
+      <div class="fld"><label>${esc(tr('Banco'))}</label><select id="certBanco" data-oninput="certTrocaBanco">${opts}</select></div>
+      <div class="fld"><label>${esc(tr('Período de referência'))}</label><input type="text" id="certPeriodo" placeholder="${esc(tr('ex.: 1º semestre 2026'))}"></div>
+    </div>
+    <div class="sec-h">${esc(tr('1. Extraia as permissões reais'))}</div>
+    <p class="hint-inline" style="margin-bottom:8px">${esc(tr('Rode esta consulta no banco alvo (sob sua credencial de DBA) e exporte o resultado para CSV. O portal não se conecta ao banco.'))}</p>
+    <div class="cert-motores">
+      <button type="button" class="btn btn-ghost btn-sm" data-act="certMostrarQuery" data-motor="sql server">SQL Server</button>
+      <button type="button" class="btn btn-ghost btn-sm" data-act="certMostrarQuery" data-motor="mysql">MySQL</button>
+      <button type="button" class="btn btn-ghost btn-sm" data-act="certMostrarQuery" data-motor="postgresql">PostgreSQL</button>
+    </div>
+    <div style="position:relative">
+      <button type="button" class="btn btn-ghost btn-sm" style="position:absolute;top:8px;right:8px" data-act="certCopiarQuery">${esc(tr('Copiar'))}</button>
+      <pre id="certQuery" style="background:var(--surface-2);border:1px solid var(--border-2);border-radius:8px;padding:12px;font-size:11.5px;white-space:pre-wrap;overflow:auto;max-height:200px;margin:0"></pre>
+    </div>
+    <div class="sec-h">${esc(tr('2. Envie o CSV e cruze'))}</div>
+    <div class="email-cfg-actions" style="margin-top:0">
+      <input type="file" id="certCsvInput" accept=".csv" hidden data-oninput="certArquivoEscolhido">
+      <button type="button" class="btn btn-ghost" data-act="certEscolherCsv">${I.upload}${esc(tr('Escolher CSV das permissões reais'))}</button>
+      <span id="certCsvNome" class="hint-inline"></span>
+    </div>
+    <div id="certResultado" style="margin-top:16px"></div>
+  </div>`;
+
+  $('content').innerHTML = `<div class="cert-layout">${h}${certHistoricoHtml(historico)}</div>`;
+  certTrocaBanco();
+}
+
+// Mostra a consulta de um motor no bloco, com o nome do banco substituido, e
+// destaca o botao de motor correspondente.
+function certAplicarQuery(motorNorm) {
+  const key = motorNorm === 'mariadb' ? 'mysql' : motorNorm;
+  const banco = certBancoSelecionado();
+  const q = CERT_QUERIES[key];
+  const alvo = $('certQuery');
+  if (alvo) alvo.textContent = q ? q.replace('{BANCO}', (banco && banco.nome) || 'XYZ') : tr('Motor sem consulta pronta. Extraia as permissões (usuário, papel) e monte um CSV com essas duas colunas.');
+  document.querySelectorAll('.cert-motores [data-motor]').forEach((btn) => btn.classList.toggle('active', certNorm(btn.dataset.motor) === key));
+}
+
+// Ao trocar o banco, mostra a consulta do motor dele automaticamente.
+function certTrocaBanco() {
+  const b = certBancoSelecionado();
+  if (b) certAplicarQuery(certNorm(b.motor));
+}
+
+// Botao de motor: mostra a consulta daquele banco, independente do selecionado.
+function certMostrarQuery(el) {
+  certAplicarQuery(certNorm(el.dataset.motor));
+}
+
+function certBancoSelecionado() {
+  const id = $('certBanco') ? $('certBanco').value : null;
+  return bancosCache.find((x) => String(x.id) === String(id)) || null;
+}
+
+function certCopiarQuery() {
+  const t = $('certQuery') ? $('certQuery').textContent : '';
+  if (navigator.clipboard) navigator.clipboard.writeText(t).then(() => toast(tr('Consulta copiada')), () => {});
+}
+
+function certEscolherCsv() { const i = $('certCsvInput'); if (i) i.click(); }
+
+async function certArquivoEscolhido(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  if (!file) return;
+  const banco = certBancoSelecionado();
+  if (!banco) { toast(tr('Selecione um banco.'), true); return; }
+  $('certCsvNome').textContent = file.name;
+
+  // Lado real: CSV extraido do banco.
+  let linhas;
+  try { linhas = parseCsvSimples(await file.text()); } catch (e) { toast(e.message, true); return; }
+  if (linhas.length < 2) { toast(tr('Arquivo vazio ou sem linhas de dados'), true); return; }
+  const cab = linhas[0].map((c) => certNorm(c));
+  const iu = cab.findIndex((c) => c.includes('usuario') || c.includes('login') || c.includes('grantee'));
+  const ip = cab.findIndex((c) => c.includes('permissao') || c.includes('papel') || c.includes('role') || c.includes('privilege'));
+  const it = cab.findIndex((c) => c === 'tipo' || c === 'type');
+  if (iu === -1 || ip === -1) { toast(tr('O CSV precisa ter as colunas de usuário e de permissão/papel.'), true); return; }
+  const real = new Set();
+  const usuariosBanco = new Set();
+  for (let i = 1; i < linhas.length; i++) {
+    const ln = linhas[i];
+    if (it !== -1 && certNorm(ln[it]) && certNorm(ln[it]) !== 'role') continue;
+    const u = certNorm(ln[iu]), pp = certNorm(ln[ip]);
+    if (u && pp) { real.add(u + '|' + pp); usuariosBanco.add(u); }
+  }
+
+  // Lado registrado: Acessos do portal filtrados pelo servidor+banco.
+  let acessos;
+  try { acessos = await api.get('/acessos'); } catch (e) { toast(e.message, true); return; }
+  const portal = new Set();
+  acessos.forEach((a) => {
+    if (certNorm(a.servidor) !== certNorm(banco.servidor)) return;
+    if (banco.nome && !certNorm(a.objeto).includes(certNorm(banco.nome))) return;
+    const u = certNorm(a.usuario);
+    if (!u) return;
+    String(a.nivel || '').split(',').forEach((niv) => { niv = certNorm(niv); if (niv) portal.add(u + '|' + niv); });
+  });
+
+  const par = (k) => { const [u, p] = k.split('|'); return { u, p }; };
+  const naoDoc = [...real].filter((k) => !portal.has(k)).map(par).sort((a, b) => (a.u + a.p).localeCompare(b.u + b.p));
+  const defasados = [...portal].filter((k) => !real.has(k)).map(par).sort((a, b) => (a.u + a.p).localeCompare(b.u + b.p));
+  const ok = [...real].filter((k) => portal.has(k)).map(par).sort((a, b) => (a.u + a.p).localeCompare(b.u + b.p));
+
+  certResultado = {
+    banco: banco.nome, servidor: banco.servidor, motor: banco.motor,
+    periodo: $('certPeriodo') ? $('certPeriodo').value.trim() : '',
+    executor: currentUser.nome_completo || currentUser.username,
+    usuariosBanco: usuariosBanco.size, naoDoc, defasados, ok,
+  };
+  certRenderResultado();
+}
+
+function certTabelaExc(itens, risco) {
+  if (!itens.length) return `<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:12px">${esc(tr('Nenhuma ocorrência'))}</td></tr>`;
+  return itens.map((x) => `<tr><td>${esc(x.u)}</td><td class="mono">${esc(x.p)}</td><td><span class="pill ${risco === 'ALTO' ? 'p-amber' : 'p-gray'}">${esc(tr(risco === 'ALTO' ? 'Alto' : 'Médio'))}</span></td></tr>`).join('');
+}
+
+function certRenderResultado() {
+  const r = certResultado;
+  if (!r) return;
+  const el = $('certResultado');
+  const total = r.naoDoc.length + r.defasados.length;
+  el.innerHTML = `
+    <div class="tiles" style="grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+      <div class="tile"><div class="tile-ico">${I.users}</div><div class="lab">${esc(tr('Usuários no banco'))}</div><div class="val">${r.usuariosBanco}</div></div>
+      <div class="tile ok"><div class="tile-ico">${I.shield}</div><div class="lab">${esc(tr('Em conformidade'))}</div><div class="val">${r.ok.length}</div></div>
+      <div class="tile ${r.naoDoc.length ? 'attn' : 'ok'}"><div class="tile-ico">${I.alert}</div><div class="lab">${esc(tr('Não documentados'))}</div><div class="val">${r.naoDoc.length}</div></div>
+      <div class="tile ${r.defasados.length ? 'attn' : 'ok'}"><div class="tile-ico">${I.clock}</div><div class="lab">${esc(tr('Registros defasados'))}</div><div class="val">${r.defasados.length}</div></div>
+    </div>
+    <div class="sec-h">${esc(tr('Acessos não documentados'))} <span class="hint-inline" style="font-weight:400">${esc(tr('existem no banco, sem registro'))}</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>${esc(tr('Usuário'))}</th><th>${esc(tr('Papel / permissão'))}</th><th>${esc(tr('Risco'))}</th></tr></thead><tbody>${certTabelaExc(r.naoDoc, 'ALTO')}</tbody></table></div>
+    <div class="sec-h">${esc(tr('Registros defasados'))} <span class="hint-inline" style="font-weight:400">${esc(tr('registrados no portal, ausentes no banco'))}</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>${esc(tr('Usuário'))}</th><th>${esc(tr('Papel / permissão'))}</th><th>${esc(tr('Risco'))}</th></tr></thead><tbody>${certTabelaExc(r.defasados, 'MEDIO')}</tbody></table></div>
+    <div class="email-cfg-actions">
+      <button type="button" class="btn btn-primary" data-act="certGerarPdf">${esc(tr('Gerar relatório PDF'))}</button>
+      <button type="button" class="btn btn-ghost" data-act="certSalvar">${esc(tr('Salvar no histórico'))}</button>
+      <span class="hint-inline">${total === 0 ? esc(tr('Sem exceções.')) : total + ' ' + esc(tr('exceção(ões) a tratar.'))}</span>
+    </div>`;
+}
+
+async function certSalvar() {
+  if (!certResultado) return;
+  const r = certResultado;
+  try {
+    await api.post('/certificacoes', {
+      banco: r.banco, servidor: r.servidor, motor: r.motor, periodo: r.periodo,
+      usuarios_banco: r.usuariosBanco, conformidade: r.ok.length,
+      nao_documentados: r.naoDoc.length, defasados: r.defasados.length,
+      excecoes: { nao_documentados: r.naoDoc, defasados: r.defasados },
+    });
+    toast(tr('Certificação salva no histórico'));
+    await navTo('certificacao');
+  } catch (e) { toast(e.message, true); }
+}
+
+function certHistoricoHtml(hist) {
+  const ehMaster = currentUser && currentUser.role === 'master';
+  let h = `<div class="card cert-side" style="padding:22px"><div class="sec-h" style="margin-top:0">${esc(tr('Histórico de certificações'))}</div>`;
+  if (!hist.length) { h += `<div class="empty" style="padding:16px"><p>${esc(tr('Nenhuma certificação registrada ainda.'))}</p></div></div>`; return h; }
+  h += `<div class="tbl-wrap"><table><thead><tr><th>${esc(tr('Banco'))}</th><th>${esc(tr('Período'))}</th><th>${esc(tr('Data'))}</th><th>${esc(tr('Por'))}</th><th>${esc(tr('Conf.'))}</th><th>${esc(tr('Não doc.'))}</th><th>${esc(tr('Defas.'))}</th><th></th></tr></thead><tbody>`;
+  hist.forEach((c) => {
+    const exc = (Number(c.nao_documentados) || 0) + (Number(c.defasados) || 0);
+    h += `<tr><td class="mono">${esc(c.banco)}</td><td>${esc(c.periodo || '—')}</td><td class="mono">${c.criado_em ? esc(fmtDate(c.criado_em.slice(0, 10))) : '—'}</td><td>${esc(c.executor || '—')}</td>
+      <td>${esc(String(c.conformidade))}</td><td><span class="pill ${Number(c.nao_documentados) ? 'p-amber' : 'p-gray'}">${esc(String(c.nao_documentados))}</span></td><td>${esc(String(c.defasados))}</td>
+      <td><div class="row-act" style="justify-content:flex-end"><button class="icon-btn" data-act="certBaixarPdf" data-id="${c.id}" title="${esc(tr('Baixar relatório PDF'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 11l5 5l5 -5" /> <path d="M12 4l0 12" /></svg></button>${ehMaster ? `<button class="icon-btn del" data-act="certExcluir" data-id="${c.id}" title="${esc(tr('Remover (somente Master)'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button>` : ''}</div></td></tr>`;
+  });
+  h += '</tbody></table></div></div>';
+  return h;
+}
+
+async function certBaixarPdf(el) {
+  const c = certHistorico.find((x) => String(x.id) === String(el.dataset.id));
+  if (!c) return;
+  let exc = {};
+  try { exc = typeof c.excecoes === 'string' ? JSON.parse(c.excecoes || '{}') : (c.excecoes || {}); } catch (e) { exc = {}; }
+  await certGerarPdf({
+    banco: c.banco, servidor: c.servidor, motor: c.motor, periodo: c.periodo,
+    executor: c.executor, dataCert: c.criado_em,
+    usuariosBanco: Number(c.usuarios_banco) || 0,
+    naoDoc: exc.nao_documentados || [],
+    defasados: exc.defasados || [],
+    ok: new Array(Number(c.conformidade) || 0).fill({}),
+  });
+}
+
+async function certExcluir(el) {
+  if (!confirm(tr('Remover esta certificação do histórico?'))) return;
+  try { await api.del('/certificacoes/' + el.dataset.id); toast(tr('Certificação removida')); await navTo('certificacao'); } catch (e) { toast(e.message, true); }
+}
+
+
+
+// Relatorio de certificacao em PDF (jsPDF + autoTable) -- formato pronto para
+// entrega a auditoria externa: escopo, metodologia, parecer e excecoes.
+async function certGerarPdf(r) {
+  r = r || certResultado;
+  if (!r) return;
+  const { jsPDF } = window.jspdf || {};
+  if (!jsPDF) { toast('Biblioteca de PDF não carregada.', true); return; }
+
+  const accent = hexToRgb(getComputedStyle(document.documentElement).getPropertyValue('--accent'));
+  const nomeProjeto = window.NOME_PROJETO || 'Portal de Dados';
+  const agora = new Date();
+  const geradoEm = fmtDate(agora.toISOString().slice(0, 10)) + ' ' + agora.toTimeString().slice(0, 5);
+  const total = r.naoDoc.length + r.defasados.length;
+  const logoPng = await obterLogoPdf();
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+
+  function cabecalho() {
+    doc.setFillColor(28, 32, 42); doc.rect(0, 0, pageW, 20, 'F');
+    doc.setFillColor(accent[0], accent[1], accent[2]); doc.rect(0, 20, pageW, 1.4, 'F');
+    if (logoPng) { try { doc.addImage(logoPng, 'PNG', 4, 4, 12, 12); } catch (e) {} }
+    const x = logoPng ? 20 : 12;
+    doc.setTextColor(255, 255, 255); doc.setFont(undefined, 'bold'); doc.setFontSize(12.5);
+    doc.text(nomeProjeto, x, 8.5);
+    doc.setFont(undefined, 'normal'); doc.setFontSize(10);
+    doc.text(tr('Certificação de Acessos'), x, 15.5);
+    doc.setTextColor(200, 204, 214); doc.setFontSize(8);
+    doc.text(tr('Gerado em') + ': ' + geradoEm, pageW - 12, 8.5, { align: 'right' });
+  }
+  function rodape(data) {
+    doc.setFontSize(7.5); doc.setTextColor(150, 150, 150);
+    doc.text(nomeProjeto + ' — ' + tr('Certificação de Acessos'), 12, pageH - 7);
+    doc.text(String(data.pageNumber), pageW - 12, pageH - 7, { align: 'right' });
+  }
+
+  const meta = [
+    [tr('Servidor'), r.servidor || '—'],
+    [tr('Banco'), r.banco || '—'],
+    [tr('Motor'), r.motor || '—'],
+    [tr('Período de referência'), r.periodo || '—'],
+    [tr('Executado por'), execNome],
+    [tr('Fonte real'), 'SQL — ' + (r.motor || '')],
+    [tr('Fonte registrada'), tr('Portal de Gestão de Dados — Acessos')],
+  ];
+  doc.autoTable({
+    startY: 27, theme: 'plain', styles: { fontSize: 9, cellPadding: 1.2 },
+    columnStyles: { 0: { textColor: [110, 110, 110], cellWidth: 55 }, 1: { textColor: [17, 24, 39] } },
+    body: meta, margin: { left: 12, right: 12 },
+    didDrawPage: () => { cabecalho(); },
+  });
+
+  let y = doc.lastAutoTable.finalY + 6;
+  doc.setFont(undefined, 'bold'); doc.setFontSize(11); doc.setTextColor(accent[0], accent[1], accent[2]);
+  doc.text(tr('Metodologia'), 12, y); y += 5;
+  doc.setFont(undefined, 'normal'); doc.setFontSize(8.5); doc.setTextColor(60, 60, 60);
+  const met = tr('As permissões reais foram extraídas do dicionário do banco e comparadas, usuário a usuário e papel a papel, com os acessos registrados no portal. Nomes normalizados para o pareamento. Toda divergência é classificada como exceção.');
+  doc.text(doc.splitTextToSize(met, pageW - 24), 12, y); y += 14;
+
+  doc.setFont(undefined, 'bold'); doc.setFontSize(11); doc.setTextColor(accent[0], accent[1], accent[2]);
+  doc.text(tr('Parecer') + ': ' + (total === 0 ? tr('Sem exceções') : total + ' ' + tr('exceção(ões) a tratar')), 12, y);
+  y += 3;
+
+  doc.autoTable({
+    startY: y + 2, head: [[tr('Usuários no banco'), tr('Em conformidade'), tr('Não documentados'), tr('Registros defasados')]],
+    body: [[r.usuariosBanco, r.ok.length, r.naoDoc.length, r.defasados.length]],
+    styles: { halign: 'center', fontSize: 10 }, headStyles: { fillColor: accent, fontSize: 8 },
+    margin: { left: 12, right: 12 }, didDrawPage: () => { cabecalho(); rodape({ pageNumber: doc.internal.getNumberOfPages() }); },
+  });
+
+  const secao = (titulo, itens, risco) => {
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 6,
+      head: [[titulo, '', '']],
+      body: itens.length ? itens.map((x) => [x.u, x.p, tr(risco)]) : [[tr('Nenhuma ocorrência'), '', '']],
+      columnStyles: { 0: { cellWidth: 70 }, 2: { cellWidth: 30, halign: 'center' } },
+      styles: { fontSize: 8.5 }, headStyles: { fillColor: [55, 65, 81], fontSize: 9 },
+      margin: { left: 12, right: 12 }, didDrawPage: () => { cabecalho(); },
+    });
+  };
+  secao(tr('Acessos não documentados (existem no banco, sem registro)'), r.naoDoc, 'Alto');
+  secao(tr('Registros defasados (registrados no portal, ausentes no banco)'), r.defasados, 'Médio');
+
+  let yf = doc.lastAutoTable.finalY + 16;
+  if (yf > pageH - 30) { doc.addPage(); cabecalho(); yf = 30; }
+  doc.setDrawColor(150); doc.line(14, yf, 84, yf); doc.line(pageW - 84, yf, pageW - 14, yf);
+  doc.setFontSize(8); doc.setTextColor(110, 110, 110);
+  doc.text(tr('Executado por') + ' — ' + execNome, 14, yf + 5);
+  doc.text(tr('Revisado / aprovado por'), pageW - 84, yf + 5);
+
+  const nome = 'certificacao_' + (r.banco || 'banco').replace(/[^a-z0-9]+/gi, '_') + '.pdf';
+  doc.save(nome);
+}
+
+
 async function renderSeguranca() {
   let stats = { por_usuario: [], por_ip: [], total: 0, dias: segDias };
   try { stats = await api.get('/seguranca/stats?dias=' + segDias); } catch (e) { toast(e.message, true); }
@@ -4139,6 +4555,14 @@ removeTag,
   baixarManualApiEn,
   // Painel de descoberta de integracoes
   copiarConsultaDiscovery,
+  // Certificacao de acessos
+  certCopiarQuery,
+  certMostrarQuery,
+  certEscolherCsv,
+  certGerarPdf,
+  certSalvar,
+  certBaixarPdf,
+  certExcluir,
 };
 
 const SUBMIT_ACTIONS = {
@@ -4156,6 +4580,8 @@ const INPUT_ACTIONS = {
   perfilFotoEnviar,
   userFotoEnviar,
   filtrarRoles,
+  certArquivoEscolhido,
+  certTrocaBanco,
 };
 
 document.addEventListener('click', (e) => {

@@ -1537,6 +1537,66 @@ function despachar(string $metodo, string $caminho): void
     // Retorna top-10 de login_falha agrupado por usuario e por IP no periodo
     // informado via ?dias=N (padrao 30). Acessivel a admin e master -- nivel
     // abaixo da trilha completa de auditoria (que exige master).
+    // ---- /certificacoes (historico de certificacao de acessos, admin) ----
+    if ($caminho === '/certificacoes') {
+        $admin = exigirLogin();
+        exigirAdmin($admin);
+        $pdo = db();
+        $tab = quoteIdent(tableName('certificacoes'));
+
+        if ($metodo === 'GET') {
+            $stmt = $pdo->query('SELECT * FROM ' . $tab . ' ORDER BY ' . quoteIdent('criado_em') . ' DESC, ' . quoteIdent('id') . ' DESC');
+            responderJson($stmt === false ? [] : $stmt->fetchAll());
+        }
+
+        if ($metodo === 'POST') {
+            $body = corpoRequisicao();
+            $banco = trim((string) ($body['banco'] ?? ''));
+            if ($banco === '') {
+                responderErro(422, 'Informe o banco certificado.');
+            }
+            // O executor e sempre quem esta logado (nao aceita do cliente).
+            $ex = json_encode($body['excecoes'] ?? [], JSON_UNESCAPED_UNICODE);
+            $cols = ['banco','servidor','motor','periodo','executor','usuarios_banco','conformidade','nao_documentados','defasados','excecoes','criado_em'];
+            $ph = implode(', ', array_fill(0, count($cols), '?'));
+            $sql = 'INSERT INTO ' . $tab . ' (' . implode(', ', array_map('quoteIdent', $cols)) . ') VALUES (' . $ph . ')';
+            $vals = [
+                $banco,
+                trim((string) ($body['servidor'] ?? '')),
+                trim((string) ($body['motor'] ?? '')),
+                trim((string) ($body['periodo'] ?? '')),
+                (string) $admin['username'],
+                (int) ($body['usuarios_banco'] ?? 0),
+                (int) ($body['conformidade'] ?? 0),
+                (int) ($body['nao_documentados'] ?? 0),
+                (int) ($body['defasados'] ?? 0),
+                $ex === false ? '[]' : $ex,
+                date('Y-m-d H:i:s'),
+            ];
+            if (dbDriver() === 'pgsql') {
+                $stmt = $pdo->prepare($sql . ' RETURNING ' . quoteIdent('id'));
+                $stmt->execute($vals); $novoId = (int) $stmt->fetchColumn();
+            } else {
+                $pdo->prepare($sql)->execute($vals); $novoId = (int) $pdo->lastInsertId();
+            }
+            registrarAuditoria('certificacoes', $novoId, 'criar', (string) $admin['username'], null, ['banco' => $banco, 'periodo' => $body['periodo'] ?? '']);
+            responderJson(['id' => $novoId], 201);
+        }
+    }
+
+    if (preg_match('#^/certificacoes/(\d+)$#', $caminho, $m) && $metodo === 'DELETE') {
+        // Registrar certificacao e coisa de administrador; EXCLUIR do historico
+        // e restrito ao master -- preserva a trilha de certificacoes contra
+        // remocao por um admin comum (mesmo principio da trilha de Auditoria).
+        $admin = exigirLogin();
+        exigirMaster($admin);
+        $id = (int) $m[1];
+        $pdo = db();
+        $pdo->prepare('DELETE FROM ' . quoteIdent(tableName('certificacoes')) . ' WHERE ' . quoteIdent('id') . ' = ?')->execute([$id]);
+        registrarAuditoria('certificacoes', $id, 'excluir', (string) $admin['username'], null, null);
+        responderVazio(204);
+    }
+
     if ($metodo === 'GET' && $caminho === '/seguranca/stats') {
         $admin = exigirLogin();
         exigirAdmin($admin);

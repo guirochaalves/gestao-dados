@@ -708,6 +708,24 @@ function migrate(): void
             'criado_em' => $carimbo,
             'atualizado_em' => $carimbo,
         ],
+        // Certificacao de acessos: resumo de cada cruzamento entre as permissoes
+        // reais de um banco (CSV extraido pelo DBA) e o que esta registrado em
+        // Acessos. NAO guarda o CSV bruto de permissoes (dado sensivel) -- so o
+        // resultado: contadores e a lista de excecoes em JSON.
+        'certificacoes' => [
+            'id' => $pk,
+            'banco' => 'VARCHAR(150)',
+            'servidor' => 'VARCHAR(150)',
+            'motor' => 'VARCHAR(40)',
+            'periodo' => 'VARCHAR(80)',
+            'executor' => 'VARCHAR(150)',
+            'usuarios_banco' => 'INT NOT NULL DEFAULT 0',
+            'conformidade' => 'INT NOT NULL DEFAULT 0',
+            'nao_documentados' => 'INT NOT NULL DEFAULT 0',
+            'defasados' => 'INT NOT NULL DEFAULT 0',
+            'excecoes' => $txt,
+            'criado_em' => $carimbo,
+        ],
         // Cadastro: listas de opcoes editaveis pelo administrador (Ambiente,
         // Tipo e Status de Mudancas; Criticidade, Tipo de backup e Resultado
         // de Restore). Uma tabela generica com discriminador "categoria" em

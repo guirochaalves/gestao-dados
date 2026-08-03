@@ -927,3 +927,12 @@ tr.row-sem-acesso > td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
 .user-panel .user-chip:hover .nm { color: var(--side-hover-ink); }
 .user-panel .user-chip:hover .rl { color: var(--side-hover-ink); opacity: .72; }
 .user-panel .user-chip:hover .uc-chev { color: var(--side-hover-ink); opacity: .72; }
+
+/* --- Certificacao de Acessos: fluxo a esquerda, historico a direita ------ */
+.cert-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.cert-side { position: sticky; top: 12px; }
+@media (max-width: 1024px) { .cert-layout { grid-template-columns: 1fr; } .cert-side { position: static; } }
+
+/* Botoes de motor na Certificacao (mostram a consulta de cada banco). */
+.cert-motores { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.cert-motores .btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
