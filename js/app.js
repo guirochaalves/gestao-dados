@@ -587,6 +587,7 @@ const I18N = {
     'Defas.': 'Stale',
     'Remover esta certificação do histórico?': 'Remove this certification from history?',
     'Remover (somente Master)': 'Remove (Master only)', 'Baixar relatório PDF': 'Download PDF report',
+    'Faça um cruzamento antes de gerar o relatório.': 'Run a cross-check before generating the report.',
     'Certificação removida': 'Certification removed',
     'Parecer': 'Opinion',
     'Metodologia': 'Methodology',
@@ -4092,8 +4093,13 @@ async function certExcluir(el) {
 // Relatorio de certificacao em PDF (jsPDF + autoTable) -- formato pronto para
 // entrega a auditoria externa: escopo, metodologia, parecer e excecoes.
 async function certGerarPdf(r) {
+  // Chamado de duas formas: pela acao do botao "Gerar relatório PDF" (o
+  // despacho passa o ELEMENTO como argumento) ou por certBaixarPdf (passa um
+  // objeto de resultado). Se veio um elemento (tem nodeType), usa o cruzamento
+  // atual; senao, usa o resultado recebido.
+  if (r && r.nodeType) r = null;
   r = r || certResultado;
-  if (!r) return;
+  if (!r) { toast(tr('Faça um cruzamento antes de gerar o relatório.'), true); return; }
   const { jsPDF } = window.jspdf || {};
   if (!jsPDF) { toast('Biblioteca de PDF não carregada.', true); return; }
 
