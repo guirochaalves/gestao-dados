@@ -1882,7 +1882,7 @@ function buildForm(key, data) {
       const orfao = atual && !bancosCache.some((b) => (f.store === 'servidor' ? b.servidor : b.nome) === atual)
         ? `<option value="${esc(atual)}" selected>${esc(atual)}</option>` : '';
       const fill = f.fillServidor ? ' data-fill-servidor="1"' : '';
-      h += `<select data-k="${f.k}"${fill} data-act="bancoRefChange">` +
+      h += `<select data-k="${f.k}"${fill} data-oninput="bancoRefChange">` +
         `<option value="">${esc(tr(bancosCache.length ? 'Selecione um banco' : 'Nenhum banco cadastrado'))}</option>` +
         orfao + opts + '</select>';
     } else if (f.t === 'bancomulti') {
@@ -4565,7 +4565,6 @@ const ACTIONS = {
   usuariosTemplateCsv,
   usuariosImportarClick,
   // tagselect (campo "Nivel de acesso" e similares)
-  bancoRefChange,
   openTagDropdown,
   addTagOption,
 removeTag,
@@ -4652,6 +4651,7 @@ const SUBMIT_ACTIONS = {
 };
 
 const INPUT_ACTIONS = {
+  bancoRefChange,
   checkSmtpWarn,
   filterCadastroDrawer,
   filterTagOptions,
