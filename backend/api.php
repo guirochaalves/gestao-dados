@@ -1959,6 +1959,44 @@ function despachar(string $metodo, string $caminho): void
         responderJson(['ok' => true]);
     }
 
+    // ---- /mudancas/relatorio/email (envia o relatorio PDF por e-mail) ----
+    // O PDF do relatorio de auditoria de mudancas e montado no navegador e
+    // chega aqui em base64; o portal so valida, decodifica e anexa.
+    if ($caminho === '/mudancas/relatorio/email' && $metodo === 'POST') {
+        $user = exigirLogin();
+        exigirAcessoModulo($user, 'mudancas', false);
+        $body = corpoRequisicao();
+        $para = trim((string) ($body['para'] ?? ''));
+        if ($para === '' || !filter_var($para, FILTER_VALIDATE_EMAIL)) {
+            responderErro(422, 'Informe um e-mail de destino valido.');
+        }
+        $b64 = (string) ($body['pdf'] ?? '');
+        $virgula = strpos($b64, ',');
+        if ($virgula !== false) { $b64 = substr($b64, $virgula + 1); }
+        if (strlen($b64) > 8_000_000) { responderErro(422, 'Anexo muito grande.'); }
+        $binario = base64_decode($b64, true);
+        if ($binario === false || substr($binario, 0, 4) !== '%PDF') {
+            responderErro(422, 'Anexo invalido (nao e um PDF).');
+        }
+        $cfgEmail = configEmail();
+        if ($cfgEmail === null) {
+            responderErro(400, 'Configure o servidor de e-mail em Administracao > E-mail antes de enviar.');
+        }
+        try {
+            smtpEnviar(
+                $cfgEmail,
+                $para,
+                'Relatorio de Auditoria de Mudancas',
+                'Relatorio de auditoria de mudancas em anexo, gerado pelo portal ' . projectTitle() . ' em ' . date('d/m/Y H:i') . '.',
+                ['nome' => 'auditoria_mudancas.pdf', 'tipo' => 'application/pdf', 'conteudo' => $binario]
+            );
+        } catch (Throwable $e) {
+            responderErro(400, $e->getMessage());
+        }
+        registrarAuditoria('mudancas', null, 'relatorio_email', (string) $user['username'], null, ['para' => $para]);
+        responderJson(['ok' => true]);
+    }
+
     // ---- /dashboard ----------------------------------------------------
     if ($metodo === 'GET' && $caminho === '/dashboard/info') {
         // Login exigido: expor motor e versao sem autenticacao permite

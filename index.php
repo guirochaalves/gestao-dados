@@ -451,6 +451,19 @@ header('Content-Type: text/html; charset=utf-8');
   </div>
 </div>
 
+<div class="overlay" id="mudReportOverlay">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-h"><h3 data-i18n>Relatório de auditoria — Mudanças</h3><button class="x" id="mudReportClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button></div>
+    <div class="modal-b" style="grid-template-columns:1fr 1fr">
+      <div class="fld"><label data-i18n>De (início)</label><input type="date" id="mudReportInicio"></div>
+      <div class="fld"><label data-i18n>Até (fim)</label><input type="date" id="mudReportFim"></div>
+      <div class="fld span2" style="grid-column:1/-1"><label data-i18n>Período de referência</label><input type="text" id="mudReportPeriodo" placeholder="ex.: 1º semestre 2026"></div>
+      <div class="fld span2" style="grid-column:1/-1"><label data-i18n>E-mail (para envio, opcional)</label><input type="email" id="mudReportEmail" placeholder="nome@empresa.com"></div>
+    </div>
+    <div class="modal-f"><button class="btn btn-ghost" id="mudReportCancel" data-i18n>Cancelar</button><button class="btn btn-ghost" id="mudReportEnviar" data-i18n>Enviar por e-mail</button><button class="btn btn-primary" id="mudReportBaixar" data-i18n>Baixar PDF</button></div>
+  </div>
+</div>
+
 <div class="overlay" id="emailOverlay">
   <div class="modal" style="max-width:380px">
     <div class="modal-h"><h3 data-i18n>Enviar relatório por e-mail</h3><button class="x" id="emailClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12" /> <path d="M6 6l12 12" /></svg></button></div>

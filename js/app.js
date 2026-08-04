@@ -545,6 +545,28 @@ const I18N = {
     'Porta': 'Port',
     'Ambiente': 'Environment',
     'Arquivo vazio ou sem linhas de dados': 'Empty file or no data rows',
+    'Relatório de auditoria': 'Audit report',
+    'Informe um e-mail de destino': 'Enter a destination e-mail',
+    'Relatório enviado por e-mail': 'Report sent by e-mail',
+    'Justificativa / ação de remediação': 'Justification / remediation action',
+
+    'Relatório de auditoria — Mudanças': 'Audit report — Changes',
+    'Relatório de Auditoria de Mudanças': 'Changes Audit Report',
+    'De (início)': 'From (start)',
+    'Até (fim)': 'To (end)',
+    'E-mail (para envio, opcional)': 'E-mail (for sending, optional)',
+    'Baixar PDF': 'Download PDF',
+    'Total de mudanças': 'Total changes',
+    'Fonte': 'Source',
+    'Portal de Gestão de Dados — módulo Mudanças': 'Data Management Portal — Changes module',
+    'Resumo por status': 'Summary by status',
+    'Mudanças no período': 'Changes in the period',
+    'Nenhuma mudança no período': 'No changes in the period',
+    'todo o período': 'the whole period',
+    'Chamado': 'Ticket',
+    'Aprovador': 'Approver',
+    'Resultado': 'Outcome',
+    'Descrição': 'Description',
     'Certificação de Acessos': 'Access Certification',
     'Certificação': 'Certification',
     'Cruza as permissões reais de um banco com o que está registrado em Acessos': 'Cross-checks the real permissions of a database against what is registered in Access',
@@ -1565,6 +1587,7 @@ async function renderTable(key) {
   }
   const icoExport = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4" /> <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /> <path d="M9 9l1 0" /> <path d="M9 13l6 0" /> <path d="M9 17l6 0" /></svg>`;
   if (rows.length && key === 'mudancas') foot += `<button type="button" class="btn btn-ghost" data-act="exportMudancasCsv">${icoExport}${esc(tr('Exportar CSV'))}</button>`;
+  if (key === 'mudancas') foot += `<button type="button" class="btn btn-ghost" data-act="openMudReport">${I.shield}${esc(tr('Relatório de auditoria'))}</button>`;
   if (rows.length && key !== 'mudancas') foot += `<button type="button" class="btn btn-ghost" data-act="exportCsv" data-key="${key}">${icoExport}${esc(tr('Exportar CSV'))}</button>`;
   if (foot) h += `<div style="margin-top:14px;text-align:right;display:flex;gap:8px;justify-content:flex-end">${foot}</div>`;
   if (key === 'integracoes') {
@@ -3320,6 +3343,10 @@ function openEmailReport(key) {
   $('emailOverlay').classList.add('show');
 }
 function closeEmailReport() { $('emailOverlay').classList.remove('show'); emailReportKey = null; certEmailResultado = null; }
+$('mudReportClose').addEventListener('click', closeMudReport);
+$('mudReportCancel').addEventListener('click', closeMudReport);
+$('mudReportBaixar').addEventListener('click', mudReportBaixar);
+$('mudReportEnviar').addEventListener('click', mudReportEnviar);
 $('emailClose').addEventListener('click', closeEmailReport);
 $('emailCancel').addEventListener('click', closeEmailReport);
 $('emailSend').addEventListener('click', async () => {
@@ -4226,12 +4253,20 @@ async function certConstruirPdf(r) {
   });
 
   const secao = (titulo, itens, risco) => {
+    // Titulo da secao como faixa escura, seguido dos cabecalhos de coluna e das
+    // linhas -- com a coluna "Justificativa / acao de remediacao" vazia e larga
+    // para o revisor preencher a mao apos imprimir.
+    let y = doc.lastAutoTable.finalY + 7;
+    if (y > pageH - 34) { doc.addPage(); cabecalho(); y = 28; }
+    doc.setFillColor(55, 65, 81); doc.rect(12, y, pageW - 24, 6.5, 'F');
+    doc.setTextColor(255, 255, 255); doc.setFont(undefined, 'bold'); doc.setFontSize(8.5);
+    doc.text(titulo, 14, y + 4.5);
     doc.autoTable({
-      startY: doc.lastAutoTable.finalY + 6,
-      head: [[titulo, '', '']],
-      body: itens.length ? itens.map((x) => [x.u, x.p, tr(risco)]) : [[tr('Nenhuma ocorrência'), '', '']],
-      columnStyles: { 0: { cellWidth: 70 }, 2: { cellWidth: 30, halign: 'center' } },
-      styles: { fontSize: 8.5 }, headStyles: { fillColor: [55, 65, 81], fontSize: 9 },
+      startY: y + 6.5,
+      head: [[tr('Usuário'), tr('Papel / permissão'), tr('Risco'), tr('Justificativa / ação de remediação')]],
+      body: itens.length ? itens.map((x) => [x.u, x.p, tr(risco), '']) : [[tr('Nenhuma ocorrência'), '', '', '']],
+      columnStyles: { 0: { cellWidth: 36 }, 1: { cellWidth: 44 }, 2: { cellWidth: 22, halign: 'center' }, 3: { cellWidth: 'auto' } },
+      styles: { fontSize: 8.5, minCellHeight: 8 }, headStyles: { fillColor: [107, 114, 128], fontSize: 8 },
       margin: { left: 12, right: 12 }, didDrawPage: () => { cabecalho(); },
     });
   };
@@ -4262,6 +4297,135 @@ async function certGerarPdf(r) {
   doc.save('certificacao_' + (r.banco || 'banco').replace(/[^a-z0-9]+/gi, '_') + '.pdf');
 }
 
+
+
+// ===========================================================================
+// Relatorio de auditoria de Mudancas -- PDF formal para entrega a auditoria,
+// no mesmo padrao da Certificacao (escopo, resumo, lista de mudancas, area de
+// assinatura), com download e envio por e-mail. Sem cruzamento: Mudancas nao
+// tem um "lado real" do banco para comparar.
+// ===========================================================================
+function openMudReport() {
+  $('mudReportInicio').value = '';
+  $('mudReportFim').value = '';
+  $('mudReportPeriodo').value = '';
+  $('mudReportEmail').value = '';
+  $('mudReportOverlay').classList.add('show');
+}
+function closeMudReport() { $('mudReportOverlay').classList.remove('show'); }
+
+// Monta o documento PDF e devolve { doc, total } (ou null).
+async function mudReportConstruirPdf() {
+  const { jsPDF } = window.jspdf || {};
+  if (!jsPDF) { toast('Biblioteca de PDF não carregada.', true); return null; }
+  const inicio = $('mudReportInicio').value;
+  const fim = $('mudReportFim').value;
+  const periodo = $('mudReportPeriodo').value.trim();
+  const qs = [];
+  if (inicio) qs.push('inicio=' + encodeURIComponent(inicio));
+  if (fim) qs.push('fim=' + encodeURIComponent(fim));
+  let rows;
+  try { rows = await api.get('/mudancas' + (qs.length ? '?' + qs.join('&') : '')); } catch (e) { toast(e.message, true); return null; }
+
+  const accent = hexToRgb(getComputedStyle(document.documentElement).getPropertyValue('--accent'));
+  const nomeProjeto = window.NOME_PROJETO || 'Portal de Dados';
+  const agora = new Date();
+  const geradoEm = fmtDate(agora.toISOString().slice(0, 10)) + ' ' + agora.toTimeString().slice(0, 5);
+  const execNome = currentUser.nome_completo || currentUser.username;
+  const logoPng = await obterLogoPdf();
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+
+  function cabecalho() {
+    doc.setFillColor(28, 32, 42); doc.rect(0, 0, pageW, 20, 'F');
+    doc.setFillColor(accent[0], accent[1], accent[2]); doc.rect(0, 20, pageW, 1.4, 'F');
+    if (logoPng) { try { doc.addImage(logoPng, 'PNG', 4, 4, 12, 12); } catch (e) {} }
+    const x = logoPng ? 20 : 12;
+    doc.setTextColor(255, 255, 255); doc.setFont(undefined, 'bold'); doc.setFontSize(12.5);
+    doc.text(nomeProjeto, x, 8.5);
+    doc.setFont(undefined, 'normal'); doc.setFontSize(10);
+    doc.text(tr('Relatório de Auditoria de Mudanças'), x, 15.5);
+    doc.setTextColor(200, 204, 214); doc.setFontSize(8);
+    doc.text(tr('Gerado em') + ': ' + geradoEm, pageW - 12, 8.5, { align: 'right' });
+  }
+  function rodape(data) {
+    doc.setFontSize(7.5); doc.setTextColor(150, 150, 150);
+    doc.text(nomeProjeto + ' — ' + tr('Relatório de Auditoria de Mudanças'), 12, pageH - 7);
+    doc.text(String(data.pageNumber), pageW - 12, pageH - 7, { align: 'right' });
+  }
+
+  const per = periodo || (inicio || fim ? ((inicio ? fmtDate(inicio) : '—') + ' ' + tr('até') + ' ' + (fim ? fmtDate(fim) : '—')) : tr('todo o período'));
+  const meta = [
+    [tr('Período de referência'), per],
+    [tr('Total de mudanças'), String(rows.length)],
+    [tr('Executado por'), execNome],
+    [tr('Fonte'), tr('Portal de Gestão de Dados — módulo Mudanças')],
+  ];
+  doc.autoTable({
+    startY: 27, theme: 'plain', styles: { fontSize: 9, cellPadding: 1.2 },
+    columnStyles: { 0: { textColor: [110, 110, 110], cellWidth: 55 }, 1: { textColor: [17, 24, 39] } },
+    body: meta, margin: { left: 12, right: 12 }, didDrawPage: () => { cabecalho(); rodape({ pageNumber: doc.internal.getNumberOfPages() }); },
+  });
+
+  // Resumo por status.
+  const porStatus = {};
+  rows.forEach((m) => { const st = (m.status || '—'); porStatus[st] = (porStatus[st] || 0) + 1; });
+  let y = doc.lastAutoTable.finalY + 6;
+  doc.setFont(undefined, 'bold'); doc.setFontSize(11); doc.setTextColor(accent[0], accent[1], accent[2]);
+  doc.text(tr('Resumo por status'), 12, y);
+  doc.autoTable({
+    startY: y + 2, head: [Object.keys(porStatus).map((k) => tr(k))],
+    body: [Object.values(porStatus)], styles: { halign: 'center', fontSize: 10 }, headStyles: { fillColor: accent, fontSize: 8 },
+    margin: { left: 12, right: 12 }, didDrawPage: () => { cabecalho(); },
+  });
+
+  // Lista de mudancas.
+  y = doc.lastAutoTable.finalY + 8;
+  doc.setFont(undefined, 'bold'); doc.setFontSize(11); doc.setTextColor(accent[0], accent[1], accent[2]);
+  doc.text(tr('Mudanças no período'), 12, y);
+  const bancosTxt = (v) => String(v || '').replace(/\s*,\s*/g, ', ');
+  doc.autoTable({
+    startY: y + 2,
+    head: [[tr('Chamado'), tr('Data'), tr('Ambiente'), tr('Tipo'), tr('Bancos'), tr('Descrição'), tr('Aprovador'), tr('Status'), tr('Resultado')]],
+    body: rows.length ? rows.map((m) => [
+      m.codigo || '', m.data ? fmtDate(m.data) : '', m.ambiente || '', m.tipo || '', bancosTxt(m.bancos),
+      m.descricao || '', m.aprovador || '', m.status || '', m.resultado || '',
+    ]) : [[tr('Nenhuma mudança no período'), '', '', '', '', '', '', '', '']],
+    styles: { fontSize: 7.5, cellPadding: 1.5, overflow: 'linebreak' },
+    columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 18 }, 4: { cellWidth: 40 }, 5: { cellWidth: 55 }, 8: { cellWidth: 45 } },
+    headStyles: { fillColor: [55, 65, 81], fontSize: 7.5 },
+    margin: { left: 12, right: 12 }, didDrawPage: () => { cabecalho(); rodape({ pageNumber: doc.internal.getNumberOfPages() }); },
+  });
+
+  let yf = doc.lastAutoTable.finalY + 16;
+  if (yf > pageH - 24) { doc.addPage(); cabecalho(); yf = 30; }
+  doc.setDrawColor(150); doc.line(14, yf, 94, yf); doc.line(pageW - 94, yf, pageW - 14, yf);
+  doc.setFontSize(8); doc.setTextColor(110, 110, 110);
+  doc.text(tr('Executado por') + ' — ' + execNome, 14, yf + 5);
+  doc.text(tr('Revisado / aprovado por'), pageW - 94, yf + 5);
+  return { doc, total: rows.length };
+}
+
+async function mudReportBaixar() {
+  const r = await mudReportConstruirPdf();
+  if (!r) return;
+  r.doc.save('auditoria_mudancas.pdf');
+  closeMudReport();
+}
+
+async function mudReportEnviar() {
+  const para = $('mudReportEmail').value.trim();
+  if (!para) { toast(tr('Informe um e-mail de destino'), true); return; }
+  const btn = $('mudReportEnviar'); btn.disabled = true;
+  try {
+    const r = await mudReportConstruirPdf();
+    if (!r) return;
+    await api.post('/mudancas/relatorio/email', { para, pdf: r.doc.output('datauristring') });
+    toast(tr('Relatório enviado por e-mail'));
+    closeMudReport();
+  } catch (e) { toast(e.message, true); } finally { btn.disabled = false; }
+}
 
 async function renderSeguranca() {
   let stats = { por_usuario: [], por_ip: [], total: 0, dias: segDias };
@@ -4558,6 +4722,7 @@ const ACTIONS = {
   openEdit: (el) => openEdit(el.dataset.key, el.dataset.id),
   delRow: (el) => delRow(el.dataset.key, el.dataset.id),
   exportMudancasCsv: () => exportarMudancasCsv(),
+  openMudReport,
   exportCsv: (el) => exportCsv(el.dataset.key),
   // Dicionario de dados -- importacao em lote (CSV)
   dicTemplateCsv,
