@@ -607,7 +607,7 @@ const I18N = {
     'Histórico de certificações': 'Certification history',
     'Nenhuma certificação registrada ainda.': 'No certification recorded yet.',
     'Por': 'By',
-    'Conf.': 'Compl.',
+    'Conf.': 'Compl.', 'Conformidade': 'Compliance', 'Faixas': 'Bands',
     'Não doc.': 'Undoc.',
     'Defas.': 'Stale',
     'Remover esta certificação do histórico?': 'Remove this certification from history?',
@@ -4189,10 +4189,12 @@ function certHistoricoHtml(hist) {
   const ehMaster = currentUser && currentUser.role === 'master';
   let h = `<div class="card cert-side" style="padding:22px"><div class="sec-h" style="margin-top:0">${esc(tr('Histórico de certificações'))}</div>`;
   if (!hist.length) { h += `<div class="empty" style="padding:16px"><p>${esc(tr('Nenhuma certificação registrada ainda.'))}</p></div></div>`; return h; }
-  h += `<div class="tbl-wrap"><table><thead><tr><th>${esc(tr('Banco'))}</th><th>${esc(tr('Período'))}</th><th>${esc(tr('Data'))}</th><th>${esc(tr('Por'))}</th><th>${esc(tr('Conf.'))}</th><th>${esc(tr('Não doc.'))}</th><th>${esc(tr('Defas.'))}</th><th></th></tr></thead><tbody>`;
+  h += `<div class="tbl-wrap"><table><thead><tr><th>${esc(tr('Banco'))}</th><th>${esc(tr('Período'))}</th><th>${esc(tr('Data'))}</th><th>${esc(tr('Por'))}</th><th>${esc(tr('Conformidade'))}</th><th>${esc(tr('Conf.'))}</th><th>${esc(tr('Não doc.'))}</th><th>${esc(tr('Defas.'))}</th><th></th></tr></thead><tbody>`;
   hist.forEach((c) => {
-    const exc = (Number(c.nao_documentados) || 0) + (Number(c.defasados) || 0);
+    const cp = certCompliance(Number(c.conformidade) || 0, (Number(c.nao_documentados) || 0) + (Number(c.defasados) || 0));
+    const pillCls = cp.nivel === 'bom' ? 'p-green' : (cp.nivel === 'medio' ? 'p-amber' : 'p-red');
     h += `<tr><td class="mono">${esc(c.banco)}</td><td>${esc(c.periodo || '—')}</td><td class="mono">${c.criado_em ? esc(fmtDate(c.criado_em.slice(0, 10))) : '—'}</td><td>${esc(c.executor || '—')}</td>
+      <td><span class="pill ${pillCls}" title="${esc(tr(cp.label))}">${cp.pct}%</span></td>
       <td>${esc(String(c.conformidade))}</td><td><span class="pill ${Number(c.nao_documentados) ? 'p-amber' : 'p-gray'}">${esc(String(c.nao_documentados))}</span></td><td>${esc(String(c.defasados))}</td>
       <td><div class="row-act" style="justify-content:flex-end"><button class="icon-btn" data-act="certBaixarPdf" data-id="${c.id}" title="${esc(tr('Baixar relatório PDF'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 11l5 5l5 -5" /> <path d="M12 4l0 12" /></svg></button><button class="icon-btn" data-act="certEmail" data-id="${c.id}" title="${esc(tr('Enviar por e-mail'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10" /> <path d="M3 7l9 6l9 -6" /></svg></button>${ehMaster ? `<button class="icon-btn del" data-act="certExcluir" data-id="${c.id}" title="${esc(tr('Remover (somente Master)'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button>` : ''}</div></td></tr>`;
   });
@@ -4312,6 +4314,23 @@ async function certConstruirPdf(r) {
   doc.setFont(undefined, 'bold'); doc.setFontSize(11); doc.setTextColor(accent[0], accent[1], accent[2]);
   doc.text(tr('Parecer') + ': ' + (total === 0 ? tr('Sem exceções') : total + ' ' + tr('exceção(ões) a tratar')), 12, y);
   y += 3;
+
+  // Indice de conformidade em destaque, colorido por nivel (registro auditavel do percentual).
+  const cp = certCompliance(r.ok.length, total);
+  const corNivel = cp.nivel === 'bom' ? [4, 120, 87] : (cp.nivel === 'medio' ? [180, 83, 9] : [220, 38, 38]);
+  const fundoNivel = cp.nivel === 'bom' ? [236, 253, 245] : (cp.nivel === 'medio' ? [255, 251, 235] : [254, 242, 242]);
+  y += 3;
+  doc.setFillColor(fundoNivel[0], fundoNivel[1], fundoNivel[2]);
+  doc.roundedRect(12, y, pageW - 24, 12, 1.5, 1.5, 'F');
+  doc.setTextColor(90, 90, 90); doc.setFont(undefined, 'normal'); doc.setFontSize(8.5);
+  doc.text(tr('Conformidade de acessos'), 16, y + 5);
+  doc.setTextColor(corNivel[0], corNivel[1], corNivel[2]); doc.setFont(undefined, 'bold'); doc.setFontSize(15);
+  doc.text(cp.pct + '%', 16, y + 10);
+  doc.setFontSize(9.5);
+  doc.text(tr(cp.label), 40, y + 10);
+  doc.setTextColor(120, 120, 120); doc.setFont(undefined, 'normal'); doc.setFontSize(7.5);
+  doc.text(tr('Faixas') + ': ' + tr('Ruim') + ' 0–50% · ' + tr('Moderado') + ' 51–90% · ' + tr('Excelente') + ' 91–100%', pageW - 16, y + 7.5, { align: 'right' });
+  y += 15;
 
   doc.autoTable({
     startY: y + 2, head: [[tr('Usuários no banco'), tr('Em conformidade'), tr('Não documentados'), tr('Registros defasados')]],
