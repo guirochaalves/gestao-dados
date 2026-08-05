@@ -567,6 +567,9 @@ const I18N = {
     'Aprovador': 'Approver',
     'Resultado': 'Outcome',
     'Descrição': 'Description',
+    'Compliance': 'Compliance', 'Excelente': 'Excellent', 'Moderado': 'Moderate', 'Ruim': 'Poor', 'de conformidade': 'compliant', 'em conformidade': 'compliant', 'exceção(ões)': 'exception(s)',
+    'Compliance de acessos': 'Access compliance', 'banco(s) certificado(s)': 'certified database(s)',
+    'Abrir Certificação de Acessos': 'Open Access Certification',
     'Certificação de Acessos': 'Access Certification',
     'Certificação': 'Certification',
     'Cruza as permissões reais de um banco com o que está registrado em Acessos': 'Cross-checks the real permissions of a database against what is registered in Access',
@@ -3928,7 +3931,7 @@ async function renderCertificacao() {
 
   if (semBanco) {
     h += `<div class="empty" style="padding:20px">${I.db}<p>${esc(tr('Cadastre um banco no módulo Bancos antes de certificar.'))}</p></div></div>`;
-    $('content').innerHTML = `<div class="cert-layout">${h}${certHistoricoHtml(historico)}</div>`;
+    $('content').innerHTML = certHeroAgregado(historico) + `<div class="cert-layout">${h}${certHistoricoHtml(historico)}</div>`;
     return;
   }
 
@@ -3957,7 +3960,7 @@ async function renderCertificacao() {
     <div id="certResultado" style="margin-top:16px"></div>
   </div>`;
 
-  $('content').innerHTML = `<div class="cert-layout">${h}${certHistoricoHtml(historico)}</div>`;
+  $('content').innerHTML = certHeroAgregado(historico) + `<div class="cert-layout">${h}${certHistoricoHtml(historico)}</div>`;
   certTrocaBanco();
 }
 
@@ -4078,13 +4081,61 @@ function certTabelaExc(itens, risco) {
   return itens.map((x) => `<tr><td>${esc(x.u)}</td><td class="mono">${esc(x.p)}</td><td><span class="pill ${risco === 'ALTO' ? 'p-amber' : 'p-gray'}">${esc(tr(risco === 'ALTO' ? 'Alto' : 'Médio'))}</span></td></tr>`).join('');
 }
 
+// Compliance = conformidade / (conformidade + excecoes). Usa as mesmas classes
+// de tile dos demais indicadores: 'ok' (verde) quando alto, 'attn' (ambar)
+// quando ha exceções a tratar.
+// Faixas de conformidade: 0-50 Ruim (vermelho), 51-90 Moderado (ambar),
+// 91-100 Excelente (verde). Devolve tudo pronto para o cartao "hero".
+function certCompliance(ok, excecoes) {
+  const tot = ok + excecoes;
+  const pct = tot === 0 ? 100 : Math.round((ok / tot) * 100);
+  let nivel, label;
+  if (pct >= 91) { nivel = 'bom'; label = 'Excelente'; }
+  else if (pct >= 51) { nivel = 'medio'; label = 'Moderado'; }
+  else { nivel = 'ruim'; label = 'Ruim'; }
+  return { pct, nivel, label, cls: pct >= 91 ? 'ok' : 'attn' };
+}
+
+// Icone por nivel (check verde / alerta ambar / octagono vermelho).
+function certNivelIcone(nivel) {
+  if (nivel === 'bom') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0 -18" fill="currentColor" fill-opacity="0.18" /><path d="M9 12l2 2l4 -4" /></svg>';
+  if (nivel === 'medio') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4" /><path d="M10.36 3.6l-8.1 13.5a1.9 1.9 0 0 0 1.63 2.9h16.22a1.9 1.9 0 0 0 1.63 -2.9l-8.1 -13.5a1.9 1.9 0 0 0 -3.28 0" fill="currentColor" fill-opacity="0.15" /><path d="M12 16h.01" /></svg>';
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.7 3h6.6l4.7 4.7v6.6l-4.7 4.7h-6.6l-4.7 -4.7v-6.6z" fill="currentColor" fill-opacity="0.15" /><path d="M12 8v4" /><path d="M12 16h.01" /></svg>';
+}
+
+// Cartao "hero" de compliance: % grande, nivel e detalhe, colorido por faixa.
+function complianceHeroHtml(ok, excecoes, sub) {
+  const c = certCompliance(ok, excecoes);
+  return `<div class="comp-hero comp-${c.nivel}">
+    <div class="ch-ico">${certNivelIcone(c.nivel)}</div>
+    <div class="ch-body">
+      <div class="ch-top"><span class="ch-pct">${c.pct}%</span><span class="ch-badge">${esc(tr(c.label))}</span></div>
+      <div class="ch-sub">${esc(sub)}</div>
+    </div>
+  </div>`;
+}
+
+// Compliance agregado do historico: certificacao mais recente de cada banco.
+function certHeroAgregado(hist) {
+  const ult = {};
+  (hist || []).forEach((c) => { const k = (c.banco || '') + '|' + (c.servidor || ''); if (!ult[k]) ult[k] = c; });
+  const lista = Object.values(ult);
+  if (!lista.length) return '';
+  let ok = 0; let exc = 0;
+  lista.forEach((c) => { ok += Number(c.conformidade) || 0; exc += (Number(c.nao_documentados) || 0) + (Number(c.defasados) || 0); });
+  const sub = lista.length + ' ' + tr('banco(s) certificado(s)') + ' · ' + exc + ' ' + tr('exceção(ões)');
+  return complianceHeroHtml(ok, exc, sub);
+}
+
 function certRenderResultado() {
   const r = certResultado;
   if (!r) return;
   const el = $('certResultado');
   const total = r.naoDoc.length + r.defasados.length;
+  const subHero = r.ok.length + ' ' + tr('em conformidade') + ' · ' + total + ' ' + tr('exceção(ões)');
   el.innerHTML = `
-    <div class="tiles" style="grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+    ${complianceHeroHtml(r.ok.length, total, subHero)}
+    <div class="tiles" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px">
       <div class="tile"><div class="tile-ico">${I.users}</div><div class="lab">${esc(tr('Usuários no banco'))}</div><div class="val">${r.usuariosBanco}</div></div>
       <div class="tile ok"><div class="tile-ico">${I.shield}</div><div class="lab">${esc(tr('Em conformidade'))}</div><div class="val">${r.ok.length}</div></div>
       <div class="tile ${r.naoDoc.length ? 'attn' : 'ok'}"><div class="tile-ico">${I.alert}</div><div class="lab">${esc(tr('Não documentados'))}</div><div class="val">${r.naoDoc.length}</div></div>
@@ -4723,6 +4774,7 @@ const ACTIONS = {
   delRow: (el) => delRow(el.dataset.key, el.dataset.id),
   exportMudancasCsv: () => exportarMudancasCsv(),
   openMudReport,
+  irCertificacao: () => navTo('certificacao'),
   exportCsv: (el) => exportCsv(el.dataset.key),
   // Dicionario de dados -- importacao em lote (CSV)
   dicTemplateCsv,

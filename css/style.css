@@ -936,3 +936,17 @@ tr.row-sem-acesso > td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
 /* Botoes de motor na Certificacao (mostram a consulta de cada banco). */
 .cert-motores { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
 .cert-motores .btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+
+/* --- Compliance "hero": % grande + nivel, colorido por faixa ------------- */
+.comp-hero { display: flex; align-items: center; gap: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 18px 20px; margin-bottom: 16px; }
+.comp-hero .ch-ico { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex: none; }
+.comp-hero .ch-ico svg { width: 26px; height: 26px; }
+.comp-hero .ch-body { flex: 1; min-width: 0; }
+.comp-hero .ch-top { display: flex; align-items: baseline; gap: 12px; }
+.comp-hero .ch-pct { font-size: 34px; font-weight: 700; font-family: var(--mono); letter-spacing: -1px; line-height: 1; }
+.comp-hero .ch-badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+.comp-hero .ch-sub { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+.comp-hero.comp-bom .ch-ico { background: var(--green-soft); color: var(--green); } .comp-hero.comp-bom .ch-pct { color: var(--green); } .comp-hero.comp-bom .ch-badge { background: var(--green-soft); color: var(--green); }
+.comp-hero.comp-medio .ch-ico { background: var(--amber-soft); color: var(--amber); } .comp-hero.comp-medio .ch-pct { color: var(--amber); } .comp-hero.comp-medio .ch-badge { background: var(--amber-soft); color: var(--amber); }
+.comp-hero.comp-ruim .ch-ico { background: var(--red-soft); color: var(--red); } .comp-hero.comp-ruim .ch-pct { color: var(--red); } .comp-hero.comp-ruim .ch-badge { background: var(--red-soft); color: var(--red); }
