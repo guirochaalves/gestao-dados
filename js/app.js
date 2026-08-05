@@ -754,6 +754,7 @@ const I18N = {
 
     'Filtros': 'Filters', 'Colunas': 'Columns', 'Ordenar': 'Sort', 'Padrão': 'Default',
     'selecionado(s)': 'selected', 'Excluir selecionados': 'Delete selected',
+    'Filtrar por data': 'Filter by date', 'Selecionar todos': 'Select all', 'Selecionar': 'Select', 'Nenhuma certificação no período.': 'No certifications in the period.', 'certificação(ões) do histórico?': 'certification(s) from the history?', 'Certificações removidas': 'Certifications removed', 'Excluir TODAS as certificações do histórico? Esta ação não pode ser desfeita.': 'Delete ALL certifications from the history? This action cannot be undone.', 'Histórico de certificações limpo': 'Certification history cleared',
     'Mostrando': 'Showing', 'de': 'of', 'Buscar...': 'Search...',
     'Excluir os registros selecionados? Esta ação não pode ser desfeita.': 'Delete the selected records? This action cannot be undone.',
     'Registros excluídos': 'Records deleted',
@@ -3905,6 +3906,19 @@ CERT_QUERIES['mariadb'] = CERT_QUERIES['mysql'];
 
 let certHistorico = [];     // historico carregado (para regenerar o PDF)
 let certResultado = null;   // ultimo cruzamento: {banco, servidor, motor, periodo, naoDoc, defasados, ok, usuariosBanco}
+let certSelecao = new Set(); // ids marcados no historico (para exclusao em lote)
+let certFiltroDe = '';      // filtro de data (inicio) sobre criado_em
+let certFiltroAte = '';     // filtro de data (fim) sobre criado_em
+
+// Historico apos aplicar o filtro de data (compara pela data de criacao, YYYY-MM-DD).
+function certHistoricoFiltrado() {
+  return (certHistorico || []).filter((c) => {
+    const d = c.criado_em ? String(c.criado_em).slice(0, 10) : '';
+    if (certFiltroDe && (!d || d < certFiltroDe)) return false;
+    if (certFiltroAte && (!d || d > certFiltroAte)) return false;
+    return true;
+  });
+}
 
 function certNorm(x) {
   return String(x || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -3922,6 +3936,8 @@ async function renderCertificacao() {
   try { historico = await api.get('/certificacoes'); } catch (e) { historico = []; }
   certHistorico = historico;
   certResultado = null;
+  certSelecao = new Set();
+  certFiltroDe = ''; certFiltroAte = '';
 
   const opts = bancosCache.map((b) => `<option value="${b.id}">${esc(bancoLabel(b))}</option>`).join('');
   const semBanco = bancosCache.length === 0;
@@ -3931,7 +3947,7 @@ async function renderCertificacao() {
 
   if (semBanco) {
     h += `<div class="empty" style="padding:20px">${I.db}<p>${esc(tr('Cadastre um banco no módulo Bancos antes de certificar.'))}</p></div></div>`;
-    $('content').innerHTML = certHeroAgregado(historico) + `<div class="cert-layout">${h}${certHistoricoHtml(historico)}</div>`;
+    $('content').innerHTML = certHeroAgregado(historico) + `<div class="cert-layout">${h}${certHistoricoHtml()}</div>`;
     return;
   }
 
@@ -3960,7 +3976,7 @@ async function renderCertificacao() {
     <div id="certResultado" style="margin-top:16px"></div>
   </div>`;
 
-  $('content').innerHTML = certHeroAgregado(historico) + `<div class="cert-layout">${h}${certHistoricoHtml(historico)}</div>`;
+  $('content').innerHTML = certHeroAgregado(historico) + `<div class="cert-layout">${h}${certHistoricoHtml()}</div>`;
   certTrocaBanco();
 }
 
@@ -4185,21 +4201,64 @@ async function certSalvar() {
   } catch (e) { toast(e.message, true); }
 }
 
-function certHistoricoHtml(hist) {
-  const ehMaster = currentUser && currentUser.role === 'master';
+function certHistoricoHtml() {
   let h = `<div class="card cert-side" style="padding:22px"><div class="sec-h" style="margin-top:0">${esc(tr('Histórico de certificações'))}</div>`;
-  if (!hist.length) { h += `<div class="empty" style="padding:16px"><p>${esc(tr('Nenhuma certificação registrada ainda.'))}</p></div></div>`; return h; }
-  h += `<div class="tbl-wrap"><table><thead><tr><th>${esc(tr('Banco'))}</th><th>${esc(tr('Período'))}</th><th>${esc(tr('Data'))}</th><th>${esc(tr('Por'))}</th><th>${esc(tr('Conformidade'))}</th><th>${esc(tr('Conf.'))}</th><th>${esc(tr('Não doc.'))}</th><th>${esc(tr('Defas.'))}</th><th></th></tr></thead><tbody>`;
-  hist.forEach((c) => {
+  h += `<div class="cert-hist-filtro">
+    <span class="hint-inline">${esc(tr('Filtrar por data'))}:</span>
+    <input type="date" class="cert-filtro-data" data-campo="de" value="${esc(certFiltroDe)}" data-oninput="certFiltrarData" aria-label="${esc(tr('De'))}">
+    <span class="hint-inline">${esc(tr('até'))}</span>
+    <input type="date" class="cert-filtro-data" data-campo="ate" value="${esc(certFiltroAte)}" data-oninput="certFiltrarData" aria-label="${esc(tr('Até'))}">
+    ${(certFiltroDe || certFiltroAte) ? `<button type="button" class="btn btn-ghost btn-sm" data-act="certLimparFiltro">${esc(tr('Limpar'))}</button>` : ''}
+  </div>`;
+  h += `<div id="certHistBody">${certHistBodyHtml()}</div></div>`;
+  return h;
+}
+
+// Corpo re-renderizavel do historico: barra de selecao (quando ha marcados) e a tabela.
+function certHistBodyHtml() {
+  const ehMaster = currentUser && currentUser.role === 'master';
+  const rows = certHistoricoFiltrado();
+  const temFiltro = !!(certFiltroDe || certFiltroAte);
+  if (!rows.length) {
+    return `<div class="empty" style="padding:16px"><p>${esc(temFiltro ? tr('Nenhuma certificação no período.') : tr('Nenhuma certificação registrada ainda.'))}</p></div>`;
+  }
+  // IDs visiveis (para o "selecionar todos" respeitar o filtro atual).
+  const idsVisiveis = rows.map((c) => String(c.id));
+  const selVis = idsVisiveis.filter((id) => certSelecao.has(id));
+  const todosMarcados = selVis.length > 0 && selVis.length === idsVisiveis.length;
+
+  let h = '';
+  if (ehMaster && certSelecao.size > 0) {
+    h += `<div class="tbl-toolbar tbl-toolbar-sel" style="margin-bottom:10px">
+      <span class="tbl-sel-info">${certSelecao.size} ${esc(tr('selecionado(s)'))}</span>
+      <div class="tbl-toolbar-actions">
+        <button type="button" class="btn btn-ghost" data-act="certLimparSel">${esc(tr('Cancelar'))}</button>
+        <button type="button" class="btn btn-red" data-act="certExcluirLote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>${esc(tr('Excluir selecionados'))}</button>
+      </div>
+    </div>`;
+  } else if (ehMaster) {
+    h += `<div class="tbl-toolbar"><span class="tbl-toolbar-info"></span><div class="tbl-toolbar-actions">
+      <button type="button" class="btn btn-red" data-act="certExcluirTodos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>${esc(tr('Excluir todos'))}</button>
+    </div></div>`;
+  }
+  h += `<div class="tbl-wrap"><table><thead><tr>${ehMaster ? `<th class="th-check"><input type="checkbox" data-act="certSelTodos" ${todosMarcados ? 'checked' : ''} aria-label="${esc(tr('Selecionar todos'))}"></th>` : ''}<th>${esc(tr('Banco'))}</th><th>${esc(tr('Período'))}</th><th>${esc(tr('Data'))}</th><th>${esc(tr('Por'))}</th><th>${esc(tr('Conformidade'))}</th><th>${esc(tr('Conf.'))}</th><th>${esc(tr('Não doc.'))}</th><th>${esc(tr('Defas.'))}</th><th></th></tr></thead><tbody>`;
+  rows.forEach((c) => {
     const cp = certCompliance(Number(c.conformidade) || 0, (Number(c.nao_documentados) || 0) + (Number(c.defasados) || 0));
     const pillCls = cp.nivel === 'bom' ? 'p-green' : (cp.nivel === 'medio' ? 'p-amber' : 'p-red');
-    h += `<tr><td class="mono">${esc(c.banco)}</td><td>${esc(c.periodo || '—')}</td><td class="mono">${c.criado_em ? esc(fmtDate(c.criado_em.slice(0, 10))) : '—'}</td><td>${esc(c.executor || '—')}</td>
+    const marcado = certSelecao.has(String(c.id));
+    h += `<tr class="${marcado ? 'row-sel' : ''}">${ehMaster ? `<td class="td-check"><input type="checkbox" data-act="certSelLinha" data-id="${c.id}" ${marcado ? 'checked' : ''} aria-label="${esc(tr('Selecionar'))}"></td>` : ''}<td class="mono">${esc(c.banco)}</td><td>${esc(c.periodo || '—')}</td><td class="mono">${c.criado_em ? esc(fmtDate(c.criado_em.slice(0, 10))) : '—'}</td><td>${esc(c.executor || '—')}</td>
       <td><span class="pill ${pillCls}" title="${esc(tr(cp.label))}">${cp.pct}%</span></td>
       <td>${esc(String(c.conformidade))}</td><td><span class="pill ${Number(c.nao_documentados) ? 'p-amber' : 'p-gray'}">${esc(String(c.nao_documentados))}</span></td><td>${esc(String(c.defasados))}</td>
       <td><div class="row-act" style="justify-content:flex-end"><button class="icon-btn" data-act="certBaixarPdf" data-id="${c.id}" title="${esc(tr('Baixar relatório PDF'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /> <path d="M7 11l5 5l5 -5" /> <path d="M12 4l0 12" /></svg></button><button class="icon-btn" data-act="certEmail" data-id="${c.id}" title="${esc(tr('Enviar por e-mail'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10" /> <path d="M3 7l9 6l9 -6" /></svg></button>${ehMaster ? `<button class="icon-btn del" data-act="certExcluir" data-id="${c.id}" title="${esc(tr('Remover (somente Master)'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button>` : ''}</div></td></tr>`;
   });
-  h += '</tbody></table></div></div>';
+  h += '</tbody></table></div>';
   return h;
+}
+
+// Re-renderiza so o corpo do historico (mantem os campos de data em foco).
+function certRenderHistBody() {
+  const el = $('certHistBody');
+  if (el) el.innerHTML = certHistBodyHtml();
 }
 
 // Reconstroi o objeto de resultado a partir de uma linha do historico.
@@ -4246,6 +4305,60 @@ function certEmail(el) {
 async function certExcluir(el) {
   if (!confirm(tr('Remover esta certificação do histórico?'))) return;
   try { await api.del('/certificacoes/' + el.dataset.id); toast(tr('Certificação removida')); await navTo('certificacao'); } catch (e) { toast(e.message, true); }
+}
+
+// --- Filtro por data e selecao/exclusao em lote do historico ---
+
+function certFiltrarData(el) {
+  if (el.dataset.campo === 'de') certFiltroDe = el.value; else certFiltroAte = el.value;
+  certRenderHistBody();
+}
+
+function certLimparFiltro() {
+  certFiltroDe = ''; certFiltroAte = '';
+  const w = $('certHistBody'); if (w && w.parentNode) w.parentNode.outerHTML = certHistoricoHtml();
+}
+
+function certSelLinha(el) {
+  const id = String(el.dataset.id);
+  if (el.checked) certSelecao.add(id); else certSelecao.delete(id);
+  certRenderHistBody();
+}
+
+function certSelTodos(el) {
+  const ids = certHistoricoFiltrado().map((c) => String(c.id));
+  if (el.checked) ids.forEach((id) => certSelecao.add(id));
+  else ids.forEach((id) => certSelecao.delete(id));
+  certRenderHistBody();
+}
+
+function certLimparSel() {
+  certSelecao = new Set();
+  certRenderHistBody();
+}
+
+async function certExcluirLote() {
+  const ids = Array.from(certSelecao).map((x) => Number(x)).filter((x) => x > 0);
+  if (!ids.length) return;
+  if (!confirm(tr('Remover') + ' ' + ids.length + ' ' + tr('certificação(ões) do histórico?'))) return;
+  try {
+    await api.post('/certificacoes/excluir-lote', { ids });
+    certSelecao = new Set();
+    toast(tr('Certificações removidas'));
+    await navTo('certificacao');
+  } catch (e) { toast(e.message, true); }
+}
+
+async function certExcluirTodos() {
+  const n = certHistorico.length;
+  if (!n) return;
+  if (!confirm(tr('Excluir TODAS as certificações do histórico? Esta ação não pode ser desfeita.'))) return;
+  try {
+    await api.post('/certificacoes/excluir-lote', { tudo: true });
+    certSelecao = new Set();
+    toast(tr('Histórico de certificações limpo'));
+    await navTo('certificacao');
+  } catch (e) { toast(e.message, true); }
 }
 
 
@@ -4897,6 +5010,12 @@ removeTag,
   certBaixarPdf,
   certEmail,
   certExcluir,
+  certLimparFiltro,
+  certSelLinha,
+  certSelTodos,
+  certLimparSel,
+  certExcluirLote,
+  certExcluirTodos,
 };
 
 const SUBMIT_ACTIONS = {
@@ -4917,6 +5036,7 @@ const INPUT_ACTIONS = {
   filtrarRoles,
   certArquivoEscolhido,
   certTrocaBanco,
+  certFiltrarData,
 };
 
 document.addEventListener('click', (e) => {

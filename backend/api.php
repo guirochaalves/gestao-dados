@@ -1627,6 +1627,29 @@ function despachar(string $metodo, string $caminho): void
         responderJson(['ok' => true]);
     }
 
+    if ($caminho === '/certificacoes/excluir-lote' && $metodo === 'POST') {
+        // Exclusao em massa (varias ou todas) -- restrita ao master, como a
+        // exclusao individual, para preservar a trilha de certificacoes.
+        $admin = exigirLogin();
+        exigirMaster($admin);
+        $body = corpoRequisicao();
+        $pdo  = db();
+        $tab  = quoteIdent(tableName('certificacoes'));
+        if (!empty($body['tudo'])) {
+            $pdo->exec('DELETE FROM ' . $tab);
+            registrarAuditoria('certificacoes', null, 'excluir_tudo', (string) $admin['username'], null, null);
+            responderJson(['ok' => true, 'removidos' => 'tudo']);
+        }
+        $ids = array_values(array_filter(array_map('intval', (array) ($body['ids'] ?? [])), static fn ($v) => $v > 0));
+        if (count($ids) === 0) {
+            responderErro(422, 'Nenhum registro informado.');
+        }
+        $ph = implode(',', array_fill(0, count($ids), '?'));
+        $pdo->prepare('DELETE FROM ' . $tab . ' WHERE ' . quoteIdent('id') . ' IN (' . $ph . ')')->execute($ids);
+        registrarAuditoria('certificacoes', null, 'excluir_lote', (string) $admin['username'], null, ['ids' => $ids]);
+        responderJson(['ok' => true, 'removidos' => count($ids)]);
+    }
+
     if (preg_match('#^/certificacoes/(\d+)$#', $caminho, $m) && $metodo === 'DELETE') {
         // Registrar certificacao e coisa de administrador; EXCLUIR do historico
         // e restrito ao master -- preserva a trilha de certificacoes contra

@@ -932,6 +932,9 @@ tr.row-sem-acesso > td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
 .cert-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; align-items: start; }
 .cert-side { position: sticky; top: 12px; }
 @media (max-width: 1024px) { .cert-layout { grid-template-columns: 1fr; } .cert-side { position: static; } }
+.cert-hist-filtro { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
+.cert-hist-filtro .cert-filtro-data { padding: 5px 8px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); color: var(--text); font: inherit; font-size: 12.5px; }
+.cert-hist-filtro .cert-filtro-data:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
 
 /* Botoes de motor na Certificacao (mostram a consulta de cada banco). */
 .cert-motores { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
