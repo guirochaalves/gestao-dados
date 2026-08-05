@@ -567,7 +567,7 @@ const I18N = {
     'Aprovador': 'Approver',
     'Resultado': 'Outcome',
     'Descrição': 'Description',
-    'Compliance': 'Compliance', 'Excelente': 'Excellent', 'Moderado': 'Moderate', 'Ruim': 'Poor', 'de conformidade': 'compliant', 'em conformidade': 'compliant', 'exceção(ões)': 'exception(s)',
+    'Compliance': 'Compliance', 'Conformidade de acessos': 'Access compliance', 'Excelente': 'Excellent', 'Moderado': 'Moderate', 'Ruim': 'Poor', 'de conformidade': 'compliant', 'em conformidade': 'compliant', 'exceção(ões)': 'exception(s)',
     'Compliance de acessos': 'Access compliance', 'banco(s) certificado(s)': 'certified database(s)',
     'Abrir Certificação de Acessos': 'Open Access Certification',
     'Certificação de Acessos': 'Access Certification',
@@ -4103,15 +4103,32 @@ function certNivelIcone(nivel) {
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.7 3h6.6l4.7 4.7v6.6l-4.7 4.7h-6.6l-4.7 -4.7v-6.6z" fill="currentColor" fill-opacity="0.15" /><path d="M12 8v4" /><path d="M12 16h.01" /></svg>';
 }
 
-// Cartao "hero" de compliance: % grande, nivel e detalhe, colorido por faixa.
+// Legenda das faixas de conformidade (0-50 Ruim / 51-90 Moderado / 91-100 Excelente).
+// Destaca o nivel atual para o leitor situar o % de imediato.
+function complianceLegendaHtml(nivelAtual) {
+  const faixas = [
+    { nivel: 'bom', label: 'Excelente', faixa: '91–100%' },
+    { nivel: 'medio', label: 'Moderado', faixa: '51–90%' },
+    { nivel: 'ruim', label: 'Ruim', faixa: '0–50%' },
+  ];
+  const itens = faixas.map((f) => `<div class="ch-leg-item comp-${f.nivel}${f.nivel === nivelAtual ? ' is-atual' : ''}">
+    <span class="ch-leg-dot"></span>
+    <span class="ch-leg-txt"><b>${esc(tr(f.label))}</b> <span class="ch-leg-faixa">${f.faixa}</span></span>
+  </div>`).join('');
+  return `<div class="ch-legenda">${itens}</div>`;
+}
+
+// Cartao "hero" de compliance: titulo, % grande, nivel e legenda das faixas.
 function complianceHeroHtml(ok, excecoes, sub) {
   const c = certCompliance(ok, excecoes);
   return `<div class="comp-hero comp-${c.nivel}">
     <div class="ch-ico">${certNivelIcone(c.nivel)}</div>
     <div class="ch-body">
+      <div class="ch-titulo">${esc(tr('Conformidade de acessos'))}</div>
       <div class="ch-top"><span class="ch-pct">${c.pct}%</span><span class="ch-badge">${esc(tr(c.label))}</span></div>
       <div class="ch-sub">${esc(sub)}</div>
     </div>
+    ${complianceLegendaHtml(c.nivel)}
   </div>`;
 }
 

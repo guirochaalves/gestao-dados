@@ -943,6 +943,7 @@ tr.row-sem-acesso > td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
 .comp-hero .ch-ico { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex: none; }
 .comp-hero .ch-ico svg { width: 26px; height: 26px; }
 .comp-hero .ch-body { flex: 1; min-width: 0; }
+.comp-hero .ch-titulo { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 4px; }
 .comp-hero .ch-top { display: flex; align-items: baseline; gap: 12px; }
 .comp-hero .ch-pct { font-size: 34px; font-weight: 700; font-family: var(--mono); letter-spacing: -1px; line-height: 1; }
 .comp-hero .ch-badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
@@ -950,3 +951,18 @@ tr.row-sem-acesso > td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
 .comp-hero.comp-bom .ch-ico { background: var(--green-soft); color: var(--green); } .comp-hero.comp-bom .ch-pct { color: var(--green); } .comp-hero.comp-bom .ch-badge { background: var(--green-soft); color: var(--green); }
 .comp-hero.comp-medio .ch-ico { background: var(--amber-soft); color: var(--amber); } .comp-hero.comp-medio .ch-pct { color: var(--amber); } .comp-hero.comp-medio .ch-badge { background: var(--amber-soft); color: var(--amber); }
 .comp-hero.comp-ruim .ch-ico { background: var(--red-soft); color: var(--red); } .comp-hero.comp-ruim .ch-pct { color: var(--red); } .comp-hero.comp-ruim .ch-badge { background: var(--red-soft); color: var(--red); }
+/* Legenda das faixas ao lado do cartao */
+.comp-hero .ch-legenda { display: flex; flex-direction: column; gap: 6px; flex: none; padding-left: 18px; border-left: 1px solid var(--border); align-self: stretch; justify-content: center; }
+.comp-hero .ch-leg-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); opacity: .6; }
+.comp-hero .ch-leg-item.is-atual { opacity: 1; }
+.comp-hero .ch-leg-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.comp-hero .ch-leg-item.comp-bom .ch-leg-dot { background: var(--green); }
+.comp-hero .ch-leg-item.comp-medio .ch-leg-dot { background: var(--amber); }
+.comp-hero .ch-leg-item.comp-ruim .ch-leg-dot { background: var(--red); }
+.comp-hero .ch-leg-item.is-atual .ch-leg-txt b { color: var(--text); }
+.comp-hero .ch-leg-txt b { font-weight: 600; }
+.comp-hero .ch-leg-faixa { font-family: var(--mono); font-size: 11px; opacity: .85; }
+@media (max-width: 640px) {
+  .comp-hero { flex-wrap: wrap; }
+  .comp-hero .ch-legenda { border-left: 0; padding-left: 0; padding-top: 12px; margin-top: 4px; border-top: 1px solid var(--border); flex-direction: row; flex-wrap: wrap; gap: 6px 16px; width: 100%; }
+}
