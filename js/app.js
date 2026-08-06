@@ -247,6 +247,8 @@ const CATEGORIAS_CADASTRO = [
   { cat: 'job_frequencia', grupo: 'Jobs', label: 'Frequência', ico: 'clock' },
   { cat: 'job_criticidade', grupo: 'Jobs', label: 'Criticidade', ico: 'alert' },
   { cat: 'job_status', grupo: 'Jobs', label: 'Status', ico: 'shield' },
+  { cat: 'app_categoria', grupo: 'Inventário', label: 'Categoria', ico: 'refresh' },
+  { cat: 'app_status', grupo: 'Inventário', label: 'Status', ico: 'shield' },
 ];
 let tiposPorCategoria = {};
 
@@ -420,12 +422,30 @@ const SCHEMA = {
       { k: 'obs', l: 'Observações', t: 'textarea', full: 1 },
       { k: 'criado_por', l: 'Adicionado por', t: 'text', table: 1, ro: 1 },
     ] },
+  inventario: { title: 'Inventário', sub: 'Aplicações e SGBD instalados nos servidores: versão, service pack/patch, fim de suporte e histórico de patches', singular: 'aplicação',
+    fields: [
+      { k: 'nome', l: 'Aplicação / SGBD', t: 'text', table: 1, mono: 1 },
+      { k: 'banco', l: 'Banco', t: 'bancoref', fillServidor: 1, table: 1 },
+      { k: 'servidor', l: 'Servidor / instância', t: 'text', table: 1, mono: 1 },
+      { k: 'categoria', l: 'Categoria', t: 'select', cat: 'app_categoria', table: 1 },
+      { k: 'fabricante', l: 'Fabricante', t: 'text', table: 1 },
+      { k: 'versao', l: 'Versão', t: 'text', table: 1, mono: 1 },
+      { k: 'edicao', l: 'Edição', t: 'text', table: 1 },
+      { k: 'patch_atual', l: 'Service pack / patch atual', t: 'text', table: 1, mono: 1 },
+      { k: 'data_instalacao', l: 'Data de instalação', t: 'date', table: 1 },
+      { k: 'fim_suporte', l: 'Fim de suporte', t: 'date', table: 1 },
+      { k: 'status', l: 'Status', t: 'select', cat: 'app_status', table: 1, pill: 1 },
+      { k: 'historico_patches', l: 'Histórico de patches', t: 'patches', full: 1, table: 1, trunc: 1 },
+      { k: 'responsavel', l: 'Responsável', t: 'text', table: 1 },
+      { k: 'obs', l: 'Observações', t: 'textarea', full: 1 },
+      { k: 'criado_por', l: 'Adicionado por', t: 'text', table: 1, ro: 1 },
+    ] },
 };
 
-const ENDPOINT = { bancos: '/bancos', acessos: '/acessos', mudancas: '/mudancas', backup: '/backup', restore: '/restore', dicionario: '/dicionario', integracoes: '/integracoes', jobs: '/jobs' };
+const ENDPOINT = { bancos: '/bancos', acessos: '/acessos', mudancas: '/mudancas', backup: '/backup', restore: '/restore', dicionario: '/dicionario', integracoes: '/integracoes', jobs: '/jobs', inventario: '/inventario' };
 
 const MODULOS_KEYS = Object.keys(ENDPOINT);
-const MODULO_LABELS = { bancos: 'Bancos', acessos: 'Acessos', mudancas: 'Mudanças', backup: 'Backup', restore: 'Restore', dicionario: 'Dicionário', integracoes: 'Integrações', jobs: 'Jobs' };
+const MODULO_LABELS = { bancos: 'Bancos', acessos: 'Acessos', mudancas: 'Mudanças', backup: 'Backup', restore: 'Restore', dicionario: 'Dicionário', integracoes: 'Integrações', jobs: 'Jobs', inventario: 'Inventário' };
 const ROLE_LABEL = { admin: 'Administrador', escrita: 'Escrita', leitura: 'Leitura', master: 'Master' };
 const ROLE_PILL = { admin: 'p-teal', escrita: 'p-amber', leitura: 'p-gray', master: 'p-violet' };
 
@@ -439,6 +459,7 @@ const PILL = {
   Crítica: 'p-red',
   Ativa: 'p-green', Inativa: 'p-gray', 'Em implantação': 'p-amber', 'A desativar': 'p-red', Desconhecida: 'p-gray',
   'Público': 'p-gray', 'Interno': 'p-teal', 'Pessoal / Sensível (LGPD)': 'p-red',
+  Desatualizado: 'p-amber', 'Fora de suporte': 'p-red', Descontinuado: 'p-gray',
 };
 const HEXMAP = { 'p-green': '#2E7D52', 'p-amber': '#B5751F', 'p-red': '#B23B3B', 'p-gray': '#8A93A3', 'p-teal': '#B08D3E' };
 const colorFor = (label) => HEXMAP[PILL[label]] || '#8A93A3';
@@ -458,6 +479,18 @@ const I18N = {
     'Comando / Passo': 'Command / Step', 'Adicionar passo': 'Add step', 'Nome do passo': 'Step name', 'O que executa': 'What it runs', 'Última execução': 'Last run', 'Próxima execução': 'Next run',
     'Jobs cadastrados': 'Registered jobs', 'ativo(s)': 'active', 'Jobs desativados': 'Disabled jobs', 'em status Desabilitado': 'in Disabled status',
     'Tempo da Frequência': 'Frequency time', 'Agendamentos': 'Schedules', 'Início': 'Start', 'Fim': 'End', 'Adicionar agendamento': 'Add schedule',
+    'Aplicações': 'Applications', 'Inventário': 'Inventory', 'Relatório de Inventário': 'Inventory Report',
+    'Aplicações e SGBD instalados nos servidores: versão, service pack/patch, fim de suporte e histórico de patches': 'Applications and DBMS installed on servers: version, service pack/patch, end of support and patch history',
+    'Aplicação / SGBD': 'Application / DBMS', 'Categoria': 'Category', 'Fabricante': 'Vendor', 'Versão': 'Version', 'Edição': 'Edition',
+    'Service pack / patch atual': 'Current service pack / patch', 'Data de instalação': 'Install date', 'Fim de suporte': 'End of support',
+    'Histórico de patches': 'Patch history', 'Adicionar patch': 'Add patch', 'Versão / patch': 'Version / patch', 'Chamado': 'Ticket', 'Executor': 'Performed by', 'Instalado por': 'Installed by', 'por': 'by',
+    'Service Pack': 'Service Pack', 'Cumulative Update': 'Cumulative Update', 'Patch de segurança': 'Security patch', 'Hotfix': 'Hotfix', 'Upgrade de versão': 'Version upgrade',
+    'Desatualizado': 'Outdated', 'Fora de suporte': 'Out of support', 'Descontinuado': 'Decommissioned',
+    'Relatório de Aplicações': 'Applications Report', 'Aplicações inventariadas': 'Applications inventoried',
+    'Portal de Gestão de Dados — Aplicações': 'Data Management Portal — Applications', 'Escopo': 'Scope',
+    'Inventário das aplicações e SGBD instalados nos servidores de banco, com versão, edição, service pack/patch vigente e fim de suporte. Cada aplicação traz o histórico de patches aplicados (data, tipo, versão, chamado e responsável pela instalação), servindo de evidência de gestão de versões e patching para a auditoria de TI.': 'Inventory of applications and DBMS installed on the database servers, with version, edition, current service pack/patch and end of support. Each application includes the history of applied patches (date, type, version, ticket and who installed it), serving as evidence of version and patch management for IT audit.',
+    'Situação de suporte': 'Support status', 'aplicação(ões) fora de suporte ou vencida(s)': 'application(s) out of support or expired', 'Todas as aplicações dentro do suporte': 'All applications within support',
+    'Total': 'Total', 'SP / patch': 'SP / patch', 'Nenhuma aplicação registrada': 'No application registered', 'Histórico de patches aplicados': 'Applied patch history', 'Nenhum patch registrado': 'No patch registered',
     'Guia de Segurança': 'Security Guide',
     'Segurança': 'Security',
     'Desativar usuário': 'Disable user',
@@ -1354,6 +1387,12 @@ function cellVal(f, r) {
     if (!Array.isArray(arr) || !arr.length) return '—';
     return esc(arr.map((o) => (o.inicio || '') + (o.fim ? '–' + o.fim : '')).join(' · '));
   }
+  if (f.t === 'patches') {
+    let arr = raw;
+    if (typeof raw === 'string') { try { arr = JSON.parse(raw); } catch (e) { return esc(raw); } }
+    if (!Array.isArray(arr) || !arr.length) return '—';
+    return esc(arr.map((o) => (o.data ? fmtDate(o.data) + ' ' : '') + (o.versao || o.tipo || '') + (o.chamado ? ' (' + o.chamado + ')' : '')).join(' · '));
+  }
   let v = raw;
   if (f.t === 'date') v = fmtDate(v);
   // Só traduz valores de listas FIXAS (f.o: Sim/Não, tipo de conta, etc.)
@@ -1887,6 +1926,28 @@ function buildForm(key, data) {
       h += '<button type="button" class="btn btn-ghost" style="margin-top:8px" data-act="addAgendaRow">+ ' + esc(tr('Adicionar agendamento')) + '</button>';
       const agFiltrados = agItems.filter((o) => o.inicio || o.fim);
       h += '<input type="hidden" data-k="' + f.k + '" value="' + esc(agFiltrados.length ? JSON.stringify(agFiltrados) : '') + '">';
+    } else if (f.t === 'patches') {
+      // Historico de patches (modulo Aplicacoes): cada linha registra a aplicacao
+      // de um patch/service pack -- data, tipo, versao/patch, chamado e executor.
+      // Guardado como JSON na coluna historico_patches. Trilha para auditoria.
+      let pItems = [];
+      const rawPp = data ? data[f.k] : '';
+      if (rawPp) { try { const parsed = JSON.parse(rawPp); if (Array.isArray(parsed)) pItems = parsed; } catch (e) {} }
+      if (!pItems.length) pItems = [{ data: '', tipo: '', versao: '', chamado: '', executor: '' }];
+      h += '<div class="patch-box">';
+      h += '<div class="patch-head">'
+        + '<span class="patch-data">' + esc(tr('Data')) + '</span>'
+        + '<span class="patch-tipo">' + esc(tr('Tipo')) + '</span>'
+        + '<span class="patch-versao">' + esc(tr('Versão / patch')) + '</span>'
+        + '<span class="patch-chamado">' + esc(tr('Chamado')) + '</span>'
+        + '<span class="patch-executor">' + esc(tr('Instalado por')) + '</span>'
+        + '<span class="patch-del-sp"></span>'
+        + '</div>';
+      h += '<div class="obj-list patch-list">' + pItems.map((o) => patchRowHtml(o)).join('') + '</div>';
+      h += '<button type="button" class="btn btn-ghost btn-sm" style="margin-top:8px" data-act="addPatchRow">+ ' + esc(tr('Adicionar patch')) + '</button>';
+      h += '</div>';
+      const pFiltrados = pItems.filter((o) => o.data || o.versao || o.tipo || o.chamado || o.executor);
+      h += '<input type="hidden" data-k="' + f.k + '" value="' + esc(pFiltrados.length ? JSON.stringify(pFiltrados) : '') + '">';
     } else if (f.t === 'multitext') {
       const items = (data && data[f.k] ? String(data[f.k]).split(',').map((s) => s.trim()).filter(Boolean) : []);
       if (!items.length) items.push('');
@@ -2068,6 +2129,56 @@ function removeAgendaRow(btn) {
 }
 
 
+// ---------------------------------------------------------------------------
+// Campo 'patches' (módulo Aplicações): cada linha é a aplicação de um patch /
+// service pack -- data, tipo, versão/patch, chamado e executor. Guardado como
+// JSON na coluna historico_patches. Serve de trilha para a auditoria.
+// ---------------------------------------------------------------------------
+const PATCH_TIPOS = ['Service Pack', 'Cumulative Update', 'Patch de segurança', 'Hotfix', 'Upgrade de versão'];
+
+function patchRowHtml(o) {
+  o = o || {};
+  const opts = ['<option value=""></option>'].concat(PATCH_TIPOS.map((t) =>
+    '<option value="' + esc(t) + '"' + (o.tipo === t ? ' selected' : '') + '>' + esc(tr(t)) + '</option>')).join('');
+  return '<div class="obj-row patch-row">'
+    + '<input type="date" class="patch-data" value="' + esc(o.data || '') + '" data-oninput="syncPatches" title="' + esc(tr('Data')) + '">'
+    + '<select class="patch-tipo" data-oninput="syncPatches" title="' + esc(tr('Tipo')) + '">' + opts + '</select>'
+    + '<input type="text" class="patch-versao" value="' + esc(o.versao || '') + '" placeholder="' + esc(tr('Versão / patch')) + '" data-oninput="syncPatches">'
+    + '<input type="text" class="patch-chamado" value="' + esc(o.chamado || '') + '" placeholder="' + esc(tr('Chamado')) + '" data-oninput="syncPatches">'
+    + '<input type="text" class="patch-executor" value="' + esc(o.executor || '') + '" placeholder="' + esc(tr('Instalado por')) + '" data-oninput="syncPatches">'
+    + '<button type="button" class="icon-btn del patch-del" data-act="removePatchRow" title="' + esc(tr('Remover')) + '">&times;</button>'
+    + '</div>';
+}
+
+function syncPatches(el) {
+  const fld = el ? el.closest('.fld') : null;
+  if (!fld) return;
+  const hidden = fld.querySelector('input[type="hidden"][data-k]');
+  if (!hidden) return;
+  const rows = [...fld.querySelectorAll('.patch-list .obj-row')].map((row) => ({
+    data: (row.querySelector('.patch-data') ? row.querySelector('.patch-data').value : '').trim(),
+    tipo: (row.querySelector('.patch-tipo') ? row.querySelector('.patch-tipo').value : '').trim(),
+    versao: (row.querySelector('.patch-versao') ? row.querySelector('.patch-versao').value : '').trim(),
+    chamado: (row.querySelector('.patch-chamado') ? row.querySelector('.patch-chamado').value : '').trim(),
+    executor: (row.querySelector('.patch-executor') ? row.querySelector('.patch-executor').value : '').trim(),
+  })).filter((o) => o.data || o.versao || o.tipo || o.chamado || o.executor);
+  hidden.value = rows.length ? JSON.stringify(rows) : '';
+}
+
+function addPatchRow(btn) {
+  const list = btn.closest('.fld').querySelector('.patch-list');
+  list.insertAdjacentHTML('beforeend', patchRowHtml({}));
+  syncPatches(btn);
+}
+
+function removePatchRow(btn) {
+  const fld = btn.closest('.fld');
+  btn.closest('.obj-row').remove();
+  const first = fld.querySelector('.patch-data');
+  if (first) syncPatches(first);
+}
+
+
 function multitextRowHtml(val) {
   return `<div class="multitext-row"><input type="text" value="${esc(val)}" placeholder="${esc(tr('Nome do objeto'))}" data-oninput="syncMultitext"><button type="button" class="icon-btn del" data-act="removeMultitextRow" title="${esc(tr('Remover'))}">&times;</button></div>`;
 }
@@ -2174,12 +2285,22 @@ function removeMultitextRow(btn) {
   syncMultitext(wrap.querySelector('.multitext-row input[type="text"]'));
 }
 
-const USA_BANCOS = ['acessos', 'mudancas', 'backup', 'restore', 'dicionario', 'jobs'];
+const USA_BANCOS = ['acessos', 'mudancas', 'backup', 'restore', 'dicionario', 'jobs', 'inventario'];
+
+// Módulos com sub-lista de patches (ex.: Aplicações) usam um modal mais largo
+// para o histórico caber numa linha só, com o mini-cabeçalho alinhado.
+function ajustarLarguraModal(key) {
+  const m = $('recModal');
+  if (!m) return;
+  const largo = !!(SCHEMA[key] && SCHEMA[key].fields.some((f) => f.t === 'patches'));
+  m.classList.toggle('modal-wide', largo);
+}
 
 async function openNew(key) {
   if (key === 'mudancas' || key === 'backup' || key === 'restore') await fetchTipos();
   if (USA_BANCOS.includes(key)) await fetchBancos();
   editId = null; editKey = key;
+  ajustarLarguraModal(key);
   $('modalTitle').textContent = tr('Novo registro') + ' · ' + tr(SCHEMA[key].title);
   $('modalBody').innerHTML = buildForm(key, null);
   if (key === 'mudancas') {
@@ -2193,6 +2314,7 @@ async function openEdit(key, id) {
   if (key === 'mudancas' || key === 'backup' || key === 'restore') await fetchTipos();
   if (USA_BANCOS.includes(key)) await fetchBancos();
   editKey = key; editId = id;
+  ajustarLarguraModal(key);
   const rec = cache[key].find((r) => String(r.id) === String(id));
   $('modalTitle').textContent = tr('Editar') + ' · ' + tr(SCHEMA[key].title);
   $('modalBody').innerHTML = buildForm(key, rec);
@@ -2894,6 +3016,10 @@ async function exportCsv(key, filtros) {
       let arrG = v;
       if (typeof v === 'string') { try { arrG = JSON.parse(v); } catch (e) { arrG = []; } }
       v = Array.isArray(arrG) ? arrG.map((o) => (o && (o.inicio || o.fim)) ? ((o.inicio || '') + (o.fim ? '-' + o.fim : '')) : '').filter(Boolean).join(' | ') : '';
+    } else if (f.t === 'patches') {
+      let arrPt = v;
+      if (typeof v === 'string') { try { arrPt = JSON.parse(v); } catch (e) { arrPt = []; } }
+      v = Array.isArray(arrPt) ? arrPt.map((o) => (o && (o.data || o.versao || o.tipo || o.chamado || o.executor)) ? [o.data || '', o.tipo || '', o.versao || '', o.chamado ? 'chamado ' + o.chamado : '', o.executor || ''].filter(Boolean).join(' ') : '').filter(Boolean).join(' | ') : '';
     } else if (Array.isArray(v)) {
       // campo objetos: [{nome, tipo}, ...] → "NOME (tipo), ..."
       v = v.map((o) => (o && o.nome) ? (o.tipo ? o.nome + ' (' + o.tipo + ')' : o.nome) : '').filter(Boolean).join(', ');
@@ -3181,6 +3307,10 @@ async function exportPdf(key, filtros) {
   const { jsPDF } = window.jspdf || {};
   if (!jsPDF) { toast('Biblioteca de PDF não carregada.', true); return; }
 
+  // Aplicações tem relatorio formal proprio (padrao da Certificacao), em vez da
+  // tabela generica -- escopo, resumo por status, inventario e historico de patches.
+  if (key === 'inventario') { await inventarioRelatorioPdf(rows); return; }
+
   const corAccent = hexToRgb(getComputedStyle(document.documentElement).getPropertyValue('--accent'));
   const corFaixa = [28, 32, 42];
   const nomeProjeto = window.NOME_PROJETO || 'Portal de Dados';
@@ -3239,6 +3369,20 @@ async function exportPdf(key, filtros) {
       let a = v; if (typeof v === 'string') { try { a = JSON.parse(v); } catch (e) { a = []; } }
       return Array.isArray(a) ? a.map((o) => (o && (o.inicio || o.fim)) ? ((o.inicio || '') + (o.fim ? '-' + o.fim : '')) : '').filter(Boolean).join(' | ') : '';
     }
+    if (f.t === 'patches') {
+      let a = v; if (typeof v === 'string') { try { a = JSON.parse(v); } catch (e) { a = []; } }
+      // Uma linha por patch, coesa: "DD/MM/AAAA · Tipo · versão · #chamado · instalado por"
+      return Array.isArray(a) ? a.map((o) => {
+        if (!o || !(o.data || o.versao || o.tipo || o.chamado || o.executor)) return '';
+        const parts = [];
+        if (o.data) parts.push(fmtDate(o.data));
+        if (o.tipo) parts.push(tr(o.tipo));
+        if (o.versao) parts.push(o.versao);
+        if (o.chamado) parts.push('#' + String(o.chamado).replace(/^#/, ''));
+        if (o.executor) parts.push(tr('por') + ' ' + o.executor);
+        return parts.join(' · ');
+      }).filter(Boolean).join('\n') : '';
+    }
     if (Array.isArray(v)) {
       return v.map((o) => (o && o.nome) ? (o.tipo ? o.nome + ' (' + o.tipo + ')' : o.nome) : '').filter(Boolean).join(', ');
     }
@@ -3267,6 +3411,173 @@ async function exportPdf(key, filtros) {
   });
 
   doc.save(key + '_' + agora.toISOString().slice(0, 10) + '.pdf');
+  toast(tr('PDF exportado'));
+}
+
+// Relatorio formal de Aplicacoes (mesmo padrao visual da Certificacao de Acessos):
+// cabecalho com logo, escopo, resumo por status, inventario das aplicacoes e o
+// historico de patches aplicados -- pronto para entrega a auditoria de TI.
+async function inventarioRelatorioPdf(rows) {
+  const { jsPDF } = window.jspdf || {};
+  if (!jsPDF) { toast('Biblioteca de PDF não carregada.', true); return; }
+  rows = rows || [];
+
+  const accent = hexToRgb(getComputedStyle(document.documentElement).getPropertyValue('--accent'));
+  const nomeProjeto = window.NOME_PROJETO || 'Portal de Dados';
+  const tituloRel = tr('Relatório de Inventário');
+  const agora = new Date();
+  const geradoEm = fmtDate(agora.toISOString().slice(0, 10)) + ' ' + agora.toTimeString().slice(0, 5);
+  const execNome = currentUser.nome_completo || currentUser.username;
+  const logoPng = await obterLogoPdf();
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+
+  function cabecalho() {
+    doc.setFillColor(28, 32, 42); doc.rect(0, 0, pageW, 20, 'F');
+    doc.setFillColor(accent[0], accent[1], accent[2]); doc.rect(0, 20, pageW, 1.4, 'F');
+    if (logoPng) { try { doc.addImage(logoPng, 'PNG', 4, 4, 12, 12); } catch (e) {} }
+    const x = logoPng ? 20 : 12;
+    doc.setTextColor(255, 255, 255); doc.setFont(undefined, 'bold'); doc.setFontSize(12.5);
+    doc.text(nomeProjeto, x, 8.5);
+    doc.setFont(undefined, 'normal'); doc.setFontSize(10);
+    doc.text(tituloRel, x, 15.5);
+    doc.setTextColor(200, 204, 214); doc.setFontSize(8);
+    doc.text(tr('Gerado em') + ': ' + geradoEm, pageW - 12, 8.5, { align: 'right' });
+  }
+  function rodape(data) {
+    doc.setFontSize(7.5); doc.setTextColor(150, 150, 150);
+    doc.text(nomeProjeto + ' — ' + tituloRel, 12, pageH - 7);
+    doc.text(String(data.pageNumber), pageW - 12, pageH - 7, { align: 'right' });
+  }
+
+  // Contagens por status (faixas do modulo).
+  const norm = (s) => certNorm(s);
+  const cont = { total: rows.length, ativo: 0, desatualizado: 0, forasup: 0, descont: 0, semsup: 0 };
+  const hoje = agora.toISOString().slice(0, 10);
+  rows.forEach((r) => {
+    const st = norm(r.status);
+    if (st === 'ativo') cont.ativo++;
+    else if (st === 'desatualizado') cont.desatualizado++;
+    else if (st === 'fora de suporte') cont.forasup++;
+    else if (st === 'descontinuado') cont.descont++;
+    if (r.fim_suporte && String(r.fim_suporte).slice(0, 10) < hoje) cont.semsup++;
+  });
+
+  const meta = [
+    [tr('Executado por'), execNome],
+    [tr('Aplicações inventariadas'), String(cont.total)],
+    [tr('Fonte'), tr('Portal de Gestão de Dados — Aplicações')],
+  ];
+  doc.autoTable({
+    startY: 27, theme: 'plain', styles: { fontSize: 9, cellPadding: 1.2 },
+    columnStyles: { 0: { textColor: [110, 110, 110], cellWidth: 60 }, 1: { textColor: [17, 24, 39] } },
+    body: meta, margin: { left: 12, right: 12 },
+    didDrawPage: () => { cabecalho(); },
+  });
+
+  let y = doc.lastAutoTable.finalY + 6;
+  doc.setFont(undefined, 'bold'); doc.setFontSize(11); doc.setTextColor(accent[0], accent[1], accent[2]);
+  doc.text(tr('Escopo'), 12, y); y += 5;
+  doc.setFont(undefined, 'normal'); doc.setFontSize(8.5); doc.setTextColor(60, 60, 60);
+  const esc0 = tr('Inventário das aplicações e SGBD instalados nos servidores de banco, com versão, edição, service pack/patch vigente e fim de suporte. Cada aplicação traz o histórico de patches aplicados (data, tipo, versão, chamado e responsável pela instalação), servindo de evidência de gestão de versões e patching para a auditoria de TI.');
+  doc.text(doc.splitTextToSize(esc0, pageW - 24), 12, y); y += 16;
+
+  // Alerta de suporte, colorido quando ha instancias fora de suporte.
+  const temRisco = cont.forasup > 0 || cont.semsup > 0;
+  const corN = temRisco ? [180, 83, 9] : [4, 120, 87];
+  const fundoN = temRisco ? [255, 251, 235] : [236, 253, 245];
+  doc.setFillColor(fundoN[0], fundoN[1], fundoN[2]);
+  doc.roundedRect(12, y, pageW - 24, 12, 1.5, 1.5, 'F');
+  doc.setTextColor(90, 90, 90); doc.setFont(undefined, 'normal'); doc.setFontSize(8.5);
+  doc.text(tr('Situação de suporte'), 16, y + 5);
+  doc.setTextColor(corN[0], corN[1], corN[2]); doc.setFont(undefined, 'bold'); doc.setFontSize(10.5);
+  const msgSup = temRisco
+    ? (cont.forasup + cont.semsup) + ' ' + tr('aplicação(ões) fora de suporte ou vencida(s)')
+    : tr('Todas as aplicações dentro do suporte');
+  doc.text(msgSup, 16, y + 10);
+  y += 15;
+
+  // Resumo por status.
+  doc.autoTable({
+    startY: y + 2,
+    head: [[tr('Total'), tr('Ativo'), tr('Desatualizado'), tr('Fora de suporte'), tr('Descontinuado')]],
+    body: [[cont.total, cont.ativo, cont.desatualizado, cont.forasup, cont.descont]],
+    styles: { halign: 'center', fontSize: 10 }, headStyles: { fillColor: accent, fontSize: 8 },
+    margin: { left: 12, right: 12 }, didDrawPage: () => { cabecalho(); rodape({ pageNumber: doc.internal.getNumberOfPages() }); },
+  });
+
+  // Faixa de titulo de secao (padrao da Certificacao).
+  const secaoTitulo = (titulo) => {
+    let yy = doc.lastAutoTable.finalY + 7;
+    if (yy > pageH - 30) { doc.addPage(); cabecalho(); yy = 28; }
+    doc.setFillColor(55, 65, 81); doc.rect(12, yy, pageW - 24, 6.5, 'F');
+    doc.setTextColor(255, 255, 255); doc.setFont(undefined, 'bold'); doc.setFontSize(8.5);
+    doc.text(titulo, 14, yy + 4.5);
+    return yy + 6.5;
+  };
+
+  // Seção 1: inventário das aplicações.
+  const corStatus = (st) => {
+    const s = norm(st);
+    if (s === 'ativo') return [4, 120, 87];
+    if (s === 'desatualizado') return [180, 83, 9];
+    if (s === 'fora de suporte' || s === 'descontinuado') return [220, 38, 38];
+    return [60, 60, 60];
+  };
+  let sy = secaoTitulo(tr('Aplicações inventariadas'));
+  doc.autoTable({
+    startY: sy,
+    head: [[tr('Aplicação / SGBD'), tr('Servidor'), tr('Categoria'), tr('Versão'), tr('SP / patch'), tr('Fim de suporte'), tr('Status')]],
+    body: rows.length ? rows.map((r) => [
+      r.nome || '—', r.servidor || '—', r.categoria || '—', r.versao || '—',
+      r.patch_atual || '—', r.fim_suporte ? fmtDate(String(r.fim_suporte).slice(0, 10)) : '—', tr(r.status || '—'),
+    ]) : [[tr('Nenhuma aplicação registrada'), '', '', '', '', '', '']],
+    columnStyles: {
+      0: { cellWidth: 34 }, 1: { cellWidth: 24 }, 2: { cellWidth: 24 }, 3: { cellWidth: 22 },
+      4: { cellWidth: 24 }, 5: { cellWidth: 24, halign: 'center' }, 6: { cellWidth: 'auto', fontStyle: 'bold' },
+    },
+    styles: { fontSize: 8, minCellHeight: 7, overflow: 'linebreak' }, headStyles: { fillColor: [107, 114, 128], fontSize: 7.5 },
+    margin: { left: 12, right: 12 },
+    didParseCell: (d) => { if (d.section === 'body' && d.column.index === 6) { d.cell.styles.textColor = corStatus(rows[d.row.index] ? rows[d.row.index].status : ''); } },
+    didDrawPage: () => { cabecalho(); },
+  });
+
+  // Seção 2: histórico de patches (achatado por aplicação).
+  const patchRows = [];
+  rows.forEach((r) => {
+    let arr = r.historico_patches;
+    if (typeof arr === 'string') { try { arr = JSON.parse(arr); } catch (e) { arr = []; } }
+    (Array.isArray(arr) ? arr : []).forEach((o) => {
+      if (!o || !(o.data || o.versao || o.tipo || o.chamado || o.executor)) return;
+      patchRows.push([
+        r.nome || '—', o.data ? fmtDate(o.data) : '—', o.tipo ? tr(o.tipo) : '—',
+        o.versao || '—', o.chamado ? '#' + String(o.chamado).replace(/^#/, '') : '—', o.executor || '—',
+      ]);
+    });
+  });
+  let py = secaoTitulo(tr('Histórico de patches aplicados'));
+  doc.autoTable({
+    startY: py,
+    head: [[tr('Aplicação / SGBD'), tr('Data'), tr('Tipo'), tr('Versão / patch'), tr('Chamado'), tr('Instalado por')]],
+    body: patchRows.length ? patchRows : [[tr('Nenhum patch registrado'), '', '', '', '', '']],
+    columnStyles: {
+      0: { cellWidth: 38 }, 1: { cellWidth: 24, halign: 'center' }, 2: { cellWidth: 34 },
+      3: { cellWidth: 'auto' }, 4: { cellWidth: 26 }, 5: { cellWidth: 34 },
+    },
+    styles: { fontSize: 8, minCellHeight: 7, overflow: 'linebreak' }, headStyles: { fillColor: [107, 114, 128], fontSize: 7.5 },
+    margin: { left: 12, right: 12 }, didDrawPage: () => { cabecalho(); },
+  });
+
+  // Área de assinatura.
+  let yf = doc.lastAutoTable.finalY + 16;
+  if (yf > pageH - 30) { doc.addPage(); cabecalho(); yf = 30; }
+  doc.setDrawColor(150); doc.line(14, yf, 84, yf); doc.line(pageW - 84, yf, pageW - 14, yf);
+  doc.setFontSize(8); doc.setTextColor(110, 110, 110);
+  doc.text(tr('Executado por') + ' — ' + execNome, 14, yf + 5);
+  doc.text(tr('Revisado / aprovado por'), pageW - 84, yf + 5);
+
+  doc.save('inventario_' + agora.toISOString().slice(0, 10) + '.pdf');
   toast(tr('PDF exportado'));
 }
 
@@ -4943,6 +5254,8 @@ removeTag,
   removePassoRow,
   addAgendaRow,
   removeAgendaRow,
+  addPatchRow,
+  removePatchRow,
   // Usuarios
   delUsuario: (el) => delUsuario(el.dataset.id),
   openRolesModal: (el) => openRolesModal(el.dataset.id),
@@ -5031,6 +5344,7 @@ const INPUT_ACTIONS = {
   syncObjetos,
   syncPassos,
   syncAgendas,
+  syncPatches,
   perfilFotoEnviar,
   userFotoEnviar,
   filtrarRoles,

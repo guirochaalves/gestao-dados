@@ -688,6 +688,31 @@ function migrate(): void
             'criado_em' => $carimbo,
             'atualizado_em' => $carimbo,
         ],
+        // Aplicacoes / SGBD instalados nos servidores de banco: versao, edicao,
+        // service pack / patch vigente, fim de suporte e o historico de patches
+        // aplicados (data, tipo, versao, chamado, executor) -- guardado como JSON
+        // na coluna historico_patches. Atende o que a auditoria de TI (EY,
+        // Deloitte etc.) cobra: versao suportada e trilha de patching por chamado.
+        'inventario' => [
+            'id' => $pk,
+            'nome' => 'VARCHAR(200)',
+            'banco' => 'VARCHAR(150)',
+            'servidor' => 'VARCHAR(150)',
+            'categoria' => 'VARCHAR(60)',
+            'fabricante' => 'VARCHAR(150)',
+            'versao' => 'VARCHAR(100)',
+            'edicao' => 'VARCHAR(100)',
+            'patch_atual' => 'VARCHAR(150)',
+            'data_instalacao' => 'DATE',
+            'fim_suporte' => 'DATE',
+            'status' => 'VARCHAR(40)',
+            'historico_patches' => $txt,
+            'responsavel' => 'VARCHAR(150)',
+            'obs' => $txt,
+            'criado_por' => 'VARCHAR(150)',
+            'criado_em' => $carimbo,
+            'atualizado_em' => $carimbo,
+        ],
         // Bancos de dados cadastrados uma vez e reaproveitados em Acessos,
         // Backup, Restore, Dicionario e Jobs -- em vez de redigitar servidor e
         // nome a cada registro. Um banco fica identificado pelo par
@@ -955,6 +980,15 @@ function migrate(): void
     ]);
     seedCategoriaSeVazia($pdo, 'job_status', [
         'Ativo', 'Inativo', 'Desabilitado', 'Falhando',
+    ]);
+
+    // Listas do modulo Aplicacoes (Categoria e Status de suporte).
+    seedCategoriaSeVazia($pdo, 'app_categoria', [
+        'SGBD', 'Agente de backup', 'Runtime / Framework', 'Driver / Conector',
+        'Ferramenta de gestão', 'Serviço / Aplicação', 'Outro',
+    ]);
+    seedCategoriaSeVazia($pdo, 'app_status', [
+        'Ativo', 'Desatualizado', 'Fora de suporte', 'Descontinuado',
     ]);
 
     // Semeia a tabela de Cadastro com os valores que ja existiam fixos no

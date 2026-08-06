@@ -540,6 +540,20 @@ tbody tr.row-sel{background:var(--accent-soft)}
 .obj-row{display:flex;gap:8px;align-items:center}
 .obj-row .obj-nome{flex:1;min-width:0}
 .obj-row .obj-tipo{width:148px;flex-shrink:0}
+/* Histórico de patches: box com mini-cabeçalho e uma linha por patch.
+   Cabeçalho e linhas usam o MESMO grid -> alinhamento garantido, sem depender
+   de larguras casadas. Rolagem horizontal como rede de segurança se faltar
+   largura (as colunas nunca "grudam"). */
+.patch-box{border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;background:var(--surface-2);overflow-x:auto}
+.patch-head,.patch-row{display:grid;grid-template-columns:118px 140px minmax(90px,1fr) 104px 132px 28px;gap:8px;align-items:center;min-width:560px}
+.patch-head{padding:0 0 7px;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+.patch-row{margin-bottom:6px}
+.patch-row>input,.patch-row>select{min-width:0;width:100%}
+.patch-head>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.patch-row .patch-del{width:28px;height:28px}
+/* Modal mais largo quando há histórico de patches (cabe tudo numa linha) */
+.modal.modal-wide{max-width:1000px}
+@media (max-width:1040px){ .modal.modal-wide{max-width:720px} }
 
 /* ── Info do banco no rodapé da sidebar ──────────────────────────────────── */
 .db-info{font-size:10.5px;color:var(--side-muted);padding:4px 10px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.7;cursor:default;line-height:1.4}

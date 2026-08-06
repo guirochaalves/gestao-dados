@@ -343,6 +343,7 @@ function dashboardExport(array $user): array
         'dicionario' => in_array('dicionario', $visiveis, true) ? todosRegistros('dicionario_dados') : [],
         'integracoes' => in_array('integracoes', $visiveis, true) ? todosRegistros('integracoes') : [],
         'jobs' => in_array('jobs', $visiveis, true) ? todosRegistros('jobs') : [],
+        'inventario' => in_array('inventario', $visiveis, true) ? todosRegistros('inventario') : [],
     ];
 }
 
@@ -441,6 +442,12 @@ $MODULOS = [
         'busca' => ['nome', 'tipo', 'servidor', 'banco', 'frequencia', 'status', 'responsavel', 'criado_por'],
         'ordem' => 'nome',
     ],
+    'inventario' => [
+        'tabela' => tableName('inventario'),
+        'colunas' => ['nome', 'banco', 'servidor', 'categoria', 'fabricante', 'versao', 'edicao', 'patch_atual', 'data_instalacao', 'fim_suporte', 'status', 'historico_patches', 'responsavel', 'obs', 'criado_por'],
+        'busca' => ['nome', 'banco', 'servidor', 'categoria', 'fabricante', 'versao', 'status', 'responsavel', 'criado_por'],
+        'ordem' => 'nome',
+    ],
 ];
 
 /** Titulo de cada modulo, usado no assunto do e-mail de relatorio. */
@@ -452,6 +459,7 @@ $MODULOS_TITULOS = [
     'dicionario' => 'Dicionário',
     'integracoes' => 'Integrações',
     'jobs' => 'Jobs',
+    'inventario' => 'Inventário',
 ];
 
 /**
@@ -507,6 +515,13 @@ $COLUNA_LABELS = [
         'criticidade' => 'Criticidade', 'status' => 'Status', 'responsavel' => 'Responsável',
         'obs' => 'Observações', 'criado_por' => 'Adicionado por',
     ],
+    'inventario' => [
+        'nome' => 'Aplicação / SGBD', 'banco' => 'Banco', 'servidor' => 'Servidor / instância',
+        'categoria' => 'Categoria', 'fabricante' => 'Fabricante', 'versao' => 'Versão', 'edicao' => 'Edição',
+        'patch_atual' => 'Service pack / patch atual', 'data_instalacao' => 'Data de instalação',
+        'fim_suporte' => 'Fim de suporte', 'status' => 'Status', 'historico_patches' => 'Histórico de patches',
+        'responsavel' => 'Responsável', 'obs' => 'Observações', 'criado_por' => 'Adicionado por',
+    ],
 ];
 
 /**
@@ -521,6 +536,7 @@ $CATEGORIAS_TIPOS = [
     'acesso_nivel',
     'integracao_tipo', 'integracao_ambiente', 'integracao_criticidade', 'integracao_status',
     'job_tipo', 'job_frequencia', 'job_criticidade', 'job_status',
+    'app_categoria', 'app_status',
 ];
 
 // ---------------------------------------------------------------------------
